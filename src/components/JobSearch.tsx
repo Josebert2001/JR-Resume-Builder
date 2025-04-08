@@ -87,7 +87,8 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              {/* Changed from empty string to "all" */}
+              <SelectItem value="all">All Categories</SelectItem>
               {availableCategories.map((category) => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
@@ -105,7 +106,8 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
               <SelectValue placeholder="Select location" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Locations</SelectItem>
+              {/* Changed from empty string to "all" */}
+              <SelectItem value="all">All Locations</SelectItem>
               {availableLocations.map((loc) => (
                 <SelectItem key={loc} value={loc}>{loc}</SelectItem>
               ))}
