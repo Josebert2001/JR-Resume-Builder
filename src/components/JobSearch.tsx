@@ -8,6 +8,9 @@ import { ResumeData } from '@/context/ResumeContext';
 import { searchJobs, getAvailableLocations, getAvailableCategories, JobListing } from '@/services/jobSearchService';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { JobApplication } from './JobApplicationTracker';
 
 interface JobSearchProps {
   resumeData: ResumeData;
@@ -21,6 +24,8 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
   const [availableLocations, setAvailableLocations] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [applications, setApplications] = useLocalStorage<JobApplication[]>('job-applications', []);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Pre-populate search with course and interests from resume data
@@ -48,6 +53,40 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleApplyNow = (job: JobListing) => {
+    // Check if already applied
+    const alreadyApplied = applications.some(app => app.jobId === job.id);
+    
+    if (alreadyApplied) {
+      toast({
+        title: "Already Applied",
+        description: `You've already applied for the ${job.title} position at ${job.company}.`,
+        variant: "default",
+      });
+      return;
+    }
+    
+    // Add to applications
+    const newApplication: JobApplication = {
+      id: crypto.randomUUID(),
+      jobId: job.id,
+      jobTitle: job.title,
+      company: job.company,
+      location: job.location,
+      dateApplied: new Date().toISOString(),
+      status: 'applied',
+      notes: `Applied for ${job.title} at ${job.company}`,
+    };
+    
+    setApplications([...applications, newApplication]);
+    
+    toast({
+      title: "Application Submitted",
+      description: `Your application for ${job.title} at ${job.company} has been saved.`,
+      variant: "default",
+    });
   };
 
   const formatDate = (dateString?: string) => {
@@ -170,14 +209,22 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
                     <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
                       {job.industry || 'General'}
                     </span>
-                    <a 
-                      href={job.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-block px-4 py-2 bg-resume-primary text-white text-sm rounded hover:bg-resume-secondary transition-colors"
-                    >
-                      Apply Now
-                    </a>
+                    <div className="flex gap-2">
+                      <a 
+                        href={job.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300 transition-colors"
+                      >
+                        View Details
+                      </a>
+                      <Button
+                        onClick={() => handleApplyNow(job)}
+                        className="px-4 py-2 bg-resume-primary text-white text-sm rounded hover:bg-resume-secondary transition-colors"
+                      >
+                        Apply Now
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>

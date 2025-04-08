@@ -6,6 +6,7 @@ import EducationForm from '@/components/EducationForm';
 import ResumePreview from '@/components/ResumePreview';
 import StepIndicator from '@/components/StepIndicator';
 import { useResumeContext } from '@/context/ResumeContext';
+import JobApplicationTracker from '@/components/JobApplicationTracker';
 
 const ResumeBuilder = () => {
   const { currentStep } = useResumeContext();
@@ -16,7 +17,14 @@ const ResumeBuilder = () => {
       
       {currentStep === 1 && <PersonalInfoForm />}
       {currentStep === 2 && <EducationForm />}
-      {currentStep === 3 && <ResumePreview />}
+      {currentStep === 3 && (
+        <>
+          <ResumePreview />
+          <div className="container mx-auto px-4 mt-8">
+            <JobApplicationTracker />
+          </div>
+        </>
+      )}
     </div>
   );
 };
