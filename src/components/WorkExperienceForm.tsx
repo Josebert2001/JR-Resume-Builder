@@ -1,0 +1,208 @@
+
+import React, { useState } from 'react';
+import { useResumeContext } from '@/context/ResumeContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { WorkExperience } from '@/context/ResumeContext';
+import { Briefcase, Plus, Trash2 } from 'lucide-react';
+import { 
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
+
+const WorkExperienceForm = () => {
+  const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
+  const [experiences, setExperiences] = useState<WorkExperience[]>(
+    resumeData.workExperience || []
+  );
+
+  const addExperience = () => {
+    const newExperience: WorkExperience = {
+      id: uuidv4(),
+      position: '',
+      company: '',
+      location: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+    };
+    setExperiences([...experiences, newExperience]);
+  };
+
+  const removeExperience = (id: string) => {
+    setExperiences(experiences.filter(exp => exp.id !== id));
+  };
+
+  const updateExperience = (id: string, field: string, value: string) => {
+    setExperiences(
+      experiences.map(exp => 
+        exp.id === id ? { ...exp, [field]: value } : exp
+      )
+    );
+  };
+
+  const handleBack = () => {
+    setCurrentStep(2);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateResumeData({ workExperience: experiences });
+    toast.success("Work experience updated!");
+    setCurrentStep(4);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="resume-form animate-fade-in">
+      <Card className="border-none shadow-sm">
+        <CardHeader className="bg-gradient-to-r from-resume-primary to-resume-secondary text-white rounded-t-lg">
+          <div className="flex items-center gap-2">
+            <Briefcase size={20} />
+            <CardTitle>Work Experience</CardTitle>
+          </div>
+          <CardDescription className="text-gray-100">
+            Add your work history to showcase your professional experience
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="pt-6">
+          {experiences.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Briefcase className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+              <p>No work experience added yet</p>
+              <p className="text-sm text-gray-400 mt-1">Add your work history to strengthen your resume</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {experiences.map((exp, index) => (
+                <Card key={exp.id} className="border border-gray-200">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg font-medium">Experience {index + 1}</CardTitle>
+                      <Button 
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeExperience(exp.id)}
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`position-${exp.id}`} className="block mb-2">Job Title</Label>
+                        <Input
+                          id={`position-${exp.id}`}
+                          value={exp.position}
+                          onChange={(e) => updateExperience(exp.id, 'position', e.target.value)}
+                          placeholder="e.g. Software Engineer"
+                          className="w-full"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`company-${exp.id}`} className="block mb-2">Company</Label>
+                        <Input
+                          id={`company-${exp.id}`}
+                          value={exp.company}
+                          onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
+                          placeholder="e.g. Google"
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor={`location-${exp.id}`} className="block mb-2">Location</Label>
+                        <Input
+                          id={`location-${exp.id}`}
+                          value={exp.location}
+                          onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
+                          placeholder="e.g. New York, NY"
+                          className="w-full"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`startDate-${exp.id}`} className="block mb-2">Start Date</Label>
+                        <Input
+                          id={`startDate-${exp.id}`}
+                          value={exp.startDate}
+                          onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
+                          placeholder="e.g. 01/2020"
+                          className="w-full"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`endDate-${exp.id}`} className="block mb-2">End Date</Label>
+                        <Input
+                          id={`endDate-${exp.id}`}
+                          value={exp.endDate}
+                          onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
+                          placeholder="e.g. Present or 01/2023"
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor={`description-${exp.id}`} className="block mb-2">
+                        Description (use bullet points for better ATS readability)
+                      </Label>
+                      <Textarea
+                        id={`description-${exp.id}`}
+                        value={exp.description}
+                        onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
+                        placeholder="• Increased website traffic by 40% through implementing SEO strategies
+• Led a team of 5 developers to deliver projects on time"
+                        className="w-full min-h-[120px]"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          
+          <Button 
+            type="button" 
+            onClick={addExperience}
+            variant="outline"
+            className="mt-4 border-dashed border-gray-300 text-gray-600 w-full py-6"
+          >
+            <Plus size={18} className="mr-2" /> Add Work Experience
+          </Button>
+        </CardContent>
+        
+        <CardFooter className="flex justify-between pt-4 border-t">
+          <Button 
+            type="button" 
+            onClick={handleBack}
+            variant="outline"
+            className="border-resume-primary text-resume-primary"
+          >
+            Back
+          </Button>
+          <Button 
+            type="submit" 
+            className="bg-resume-primary hover:bg-resume-secondary text-white"
+          >
+            Next
+          </Button>
+        </CardFooter>
+      </Card>
+    </form>
+  );
+};
+
+export default WorkExperienceForm;

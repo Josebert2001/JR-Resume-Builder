@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { GenerationResponse } from '@/services/aiService';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export type WorkExperience = {
   id: string;
@@ -61,7 +62,7 @@ type ResumeContextType = {
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
 
 export const ResumeProvider = ({ children }: { children: ReactNode }) => {
-  const [resumeData, setResumeData] = useState<ResumeData>({
+  const [storedResumeData, setStoredResumeData] = useLocalStorage<ResumeData>('resumeData', {
     name: '',
     email: '',
     phone: '',
@@ -71,6 +72,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     workExperience: [],
     certifications: [],
     projects: [],
+    skills: [],
   });
   
   const [aiGenerated, setAiGenerated] = useState<GenerationResponse | null>(null);
@@ -78,13 +80,13 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const updateResumeData = (data: Partial<ResumeData>) => {
-    setResumeData(prev => ({ ...prev, ...data }));
+    setStoredResumeData(prev => ({ ...prev, ...data }));
   };
 
   return (
     <ResumeContext.Provider
       value={{
-        resumeData,
+        resumeData: storedResumeData,
         updateResumeData,
         aiGenerated,
         setAiGenerated,

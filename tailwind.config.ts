@@ -69,7 +69,8 @@ export default {
 					accent: '#3182ce',
 					light: '#f7fafc',
 					dark: '#2d3748'
-				}
+				},
+				'coral-red': '#e76f51',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
