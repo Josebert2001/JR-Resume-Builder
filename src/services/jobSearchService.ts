@@ -98,7 +98,7 @@ const mockJobListings: Record<string, JobListing[]> = {
   ]
 };
 
-export const searchJobs = async (query: string, location: string): Promise<JobListing[]> {
+export const searchJobs = async (query: string, location: string) => {
   // Simulate API call delay
   await delay(1500);
   
@@ -132,5 +132,5 @@ export const searchJobs = async (query: string, location: string): Promise<JobLi
     );
   }
   
-  return categoryResults;
+  return categoryResults as JobListing[];
 };
