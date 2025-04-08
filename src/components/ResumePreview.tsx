@@ -3,14 +3,14 @@ import React, { useRef } from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
 import { Download, ArrowLeft, RefreshCw } from 'lucide-react';
-import { useReactToPdf } from 'react-to-pdf';
+import { usePDF } from 'react-to-pdf';
 import { toast } from 'sonner';
 
 const ResumePreview = () => {
   const { resumeData, setCurrentStep, setIsGenerating } = useResumeContext();
   const resumeRef = useRef<HTMLDivElement>(null);
   
-  const { toPDF, targetRef } = useReactToPdf({
+  const { toPDF, targetRef } = usePDF({
     filename: `${resumeData.name.replace(/\s+/g, '_')}_resume.pdf`,
     options: {
       format: 'a4',
