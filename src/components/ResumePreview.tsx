@@ -2,25 +2,18 @@
 import React, { useRef } from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
-import { Download, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Download, ArrowLeft, RefreshCw, Briefcase } from 'lucide-react';
 import { usePDF } from 'react-to-pdf';
 import { toast } from 'sonner';
+import JobSearch from '@/components/JobSearch';
 
 const ResumePreview = () => {
   const { resumeData, setCurrentStep, setIsGenerating } = useResumeContext();
   const resumeRef = useRef<HTMLDivElement>(null);
+  const [showJobSearch, setShowJobSearch] = React.useState(false);
   
   const { toPDF, targetRef } = usePDF({
     filename: `${resumeData.name.replace(/\s+/g, '_')}_resume.pdf`,
-    options: {
-      format: 'a4',
-      margin: {
-        top: '20mm',
-        right: '20mm',
-        bottom: '20mm',
-        left: '20mm'
-      }
-    },
   });
 
   const handleBack = () => {
@@ -39,6 +32,10 @@ const ResumePreview = () => {
     } else {
       toast.error('Failed to download. Please try again.');
     }
+  };
+
+  const toggleJobSearch = () => {
+    setShowJobSearch(!showJobSearch);
   };
 
   return (
@@ -68,11 +65,21 @@ const ResumePreview = () => {
           >
             <Download size={16} /> Download PDF
           </Button>
+          <Button 
+            type="button" 
+            onClick={toggleJobSearch}
+            variant="outline"
+            className="border-resume-primary text-resume-primary flex items-center gap-2"
+          >
+            <Briefcase size={16} /> {showJobSearch ? 'Hide' : 'Find'} Jobs
+          </Button>
         </div>
       </div>
 
+      {showJobSearch && <JobSearch resumeData={resumeData} />}
+
       <div 
-        ref={targetRef as React.RefObject<HTMLDivElement>} 
+        ref={targetRef} 
         className="resume-preview"
       >
         <div className="border-b-2 border-resume-primary pb-4 mb-6">
