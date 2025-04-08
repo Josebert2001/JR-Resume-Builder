@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,5 +100,42 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+.resume-form {
+  @apply max-w-3xl mx-auto p-6;
+}
+
+.resume-preview {
+  @apply bg-white shadow-lg p-8 max-w-3xl mx-auto rounded-lg;
+}
+
+.input-group {
+  @apply mb-6;
+}
+
+.step-indicator {
+  @apply flex justify-center my-8;
+}
+
+.step-indicator-dot {
+  @apply w-3 h-3 rounded-full mx-2;
+}
+
+.step-indicator-dot.active {
+  @apply bg-resume-primary;
+}
+
+.step-indicator-dot.completed {
+  @apply bg-resume-accent;
+}
+
+.step-indicator-dot.incomplete {
+  @apply bg-gray-300;
 }
