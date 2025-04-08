@@ -2,6 +2,32 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { GenerationResponse } from '@/services/aiService';
 
+export type WorkExperience = {
+  id: string;
+  position: string;
+  company: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+};
+
+export type Certification = {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+  description?: string;
+};
+
+export type Project = {
+  id: string;
+  name: string;
+  description: string;
+  technologies?: string;
+  url?: string;
+};
+
 export type ResumeData = {
   name: string;
   email: string;
@@ -11,6 +37,14 @@ export type ResumeData = {
   interests: string;
   summary?: string;
   skills?: string[];
+  workExperience?: WorkExperience[];
+  certifications?: Certification[];
+  projects?: Project[];
+  location?: string;
+  canRelocate?: boolean;
+  openToRemote?: boolean;
+  linkedIn?: string;
+  githubUrl?: string;
 };
 
 type ResumeContextType = {
@@ -34,6 +68,9 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     course: '',
     school: '',
     interests: '',
+    workExperience: [],
+    certifications: [],
+    projects: [],
   });
   
   const [aiGenerated, setAiGenerated] = useState<GenerationResponse | null>(null);

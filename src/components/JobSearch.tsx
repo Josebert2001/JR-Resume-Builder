@@ -3,19 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Search, MapPin, Briefcase } from 'lucide-react';
+import { Search, MapPin, Briefcase, Calendar, DollarSign, BuildingIcon } from 'lucide-react';
 import { ResumeData } from '@/context/ResumeContext';
-import { searchJobs } from '@/services/jobSearchService';
+import { searchJobs, getAvailableLocations, getAvailableCategories, JobListing } from '@/services/jobSearchService';
 import { Label } from '@/components/ui/label';
-
-type JobListingType = {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  description: string;
-  url: string;
-};
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface JobSearchProps {
   resumeData: ResumeData;
@@ -25,19 +17,31 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
   const [location, setLocation] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>(resumeData.course || '');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [jobListings, setJobListings] = useState<JobListingType[]>([]);
+  const [jobListings, setJobListings] = useState<JobListing[]>([]);
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   useEffect(() => {
     // Pre-populate search with course and interests from resume data
     if (resumeData.course || resumeData.interests) {
       setSearchQuery(`${resumeData.course} ${resumeData.interests}`);
     }
+    
+    // Get available locations and categories
+    setAvailableLocations(getAvailableLocations());
+    setAvailableCategories(getAvailableCategories());
   }, [resumeData]);
 
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      const results = await searchJobs(searchQuery, location);
+      // Update search query with selected category if available
+      const finalQuery = selectedCategory ? 
+        `${searchQuery} ${selectedCategory}` : 
+        searchQuery;
+        
+      const results = await searchJobs(finalQuery, location);
       setJobListings(results);
     } catch (error) {
       console.error('Error searching for jobs:', error);
@@ -46,11 +50,21 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
     }
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-NG', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
   return (
     <div className="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <h2 className="text-xl font-semibold text-resume-primary mb-4">Find Relevant Job Opportunities</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         <div>
           <Label htmlFor="keywords" className="block mb-2">Keywords / Skills</Label>
           <Input
@@ -64,15 +78,39 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
         </div>
         
         <div>
+          <Label htmlFor="category" className="block mb-2">Job Category</Label>
+          <Select
+            value={selectedCategory}
+            onValueChange={setSelectedCategory}
+          >
+            <SelectTrigger id="category">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Categories</SelectItem>
+              {availableCategories.map((category) => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
           <Label htmlFor="location" className="block mb-2">Location</Label>
-          <Input
-            id="location"
-            type="text"
+          <Select
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="City, state, or country"
-            className="w-full"
-          />
+            onValueChange={setLocation}
+          >
+            <SelectTrigger id="location">
+              <SelectValue placeholder="Select location" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Locations</SelectItem>
+              {availableLocations.map((loc) => (
+                <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="flex items-end">
@@ -94,28 +132,53 @@ const JobSearch: React.FC<JobSearchProps> = ({ resumeData }) => {
         {jobListings.length > 0 ? (
           <div className="space-y-4">
             {jobListings.map((job) => (
-              <Card key={job.id} className="p-4">
-                <h3 className="text-lg font-medium text-resume-primary">{job.title}</h3>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 mb-3 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Briefcase size={14} />
-                    <span>{job.company}</span>
+              <Card key={job.id} className="p-4 hover:shadow-md transition-shadow">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-resume-primary">{job.title}</h3>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 mb-3 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <Briefcase size={14} />
+                        <span>{job.company}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin size={14} />
+                        <span>{job.location}</span>
+                      </div>
+                      {job.jobType && (
+                        <div className="flex items-center gap-1">
+                          <BuildingIcon size={14} />
+                          <span>{job.jobType}</span>
+                        </div>
+                      )}
+                      {job.datePosted && (
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          <span>Posted: {formatDate(job.datePosted)}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-gray-700 mb-3">{job.description}</p>
+                    {job.salary && (
+                      <div className="flex items-center gap-1 text-sm text-green-600 font-medium mb-3">
+                        <DollarSign size={14} />
+                        <span>{job.salary}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    <span>{job.location}</span>
+                  <div className="mt-3 md:mt-0 md:ml-4 flex md:flex-col gap-2 md:items-end">
+                    <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                      {job.industry || 'General'}
+                    </span>
+                    <a 
+                      href={job.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-resume-primary text-white text-sm rounded hover:bg-resume-secondary transition-colors"
+                    >
+                      Apply Now
+                    </a>
                   </div>
-                </div>
-                <p className="text-gray-700 mb-3 line-clamp-2">{job.description}</p>
-                <div className="text-right">
-                  <a 
-                    href={job.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-resume-primary hover:underline font-medium"
-                  >
-                    View Job
-                  </a>
                 </div>
               </Card>
             ))}
