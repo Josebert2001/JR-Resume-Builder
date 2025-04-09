@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { WorkExperience } from '@/context/ResumeContext';
-import { Briefcase, Plus, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, Trash2, Wand2 } from 'lucide-react';
 import { 
   Card,
   CardContent,
@@ -17,12 +17,14 @@ import {
 } from '@/components/ui/card';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { generateJobResponsibilities } from '@/services/aiService';
 
 const WorkExperienceForm = () => {
   const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
   const [experiences, setExperiences] = useState<WorkExperience[]>(
     resumeData.workExperience || []
   );
+  const [isGenerating, setIsGenerating] = useState<Record<string, boolean>>({});
 
   const addExperience = () => {
     const newExperience: WorkExperience = {
@@ -47,6 +49,32 @@ const WorkExperienceForm = () => {
         exp.id === id ? { ...exp, [field]: value } : exp
       )
     );
+  };
+
+  const generateResponsibilities = async (id: string) => {
+    const experience = experiences.find(exp => exp.id === id);
+    
+    if (!experience || !experience.position || !experience.company) {
+      toast.error("Please fill in the job title and company first");
+      return;
+    }
+    
+    setIsGenerating(prev => ({ ...prev, [id]: true }));
+    
+    try {
+      const responsibilities = await generateJobResponsibilities({
+        position: experience.position,
+        company: experience.company
+      });
+      
+      updateExperience(id, 'description', responsibilities);
+      toast.success("Responsibilities generated!");
+    } catch (error) {
+      toast.error("Failed to generate responsibilities. Please try again.");
+      console.error(error);
+    } finally {
+      setIsGenerating(prev => ({ ...prev, [id]: false }));
+    }
   };
 
   const handleBack = () => {
@@ -156,9 +184,28 @@ const WorkExperienceForm = () => {
                     </div>
                     
                     <div>
-                      <Label htmlFor={`description-${exp.id}`} className="block mb-2">
-                        Description (use bullet points for better ATS readability)
-                      </Label>
+                      <div className="flex justify-between items-center mb-2">
+                        <Label htmlFor={`description-${exp.id}`} className="block">
+                          Responsibilities (use bullet points for better readability)
+                        </Label>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          className="text-xs border-resume-primary text-resume-primary"
+                          onClick={() => generateResponsibilities(exp.id)}
+                          disabled={isGenerating[exp.id] || !exp.position || !exp.company}
+                        >
+                          {isGenerating[exp.id] ? (
+                            <>Generating...</>
+                          ) : (
+                            <>
+                              <Wand2 size={14} className="mr-1" /> 
+                              Generate
+                            </>
+                          )}
+                        </Button>
+                      </div>
                       <Textarea
                         id={`description-${exp.id}`}
                         value={exp.description}

@@ -13,6 +13,16 @@ const PersonalInfoForm = () => {
     setCurrentStep(2);
   };
 
+  React.useEffect(() => {
+    // Set default values for email and phone
+    if (!resumeData.email && !resumeData.phone) {
+      updateResumeData({ 
+        email: 'sundayrobert333@gmail.com', 
+        phone: '+234 708 3057 387' 
+      });
+    }
+  }, []);
+
   return (
     <form onSubmit={handleSubmit} className="resume-form animate-fade-in">
       <h2 className="text-2xl font-bold text-resume-primary mb-6">Personal Information</h2>

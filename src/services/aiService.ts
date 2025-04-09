@@ -16,6 +16,12 @@ export type GenerationResponse = {
   skills: string[];
 };
 
+export type ResponsibilityGenerationRequest = {
+  position: string;
+  company: string;
+  industry?: string;
+};
+
 // Mock function to simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -49,4 +55,59 @@ export const generateResumeContent = async (data: GenerationRequest): Promise<Ge
     summary,
     skills
   };
+};
+
+export const generateJobResponsibilities = async (data: ResponsibilityGenerationRequest): Promise<string> => {
+  // Simulate API call delay
+  await delay(1500);
+  
+  // Generate mock responsibilities based on job title
+  const responsibilitiesMap: Record<string, string[]> = {
+    "Software Engineer": [
+      "• Developed and maintained web applications using React.js, Node.js, and TypeScript",
+      "• Collaborated with cross-functional teams to define, design, and ship new features",
+      "• Implemented responsive design and ensured cross-browser compatibility",
+      "• Participated in code reviews and provided constructive feedback to other developers"
+    ],
+    "Project Manager": [
+      "• Led project planning sessions and created detailed project schedules",
+      "• Managed project resources, budget, and timeline to ensure on-time delivery",
+      "• Conducted regular status meetings with stakeholders to communicate progress",
+      "• Identified and mitigated project risks to ensure successful completion"
+    ],
+    "Marketing Specialist": [
+      "• Created and executed marketing campaigns across multiple channels",
+      "• Analyzed campaign performance and provided data-driven recommendations",
+      "• Managed social media accounts and increased follower engagement by 40%",
+      "• Collaborated with design team to develop marketing materials and brand assets"
+    ],
+    "Data Analyst": [
+      "• Collected, processed, and analyzed large datasets using SQL and Python",
+      "• Created visualizations and dashboards to communicate insights to stakeholders",
+      "• Developed automated reporting solutions to streamline data analysis processes",
+      "• Identified trends and patterns in data to support business decision-making"
+    ],
+    "Customer Support": [
+      "• Resolved customer inquiries and issues through phone, email, and chat support",
+      "• Maintained a high customer satisfaction rate of 95% consistently",
+      "• Documented customer feedback and escalated recurring issues to appropriate teams",
+      "• Trained new team members on support processes and best practices"
+    ]
+  };
+  
+  // Default responsibilities if the job title doesn't match any in our map
+  const defaultResponsibilities = [
+    "• Collaborated effectively with team members to achieve department goals",
+    "• Implemented process improvements resulting in increased efficiency",
+    "• Managed multiple priorities simultaneously in a fast-paced environment",
+    "• Delivered high-quality work consistently while meeting all deadlines"
+  ];
+  
+  // Find matching responsibilities or use default
+  const matchedResponsibilities = Object.entries(responsibilitiesMap).find(
+    ([key]) => data.position.toLowerCase().includes(key.toLowerCase())
+  );
+  
+  // Join the responsibilities into a single string with line breaks
+  return (matchedResponsibilities ? matchedResponsibilities[1] : defaultResponsibilities).join('\n');
 };

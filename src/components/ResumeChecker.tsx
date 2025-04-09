@@ -15,7 +15,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 
-const ATSChecker = () => {
+const ResumeChecker = () => {
   const { resumeData } = useResumeContext();
   const [jobDescription, setJobDescription] = useState('');
   const [isChecking, setIsChecking] = useState(false);
@@ -34,7 +34,7 @@ const ATSChecker = () => {
     
     setIsChecking(true);
     
-    // Simulate ATS check process
+    // Simulate resume check process
     setTimeout(() => {
       // This would normally be an API call to analyze the resume against the job description
       // For this example, we'll create a simulated result
@@ -77,11 +77,11 @@ const ATSChecker = () => {
       }
       
       if (score < 40) {
-        suggestions.push("Your resume needs significant improvement to pass ATS systems");
+        suggestions.push("Your resume needs significant improvement to pass screening systems");
       } else if (score < 70) {
-        suggestions.push("Your resume may pass some ATS systems but could be improved");
+        suggestions.push("Your resume may pass some screening systems but could be improved");
       } else {
-        suggestions.push("Your resume is well-optimized for ATS systems");
+        suggestions.push("Your resume is well-optimized for job applications");
       }
       
       setCheckResult({
@@ -111,7 +111,7 @@ const ATSChecker = () => {
     <div className="max-w-4xl mx-auto">
       <Card className="border-none shadow-sm">
         <CardHeader className="bg-gradient-to-r from-resume-primary to-resume-secondary text-white rounded-t-lg">
-          <CardTitle>ATS Resume Checker</CardTitle>
+          <CardTitle>Resume Compatibility Checker</CardTitle>
           <CardDescription className="text-gray-100">
             Check how well your resume matches a specific job description
           </CardDescription>
@@ -139,7 +139,7 @@ const ATSChecker = () => {
               </>
             ) : (
               <>
-                Check ATS Compatibility <ArrowRight className="ml-2 h-4 w-4" />
+                Check Compatibility <ArrowRight className="ml-2 h-4 w-4" />
               </>
             )}
           </Button>
@@ -148,7 +148,7 @@ const ATSChecker = () => {
             <div className="mt-8 space-y-6">
               <div className="flex flex-col items-center">
                 <div className="text-center mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Your ATS Compatibility Score</p>
+                  <p className="text-sm text-gray-500 mb-1">Your Resume Compatibility Score</p>
                   <div className={`text-4xl font-bold ${getScoreColor(checkResult.score)}`}>
                     {checkResult.score}%
                   </div>
@@ -215,18 +215,18 @@ const ATSChecker = () => {
       </Card>
       
       <div className="mt-8 bg-gray-50 p-6 rounded-lg border">
-        <h3 className="text-xl font-semibold text-gray-900 mb-3">ATS Tips</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-3">Resume Tips</h3>
         <div className="space-y-3">
           <p className="text-gray-700">
-            <strong>What is an ATS?</strong> An Applicant Tracking System (ATS) is software used by employers to manage job applications and screen resumes.
+            <strong>What makes a good resume?</strong> A good resume clearly showcases your skills, experience, and achievements in a concise, professional format.
           </p>
           <p className="text-gray-700">
-            <strong>Why it matters:</strong> 75% of resumes are rejected by ATS before a human sees them. Optimizing your resume is crucial for getting past this first filter.
+            <strong>Why it matters:</strong> 75% of resumes are rejected by automated screening systems before a human sees them. Optimizing your resume is crucial for getting past this first filter.
           </p>
           <div className="text-gray-700">
-            <strong>Quick ATS tips:</strong>
+            <strong>Quick resume tips:</strong>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Use a simple, clean format without tables or graphics</li>
+              <li>Use a simple, clean format without tables or complicated graphics</li>
               <li>Include keywords directly from the job description</li>
               <li>Use standard section headings (Experience, Education, Skills)</li>
               <li>Submit in PDF format (unless requested otherwise)</li>
@@ -239,4 +239,4 @@ const ATSChecker = () => {
   );
 };
 
-export default ATSChecker;
+export default ResumeChecker;
