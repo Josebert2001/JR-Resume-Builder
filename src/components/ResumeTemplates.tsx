@@ -1,18 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { toast } from 'sonner';
 
+type TemplateType = 'professional' | 'modern' | 'minimal';
+
 const ResumeTemplates = () => {
   const { resumeData } = useResumeContext();
   
-  // This would normally connect to a state value for the selected template
-  const selectedTemplate = "professional";
+  // Use state to track the selected template
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>("professional");
   
-  const handleSelectTemplate = (template: string) => {
-    // This would update the selected template in a real implementation
+  const handleSelectTemplate = (template: TemplateType) => {
+    setSelectedTemplate(template);
     toast.success(`${template.charAt(0).toUpperCase() + template.slice(1)} template selected!`);
   };
   

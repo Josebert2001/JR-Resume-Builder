@@ -80,7 +80,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const updateResumeData = (data: Partial<ResumeData>) => {
-    setStoredResumeData(prev => ({ ...prev, ...data }));
+    setStoredResumeData((prev: ResumeData) => ({ ...prev, ...data }));
   };
 
   return (
