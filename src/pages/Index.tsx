@@ -13,6 +13,7 @@ import ProjectsForm from '@/components/ProjectsForm';
 import ResumeTemplates from '@/components/ResumeTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ResumeChecker from '@/components/ResumeChecker';
+import { Link } from 'react-router-dom';
 
 const ResumeBuilder = () => {
   const { currentStep } = useResumeContext();
@@ -95,10 +96,10 @@ const Index = () => {
             <div>
               <h3 className="font-medium text-gray-800 mb-3">Resources</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-gray-600 hover:text-resume-primary">Resume Templates</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-resume-primary">Cover Letter Guide</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-resume-primary">Job Search Tips</a></li>
-                <li><a href="#" className="text-gray-600 hover:text-resume-primary">Interview Preparation</a></li>
+                <li><Link to="/templates" className="text-gray-600 hover:text-resume-primary">Resume Templates</Link></li>
+                <li><Link to="/cover-letter-guide" className="text-gray-600 hover:text-resume-primary">Cover Letter Guide</Link></li>
+                <li><Link to="/job-search-tips" className="text-gray-600 hover:text-resume-primary">Job Search Tips</Link></li>
+                <li><Link to="/interview-preparation" className="text-gray-600 hover:text-resume-primary">Interview Preparation</Link></li>
               </ul>
             </div>
             <div>
