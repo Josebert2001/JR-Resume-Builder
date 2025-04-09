@@ -15,12 +15,10 @@ const PersonalInfoForm = () => {
 
   React.useEffect(() => {
     // Set default values for email and phone
-    if (!resumeData.email && !resumeData.phone) {
-      updateResumeData({ 
-        email: 'sundayrobert333@gmail.com', 
-        phone: '+234 708 3057 387' 
-      });
-    }
+    updateResumeData({ 
+      email: 'sundayrobert333@gmail.com', 
+      phone: '+234 708 3057 387' 
+    });
   }, []);
 
   return (
@@ -47,7 +45,7 @@ const PersonalInfoForm = () => {
           type="email"
           value={resumeData.email}
           onChange={(e) => updateResumeData({ email: e.target.value })}
-          placeholder="e.g. john.doe@example.com"
+          placeholder="sundayrobert333@gmail.com"
           required
           className="w-full"
         />
@@ -60,7 +58,7 @@ const PersonalInfoForm = () => {
           type="tel"
           value={resumeData.phone}
           onChange={(e) => updateResumeData({ phone: e.target.value })}
-          placeholder="e.g. +234 800 1234 567"
+          placeholder="+234 708 3057 387"
           required
           className="w-full"
         />

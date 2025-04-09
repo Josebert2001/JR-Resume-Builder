@@ -32,7 +32,7 @@ const ResumeBuilder = () => {
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="preview">Resume Preview</TabsTrigger>
               <TabsTrigger value="templates">Templates</TabsTrigger>
-              <TabsTrigger value="ats">Resume Check</TabsTrigger>
+              <TabsTrigger value="check">Resume Check</TabsTrigger>
             </TabsList>
             <TabsContent value="preview">
               <ResumePreview />
@@ -40,7 +40,7 @@ const ResumeBuilder = () => {
             <TabsContent value="templates">
               <ResumeTemplates />
             </TabsContent>
-            <TabsContent value="ats">
+            <TabsContent value="check">
               <ResumeChecker />
             </TabsContent>
           </Tabs>
@@ -61,12 +61,12 @@ const Index = () => {
           <div className="flex items-center space-x-4">
             <img 
               src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
-              alt="JP Resume Builder Logo" 
+              alt="JR Resume Builder Logo" 
               className="h-12 w-auto"
             />
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text">JP Resume Builder</h1>
-              <p className="text-gray-600 text-sm">Create ATS-friendly professional resumes</p>
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text">JR Resume Builder</h1>
+              <p className="text-gray-600 text-sm">Create professional resumes with ease</p>
             </div>
           </div>
           <div className="hidden md:flex items-center space-x-4">
@@ -87,10 +87,10 @@ const Index = () => {
             <div>
               <img 
                 src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
-                alt="JP Resume Builder Logo" 
+                alt="JR Resume Builder Logo" 
                 className="h-10 w-auto mb-4"
               />
-              <p className="text-gray-600 text-sm">Building professional resumes that get you noticed by recruiters and pass ATS systems.</p>
+              <p className="text-gray-600 text-sm">Building professional resumes that help you stand out to recruiters.</p>
             </div>
             <div>
               <h3 className="font-medium text-gray-800 mb-3">Resources</h3>
@@ -104,7 +104,7 @@ const Index = () => {
             <div>
               <h3 className="font-medium text-gray-800 mb-3">Contact</h3>
               <ul className="space-y-2 text-sm">
-                <li className="text-gray-600">Email: support@jpresumebuilder.com</li>
+                <li className="text-gray-600">Email: support@jrresumebuilder.com</li>
                 <li className="text-gray-600">Phone: +123 456 7890</li>
                 <li className="flex space-x-4 mt-4">
                   <a href="#" className="text-gray-600 hover:text-resume-primary">
@@ -121,7 +121,7 @@ const Index = () => {
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
-            <p>&copy; {new Date().getFullYear()} JP Resume Builder. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} JR Resume Builder. All rights reserved.</p>
           </div>
         </div>
       </footer>
