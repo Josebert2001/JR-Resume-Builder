@@ -12,7 +12,7 @@ import SkillsForm from '@/components/SkillsForm';
 import ProjectsForm from '@/components/ProjectsForm';
 import ResumeTemplates from '@/components/ResumeTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ATSChecker from '@/components/ATSChecker';
+import ResumeChecker from '@/components/ResumeChecker';
 
 const ResumeBuilder = () => {
   const { currentStep } = useResumeContext();
@@ -32,7 +32,7 @@ const ResumeBuilder = () => {
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="preview">Resume Preview</TabsTrigger>
               <TabsTrigger value="templates">Templates</TabsTrigger>
-              <TabsTrigger value="ats">ATS Check</TabsTrigger>
+              <TabsTrigger value="ats">Resume Check</TabsTrigger>
             </TabsList>
             <TabsContent value="preview">
               <ResumePreview />
@@ -41,7 +41,7 @@ const ResumeBuilder = () => {
               <ResumeTemplates />
             </TabsContent>
             <TabsContent value="ats">
-              <ATSChecker />
+              <ResumeChecker />
             </TabsContent>
           </Tabs>
           <div className="container mx-auto px-4 mt-8">
