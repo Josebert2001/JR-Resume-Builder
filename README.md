@@ -1,73 +1,90 @@
-# Welcome to your Lovable project
 
-## Project info
+Welcome to JR Digital Insights – AI Resume & CV Generator App
+🔍 About the Project
+This project is proudly developed under JR Digital Insights, founded by Sunday Robert, a tech innovator committed to delivering impactful digital solutions.
+Our AI Resume & CV Generator App empowers job seekers with intelligently crafted, personalized, and ATS-optimized CVs and resumes — all created in seconds using AI.
 
-**URL**: https://lovable.dev/projects/d74b553d-699a-4c9e-b719-e0c57fab6adf
+Live Project URL: Click here to access
 
-## How can I edit this code?
+✨ Key Features
+💡 Smart AI resume content generation
 
-There are several ways of editing your application.
+🎨 Professionally designed templates
 
-**Use Lovable**
+📄 Downloadable in PDF format
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d74b553d-699a-4c9e-b719-e0c57fab6adf) and start prompting.
+⚙️ Real-time customization and edits
 
-Changes made via Lovable will be committed automatically to this repo.
+🚀 Simple, fast, and intuitive interface
 
-**Use your preferred IDE**
+🛠️ Tech Stack
+This project is built with modern, high-performance tools:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Vite – blazing-fast development and build system
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+React + TypeScript – scalable, strongly typed component-based architecture
 
-Follow these steps:
+Tailwind CSS – utility-first design system for rapid styling
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+shadcn/ui – beautiful, accessible UI components
+
+🧑‍💻 How to Edit the Project
+Choose any of the following methods to update and improve the app:
+
+✅ Option 1: Use Lovable (Fastest)
+Visit the Lovable Project Page
+
+Make changes via AI prompts or manual edits
+
+All updates are automatically committed
+
+✅ Option 2: Use Your IDE Locally
+sh
+Copy
+Edit
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Step 2: Navigate into the directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install project dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start development server
 npm run dev
-```
+✅ Option 3: GitHub File Editing
+Open the file(s) directly in GitHub
 
-**Edit a file directly in GitHub**
+Click the pencil icon ✏️ to edit
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Commit and push your changes
 
-**Use GitHub Codespaces**
+✅ Option 4: Use GitHub Codespaces
+Click the green “Code” button on GitHub
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Open the “Codespaces” tab
 
-## What technologies are used for this project?
+Create a new Codespace and start editing right away
 
-This project is built with:
+🚀 Deployment Instructions
+To deploy your app live:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Visit the Lovable Dashboard
 
-## How can I deploy this project?
+Click on Share > Publish
 
-Simply open [Lovable](https://lovable.dev/projects/d74b553d-699a-4c9e-b719-e0c57fab6adf) and click on Share -> Publish.
+Your live app will be instantly available
 
-## Can I connect a custom domain to my Lovable project?
+🌐 Connect Your Custom Domain
+Yes! You can link your own domain to this project.
 
-Yes it is!
+Go to Project > Settings > Domains
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Click Connect Domain
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+For help, check: Custom Domain Guide
+
+👤 About the Creator
+Developed by Sunday Robert, founder of JR Digital Insights — a digital innovation hub focused on AI tools, education technology, and digital transformation.
+This project reflects our mission to empower users with smart, accessible solutions that simplify life and boost career success.
