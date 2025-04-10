@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
@@ -13,10 +14,10 @@ const PersonalInfoForm = () => {
   };
 
   React.useEffect(() => {
-    // Update default values for email and phone
+    // Set empty default values to encourage user input
     updateResumeData({ 
-      email: 'john.doe@example.com', 
-      phone: '+234 800 1234 567' 
+      email: '', 
+      phone: '' 
     });
   }, []);
 
@@ -44,7 +45,7 @@ const PersonalInfoForm = () => {
           type="email"
           value={resumeData.email}
           onChange={(e) => updateResumeData({ email: e.target.value })}
-          placeholder="john.doe@example.com"
+          placeholder="e.g. john.doe@example.com"
           required
           className="w-full"
         />
@@ -57,7 +58,7 @@ const PersonalInfoForm = () => {
           type="tel"
           value={resumeData.phone}
           onChange={(e) => updateResumeData({ phone: e.target.value })}
-          placeholder="+234 800 1234 567"
+          placeholder="e.g. +234 800 1234 567"
           required
           className="w-full"
         />
