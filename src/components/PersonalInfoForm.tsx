@@ -16,8 +16,8 @@ const PersonalInfoForm = () => {
   React.useEffect(() => {
     // Update default values for email and phone
     updateResumeData({ 
-      email: 'robertsunday333@gmail.com', 
-      phone: '+23470 830 57837' 
+      email: 'sundayrobert333@gmail.com', 
+      phone: '+234 708 3057 387' 
     });
   }, []);
 
