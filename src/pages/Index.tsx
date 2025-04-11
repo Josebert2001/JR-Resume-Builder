@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { ResumeProvider } from '@/context/ResumeContext';
 import PersonalInfoForm from '@/components/PersonalInfoForm';
 import EducationForm from '@/components/EducationForm';
@@ -51,6 +50,9 @@ const ResumeBuilder = () => {
               <ResumeChecker />
             </TabsContent>
           </Tabs>
+          <div className="container mx-auto px-4 mt-8">
+            <JobApplicationTracker />
+          </div>
         </>}
     </div>;
 };
