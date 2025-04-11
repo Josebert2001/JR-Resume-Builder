@@ -10,7 +10,11 @@ const Footer = () => {
         
         {/* Logo & Tagline */}
         <div className="flex flex-col space-y-2">
-          <img src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" alt="JR Logo" className="h-10 w-auto" />
+          <img 
+            src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
+            alt="JR Logo" 
+            className="h-8 w-auto object-contain" 
+          />
           <p className="text-sm font-medium max-w-sm">
             Empowering your career with smart, professional AI-generated resumes.
           </p>
