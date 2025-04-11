@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ResumeProvider } from '@/context/ResumeContext';
 import PersonalInfoForm from '@/components/PersonalInfoForm';
 import EducationForm from '@/components/EducationForm';
 import ResumePreview from '@/components/ResumePreview';
 import StepIndicator from '@/components/StepIndicator';
 import { useResumeContext } from '@/context/ResumeContext';
-import JobApplicationTracker from '@/components/JobApplicationTracker';
 import WorkExperienceForm from '@/components/WorkExperienceForm';
 import SkillsForm from '@/components/SkillsForm';
 import ProjectsForm from '@/components/ProjectsForm';
@@ -13,6 +12,15 @@ import ResumeTemplates from '@/components/ResumeTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ResumeChecker from '@/components/ResumeChecker';
 import { Link } from 'react-router-dom';
+import { Menu } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+
 const ResumeBuilder = () => {
   const {
     currentStep
@@ -48,6 +56,7 @@ const ResumeBuilder = () => {
         </>}
     </div>;
 };
+
 const Index = () => {
   return <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm py-4 border-b border-gray-200">
@@ -56,13 +65,41 @@ const Index = () => {
             <img src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" alt="JR Resume Builder Logo" className="h-12 w-auto" />
             <div>
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text">JR Resume Builder</h1>
-              
             </div>
           </div>
-          <div className="hidden md:flex items-center space-x-4">
-            <a href="#features" className="text-gray-600 hover:text-resume-primary transition-colors">Features</a>
-            <a href="#templates" className="text-gray-600 hover:text-resume-primary transition-colors">Templates</a>
-            <a href="#tips" className="text-gray-600 hover:text-resume-primary transition-colors">Resume Tips</a>
+          <div className="md:flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <div className="flex flex-col space-y-1.5 cursor-pointer">
+                  <Separator className="w-6 h-0.5 bg-gray-600" />
+                  <Separator className="w-6 h-0.5 bg-gray-600" />
+                  <Separator className="w-6 h-0.5 bg-gray-600" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <a href="#features" className="cursor-pointer">Features</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="#templates" className="cursor-pointer">Templates</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="#tips" className="cursor-pointer">Resume Tips</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/templates" className="cursor-pointer">Resume Templates</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/cover-letter-guide" className="cursor-pointer">Cover Letter Guide</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/job-search-tips" className="cursor-pointer">Job Search Tips</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/interview-preparation" className="cursor-pointer">Interview Preparation</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -113,4 +150,5 @@ const Index = () => {
       </footer>
     </div>;
 };
+
 export default Index;
