@@ -5,6 +5,148 @@ import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TemplateType } from '@/context/ResumeContext';
+import { Mail, Phone, MapPin, Briefcase, Calendar, GraduationCap } from 'lucide-react';
+
+const TemplatePreview = ({ template }: { template: TemplateType }) => {
+  // Sample data for the templates
+  const sampleData = {
+    name: "John Smith",
+    email: "john.smith@example.com",
+    phone: "(555) 123-4567",
+    location: "New York, NY",
+    position: "Software Engineer",
+    company: "Tech Solutions Inc.",
+    school: "University of Technology",
+    course: "Computer Science",
+    skills: ["JavaScript", "React", "Node.js", "TypeScript", "HTML/CSS"],
+  };
+
+  if (template === 'professional') {
+    return (
+      <div className="border rounded bg-white p-3 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <div className="border-b-2 border-resume-primary pb-2 mb-2">
+          <h1 className="text-base font-bold text-resume-primary">{sampleData.name}</h1>
+          <div className="flex flex-wrap gap-x-2 gap-y-1 mt-1 text-xs text-gray-600">
+            <div className="flex items-center gap-1">
+              <Mail size={8} />
+              <span>{sampleData.email}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Phone size={8} />
+              <span>{sampleData.phone}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <MapPin size={8} />
+              <span>{sampleData.location}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-1">
+          <h2 className="text-xs font-semibold text-resume-secondary mb-1">EXPERIENCE</h2>
+          <div className="ml-1">
+            <p className="text-xs font-medium">{sampleData.position}</p>
+            <div className="flex items-center gap-1 text-xs text-gray-700">
+              <Briefcase size={8} />
+              <span>{sampleData.company}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-1">
+          <h2 className="text-xs font-semibold text-resume-secondary mb-1">EDUCATION</h2>
+          <div className="ml-1">
+            <p className="text-xs font-medium">{sampleData.course}</p>
+            <p className="text-xs text-gray-700">{sampleData.school}</p>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xs font-semibold text-resume-secondary mb-1">SKILLS</h2>
+          <div className="flex flex-wrap gap-1">
+            {sampleData.skills.slice(0, 3).map((skill, index) => (
+              <span key={index} className="text-xs bg-gray-100 px-1 rounded">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'modern') {
+    return (
+      <div className="border rounded bg-white p-3 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <div className="flex gap-2 mb-2">
+          <div className="w-10 h-10 bg-resume-secondary rounded-full flex items-center justify-center text-white text-xs font-bold">
+            {sampleData.name.split(' ').map(part => part[0]).join('')}
+          </div>
+          <div>
+            <h1 className="text-sm font-bold">{sampleData.name}</h1>
+            <p className="text-xs text-resume-primary font-medium">{sampleData.position}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <h2 className="text-xs font-semibold text-resume-primary mb-1 border-b border-resume-primary pb-1">
+              EXPERIENCE
+            </h2>
+            <div className="ml-1">
+              <p className="text-xs font-medium">{sampleData.position}</p>
+              <div className="flex items-center gap-1 text-xs text-gray-700">
+                <Briefcase size={8} />
+                <span>{sampleData.company}</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-xs font-semibold text-resume-primary mb-1 border-b border-resume-primary pb-1">
+              EDUCATION
+            </h2>
+            <div className="ml-1">
+              <p className="text-xs font-medium">{sampleData.course}</p>
+              <div className="flex items-center gap-1 text-xs text-gray-700">
+                <GraduationCap size={8} />
+                <span>{sampleData.school}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'minimal') {
+    return (
+      <div className="border rounded bg-white p-3 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <h1 className="text-base font-bold mb-1">{sampleData.name}</h1>
+        <p className="text-xs text-gray-700 mb-1">{sampleData.position}</p>
+        
+        <div className="flex flex-wrap gap-1 text-xs text-gray-600 mb-2">
+          <span>{sampleData.email}</span>
+          <span>•</span>
+          <span>{sampleData.phone}</span>
+        </div>
+        
+        <h2 className="text-xs font-semibold uppercase mb-1">Experience</h2>
+        <div className="mb-1 ml-1">
+          <p className="text-xs font-medium">{sampleData.company}</p>
+          <p className="text-xs">{sampleData.position}</p>
+        </div>
+        
+        <h2 className="text-xs font-semibold uppercase mb-1">Education</h2>
+        <div className="mb-1 ml-1">
+          <p className="text-xs">{sampleData.course}, {sampleData.school}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 const ResumeTemplates = () => {
   const { resumeData, setTemplate } = useResumeContext();
@@ -25,17 +167,9 @@ const ResumeTemplates = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Professional Template */}
         <div className={`border rounded-lg overflow-hidden ${selectedTemplate === 'professional' ? 'ring-2 ring-resume-primary' : ''}`}>
-          <div className="aspect-w-3 aspect-h-4 bg-gray-100 relative">
-            <div className="absolute inset-0 p-4 flex flex-col">
-              <div className="h-6 bg-resume-primary mb-3"></div>
-              <div className="h-4 w-3/4 bg-gray-300 mb-4"></div>
-              <div className="h-3 w-1/2 bg-gray-300 mb-6"></div>
-              <div className="h-4 w-1/3 bg-resume-secondary mb-2"></div>
-              <div className="flex-1 flex flex-col space-y-2">
-                <div className="h-2 bg-gray-200"></div>
-                <div className="h-2 bg-gray-200"></div>
-                <div className="h-2 w-3/4 bg-gray-200"></div>
-              </div>
+          <div className="aspect-w-3 aspect-h-4 bg-white relative">
+            <div className="absolute inset-0">
+              <TemplatePreview template="professional" />
             </div>
             
             {selectedTemplate === 'professional' && (
@@ -59,29 +193,9 @@ const ResumeTemplates = () => {
         
         {/* Modern Template */}
         <div className={`border rounded-lg overflow-hidden ${selectedTemplate === 'modern' ? 'ring-2 ring-resume-primary' : ''}`}>
-          <div className="aspect-w-3 aspect-h-4 bg-gray-100 relative">
-            <div className="absolute inset-0 p-4 flex flex-col">
-              <div className="flex space-x-3 mb-4">
-                <div className="h-12 w-12 rounded-full bg-resume-secondary"></div>
-                <div className="flex-1">
-                  <div className="h-4 w-2/3 bg-gray-300 mb-2"></div>
-                  <div className="h-3 w-1/2 bg-gray-300"></div>
-                </div>
-              </div>
-              <div className="flex space-x-3 mb-4">
-                <div className="w-1/3">
-                  <div className="h-4 bg-resume-primary mb-2"></div>
-                  <div className="h-2 bg-gray-200 mb-1"></div>
-                  <div className="h-2 bg-gray-200 mb-1"></div>
-                  <div className="h-2 bg-gray-200"></div>
-                </div>
-                <div className="w-2/3">
-                  <div className="h-4 bg-resume-primary mb-2"></div>
-                  <div className="h-2 bg-gray-200 mb-1"></div>
-                  <div className="h-2 bg-gray-200 mb-1"></div>
-                  <div className="h-2 bg-gray-200"></div>
-                </div>
-              </div>
+          <div className="aspect-w-3 aspect-h-4 bg-white relative">
+            <div className="absolute inset-0">
+              <TemplatePreview template="modern" />
             </div>
             
             {selectedTemplate === 'modern' && (
@@ -105,21 +219,9 @@ const ResumeTemplates = () => {
         
         {/* Minimal Template */}
         <div className={`border rounded-lg overflow-hidden ${selectedTemplate === 'minimal' ? 'ring-2 ring-resume-primary' : ''}`}>
-          <div className="aspect-w-3 aspect-h-4 bg-gray-100 relative">
-            <div className="absolute inset-0 p-4 flex flex-col">
-              <div className="h-5 w-1/2 bg-gray-300 mb-6"></div>
-              <div className="h-3 w-1/3 bg-gray-200 mb-1"></div>
-              <div className="h-3 w-2/3 bg-gray-200 mb-4"></div>
-              
-              <div className="h-4 w-1/4 bg-gray-300 mb-2"></div>
-              <div className="h-2 bg-gray-200 mb-1"></div>
-              <div className="h-2 bg-gray-200 mb-1"></div>
-              <div className="h-2 w-2/3 bg-gray-200 mb-4"></div>
-              
-              <div className="h-4 w-1/4 bg-gray-300 mb-2"></div>
-              <div className="h-2 bg-gray-200 mb-1"></div>
-              <div className="h-2 bg-gray-200 mb-1"></div>
-              <div className="h-2 w-3/4 bg-gray-200"></div>
+          <div className="aspect-w-3 aspect-h-4 bg-white relative">
+            <div className="absolute inset-0">
+              <TemplatePreview template="minimal" />
             </div>
             
             {selectedTemplate === 'minimal' && (
