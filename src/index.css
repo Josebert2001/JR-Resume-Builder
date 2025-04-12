@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -52,6 +51,16 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --resume-primary: 221 83% 53%;
+    --resume-secondary: 217 91% 60%;
+    --resume-accent: 214 94% 67%;
+    --resume-success: 162 94% 30%;
+    --resume-warning: 43 96% 42%;
+    --resume-error: 0 84% 60%;
+    --resume-light: 214 100% 98%;
+    --resume-dark: 217 33% 17%;
+    --resume-muted: 215 25% 27%;
   }
 
   .dark {
@@ -91,20 +100,39 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-}
 
-@layer base {
-  * {
-    @apply border-border;
+  /* Improved focus styles for better accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-resume-primary ring-offset-2 ring-offset-white;
+  }
+
+  /* Smooth scrolling for the whole page */
+  html {
+    scroll-behavior: smooth;
+    @apply antialiased;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
+    @apply tracking-tight font-medium;
+  }
+
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -114,6 +142,45 @@
 
 .resume-preview {
   @apply bg-white shadow-lg p-8 max-w-3xl mx-auto rounded-lg;
+}
+
+/* Enhanced animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Improved mobile responsiveness */
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+  
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+  
+  .resume-preview {
+    @apply p-4;
+  }
+}
+
+/* Enhanced accessibility */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+}
+
+.skip-to-content {
+  @apply absolute left-4 -top-full z-50 bg-white px-4 py-2 transition-all focus:top-4;
 }
 
 .input-group {
