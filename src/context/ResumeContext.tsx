@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { GenerationResponse } from '@/services/aiService';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -91,7 +90,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
   });
   
   const [aiGenerated, setAiGenerated] = useState<GenerationResponse | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2); // Start with personal info form
   const [isGenerating, setIsGenerating] = useState(false);
 
   const updateResumeData = (data: Partial<ResumeData>) => {
