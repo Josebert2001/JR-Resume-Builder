@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ResumeProvider } from '@/context/ResumeContext';
 import PersonalInfoForm from '@/components/PersonalInfoForm';
@@ -29,16 +30,27 @@ const ResumeBuilder = () => {
   return <div className="min-h-screen bg-gray-50">
       <StepIndicator />
       
-      {currentStep === 1 && <PersonalInfoForm />}
-      {currentStep === 2 && <EducationForm />}
-      {currentStep === 3 && <WorkExperienceForm />}
-      {currentStep === 4 && <SkillsForm />}
-      {currentStep === 5 && <ProjectsForm />}
+      {/* Step 1: Template Selection */}
+      {currentStep === 1 && <ResumeTemplates />}
+      
+      {/* Step 2: Personal Information */}
+      {currentStep === 2 && <PersonalInfoForm />}
+      
+      {/* Step 3: Education */}
+      {currentStep === 3 && <EducationForm />}
+      
+      {/* Step 4: Work Experience */}
+      {currentStep === 4 && <WorkExperienceForm />}
+      
+      {/* Step 5: Skills */}
+      {currentStep === 5 && <SkillsForm />}
+      
+      {/* Step 6: Projects and Final Preview */}
       {currentStep === 6 && <>
           <Tabs defaultValue="preview" className="max-w-4xl mx-auto">
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="preview">Resume Preview</TabsTrigger>
-              <TabsTrigger value="templates">Templates</TabsTrigger>
+              <TabsTrigger value="templates">Change Template</TabsTrigger>
               <TabsTrigger value="check">Resume Check</TabsTrigger>
             </TabsList>
             <TabsContent value="preview">
