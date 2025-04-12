@@ -1,0 +1,5 @@
+[33mb92e8e4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: Updated ResumeContext with template types and data structure
+[33m982ed85[m Enhance UI components and styling: - Add smooth transitions and animations - Improve accessibility with ARIA labels - Enhance mobile responsiveness - Update color palette and typography - Add focus states for better keyboard navigation
+[33me410082[m Refactor: Template selection flow
+[33me7f9e1b[m Refactor: Improve mobile responsiveness
+[33mc769276[m feat: Add resume types and formats
