@@ -29,6 +29,8 @@ export type Project = {
   url?: string;
 };
 
+export type TemplateType = 'professional' | 'modern' | 'minimal';
+
 export type ResumeData = {
   name: string;
   email: string;
@@ -46,6 +48,7 @@ export type ResumeData = {
   openToRemote?: boolean;
   linkedIn?: string;
   githubUrl?: string;
+  template?: TemplateType;
 };
 
 type ResumeContextType = {
@@ -57,6 +60,7 @@ type ResumeContextType = {
   setCurrentStep: (step: number) => void;
   isGenerating: boolean;
   setIsGenerating: (isGenerating: boolean) => void;
+  setTemplate: (template: TemplateType) => void;
 };
 
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
@@ -73,6 +77,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     certifications: [],
     projects: [],
     skills: [],
+    template: 'professional', // Default template
   });
   
   const [aiGenerated, setAiGenerated] = useState<GenerationResponse | null>(null);
@@ -81,6 +86,10 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
 
   const updateResumeData = (data: Partial<ResumeData>) => {
     setStoredResumeData((prev: ResumeData) => ({ ...prev, ...data }));
+  };
+
+  const setTemplate = (template: TemplateType) => {
+    updateResumeData({ template });
   };
 
   return (
@@ -94,6 +103,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
         setCurrentStep,
         isGenerating,
         setIsGenerating,
+        setTemplate,
       }}
     >
       {children}

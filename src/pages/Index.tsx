@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ResumeProvider } from '@/context/ResumeContext';
 import PersonalInfoForm from '@/components/PersonalInfoForm';
@@ -80,13 +79,10 @@ const Index = () => {
                   <a href="#features" className="cursor-pointer">Features</a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="#templates" className="cursor-pointer">Templates</a>
+                  <Link to="/templates" className="cursor-pointer">Templates</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="#tips" className="cursor-pointer">Resume Tips</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/templates" className="cursor-pointer">Resume Templates</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/cover-letter-guide" className="cursor-pointer">Cover Letter Guide</Link>
