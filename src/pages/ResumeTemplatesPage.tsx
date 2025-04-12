@@ -7,7 +7,7 @@ import { ResumeProvider, useResumeContext } from '@/context/ResumeContext';
 import type { TemplateType } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
-import { Download, Mail, Phone, MapPin, Briefcase, Calendar, Code, GraduationCap } from 'lucide-react';
+import { Download, Mail, Phone, MapPin, Briefcase, Calendar, Code, GraduationCap, Award, FilePieChart } from 'lucide-react';
 
 const TemplatePreview = ({ template }: { template: TemplateType }) => {
   // Sample data for the templates
@@ -182,6 +182,235 @@ const TemplatePreview = ({ template }: { template: TemplateType }) => {
     );
   }
 
+  if (template === 'chronological') {
+    return (
+      <div className="border rounded bg-white p-4 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <h1 className="text-lg font-bold text-center mb-1">{sampleData.name}</h1>
+        <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-600 mb-2 border-b pb-2">
+          <span>{sampleData.email}</span>
+          <span>{sampleData.phone}</span>
+          <span>{sampleData.location}</span>
+        </div>
+        
+        <h2 className="text-xs font-semibold mb-1 bg-gray-100 px-1 py-0.5">WORK EXPERIENCE</h2>
+        <div className="mb-2 ml-1">
+          <div className="flex justify-between">
+            <p className="text-xs font-medium">{sampleData.company}</p>
+            <p className="text-xs">2020-Present</p>
+          </div>
+          <p className="text-xs italic">{sampleData.position}</p>
+          <p className="text-xs">• Led development of customer-facing applications</p>
+        </div>
+        
+        <div className="mb-2 ml-1">
+          <div className="flex justify-between">
+            <p className="text-xs font-medium">Previous Company</p>
+            <p className="text-xs">2018-2020</p>
+          </div>
+          <p className="text-xs italic">Junior Developer</p>
+          <p className="text-xs">• Maintained web applications</p>
+        </div>
+        
+        <h2 className="text-xs font-semibold mb-1 bg-gray-100 px-1 py-0.5">EDUCATION</h2>
+        <div className="mb-1 ml-1">
+          <div className="flex justify-between">
+            <p className="text-xs font-medium">{sampleData.school}</p>
+            <p className="text-xs">2014-2018</p>
+          </div>
+          <p className="text-xs">{sampleData.course}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'functional') {
+    return (
+      <div className="border rounded bg-white p-4 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <h1 className="text-lg font-bold mb-1">{sampleData.name}</h1>
+        <p className="text-xs text-gray-700 mb-1 border-b pb-1">{sampleData.position} | {sampleData.email} | {sampleData.phone}</p>
+        
+        <h2 className="text-xs font-semibold mb-1 uppercase">Summary</h2>
+        <p className="text-xs mb-2">Skilled software engineer with expertise in building modern web applications.</p>
+        
+        <h2 className="text-xs font-semibold mb-1 uppercase">Core Skills</h2>
+        <div className="mb-2">
+          <div className="mb-1">
+            <p className="text-xs font-medium">Frontend Development</p>
+            <p className="text-xs">• React, JavaScript, TypeScript, HTML/CSS</p>
+          </div>
+          <div className="mb-1">
+            <p className="text-xs font-medium">Backend Development</p>
+            <p className="text-xs">• Node.js, Express, API development</p>
+          </div>
+        </div>
+        
+        <h2 className="text-xs font-semibold mb-1 uppercase">Work History</h2>
+        <div className="ml-1 flex flex-col gap-1 text-xs">
+          <div>{sampleData.position}, {sampleData.company}</div>
+          <div>Junior Developer, Previous Company</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'combination') {
+    return (
+      <div className="border rounded bg-white p-4 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <h1 className="text-lg font-bold mb-1">{sampleData.name}</h1>
+        <div className="flex flex-wrap gap-1 text-xs text-gray-600 mb-1">
+          <span>{sampleData.email}</span>
+          <span>•</span>
+          <span>{sampleData.phone}</span>
+          <span>•</span>
+          <span>{sampleData.location}</span>
+        </div>
+        
+        <h2 className="text-xs font-semibold uppercase mb-1 border-b border-gray-300">Professional Summary</h2>
+        <p className="text-xs mb-2">Experienced software engineer specialized in modern web technologies</p>
+        
+        <h2 className="text-xs font-semibold uppercase mb-1 border-b border-gray-300">Key Skills</h2>
+        <div className="flex flex-wrap gap-1 mb-2">
+          {sampleData.skills.map((skill, index) => (
+            <span key={index} className="text-xs bg-gray-100 px-1 rounded">
+              {skill}
+            </span>
+          ))}
+        </div>
+        
+        <h2 className="text-xs font-semibold uppercase mb-1 border-b border-gray-300">Experience</h2>
+        <div className="mb-1 ml-1">
+          <div className="flex justify-between">
+            <p className="text-xs font-medium">{sampleData.position}</p>
+            <p className="text-xs">2020-Present</p>
+          </div>
+          <p className="text-xs">{sampleData.company}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'targeted') {
+    return (
+      <div className="border rounded bg-white p-4 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <h1 className="text-lg font-bold mb-1">{sampleData.name}</h1>
+        <p className="text-xs bg-resume-primary text-white inline-block px-1 rounded mb-1">{sampleData.position}</p>
+        <div className="flex flex-wrap gap-1 text-xs text-gray-600 mb-1">
+          <span>{sampleData.email}</span>
+          <span>•</span>
+          <span>{sampleData.phone}</span>
+        </div>
+        
+        <h2 className="text-xs font-semibold uppercase mb-1">Career Target</h2>
+        <p className="text-xs mb-2">Senior Frontend Developer position at Tech Innovators Inc.</p>
+        
+        <h2 className="text-xs font-semibold uppercase mb-1">Relevant Experience</h2>
+        <div className="mb-1 ml-1">
+          <p className="text-xs font-medium">Frontend Development</p>
+          <p className="text-xs">• Built React applications with TypeScript</p>
+          <p className="text-xs">• Implemented responsive designs</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'infographic') {
+    return (
+      <div className="border rounded bg-white p-4 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-lg font-bold text-resume-primary">{sampleData.name}</h1>
+          <div className="w-10 h-10 bg-resume-secondary rounded-full flex items-center justify-center text-white text-xs font-bold">
+            JS
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-1 mb-2">
+          <div className="col-span-1 bg-gray-100 rounded p-1">
+            <p className="text-xs font-bold text-center">5+</p>
+            <p className="text-xs text-center">Years Exp.</p>
+          </div>
+          <div className="col-span-1 bg-gray-100 rounded p-1">
+            <p className="text-xs font-bold text-center">20+</p>
+            <p className="text-xs text-center">Projects</p>
+          </div>
+          <div className="col-span-1 bg-gray-100 rounded p-1">
+            <p className="text-xs font-bold text-center">10+</p>
+            <p className="text-xs text-center">Clients</p>
+          </div>
+        </div>
+        
+        <div className="mb-2">
+          <h2 className="text-xs font-semibold mb-1 flex items-center"><Code size={10} className="mr-1"/> SKILLS</h2>
+          <div className="grid grid-cols-2 gap-1">
+            {sampleData.skills.slice(0, 4).map((skill, index) => (
+              <div key={index} className="flex items-center">
+                <div className="w-1 h-1 bg-resume-primary rounded-full mr-1"></div>
+                <span className="text-xs">{skill}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'profile') {
+    return (
+      <div className="border rounded bg-white p-4 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <div className="flex justify-between items-center mb-2">
+          <div>
+            <h1 className="text-lg font-bold">{sampleData.name}</h1>
+            <p className="text-xs text-resume-primary">{sampleData.position}</p>
+          </div>
+          <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+        </div>
+        
+        <div className="border-t border-b py-1 mb-2">
+          <p className="text-xs">Passionate software engineer with a strong focus on frontend development and user experience.</p>
+        </div>
+        
+        <div className="mb-2">
+          <h2 className="text-xs font-semibold mb-1">Professional Profile</h2>
+          <ul className="text-xs list-disc ml-4">
+            <li>5+ years in web development</li>
+            <li>Specializes in React ecosystem</li>
+            <li>Built 20+ successful applications</li>
+          </ul>
+        </div>
+        
+        <div className="flex gap-2 text-xs">
+          <div className="bg-gray-100 p-1 rounded flex-1 text-center">
+            <Mail size={8} className="inline mr-1"/> {sampleData.email.split('@')[0]}
+          </div>
+          <div className="bg-gray-100 p-1 rounded flex-1 text-center">
+            <Phone size={8} className="inline mr-1"/> {sampleData.phone}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (template === 'mini') {
+    return (
+      <div className="border rounded bg-white p-2 h-full text-left scale-90 shadow-sm transform origin-top-left">
+        <h1 className="text-sm font-bold text-resume-primary">{sampleData.name}</h1>
+        <p className="text-xs text-gray-600">{sampleData.position}</p>
+        
+        <div className="border-t my-1 pt-1">
+          <div className="flex items-center text-xs">
+            <Mail size={8} className="mr-1"/> 
+            <span>{sampleData.email}</span>
+          </div>
+          <div className="flex items-center text-xs">
+            <Phone size={8} className="mr-1"/> 
+            <span>{sampleData.phone}</span>
+          </div>
+        </div>
+        
+        <p className="text-xs mt-1 italic">JavaScript • React • Node.js</p>
+      </div>
+    );
+  }
+
   return null;
 };
 
@@ -251,28 +480,103 @@ const TemplatesContent = () => {
       </header>
 
       <main className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-resume-primary mb-6">Resume Templates</h2>
           <p className="text-gray-600 mb-10">Choose from our professionally designed resume templates to get started with your job application.</p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <TemplateCard 
-              title="Professional" 
-              description="Clean and traditional design" 
-              template="professional" 
-            />
-            
-            <TemplateCard 
-              title="Modern" 
-              description="Contemporary layout with creative touches" 
-              template="modern" 
-            />
-            
-            <TemplateCard 
-              title="Minimal" 
-              description="Simple and elegant design" 
-              template="minimal" 
-            />
+          <div className="mb-10">
+            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Most Popular Resume Formats</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TemplateCard 
+                title="Chronological" 
+                description="Emphasizes your career path and work history" 
+                template="chronological" 
+              />
+              
+              <TemplateCard 
+                title="Functional" 
+                description="Highlights your skills and abilities" 
+                template="functional" 
+              />
+              
+              <TemplateCard 
+                title="Combination" 
+                description="Blends chronological and functional approaches" 
+                template="combination" 
+              />
+            </div>
+          </div>
+          
+          <div className="mb-10">
+            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Specialized Resume Formats</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TemplateCard 
+                title="Targeted" 
+                description="Customized for a specific job or company" 
+                template="targeted" 
+              />
+              
+              <TemplateCard 
+                title="Infographic" 
+                description="Visual representation of your qualifications" 
+                template="infographic" 
+              />
+              
+              <TemplateCard 
+                title="Profile" 
+                description="Highlights your professional persona" 
+                template="profile" 
+              />
+            </div>
+          </div>
+          
+          <div className="mb-10">
+            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Traditional Templates</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TemplateCard 
+                title="Professional" 
+                description="Clean and traditional design" 
+                template="professional" 
+              />
+              
+              <TemplateCard 
+                title="Modern" 
+                description="Contemporary layout with creative touches" 
+                template="modern" 
+              />
+              
+              <TemplateCard 
+                title="Minimal" 
+                description="Simple and elegant design" 
+                template="minimal" 
+              />
+            </div>
+          </div>
+          
+          <div className="mb-10">
+            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Special Formats</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <TemplateCard
+                title="Mini Resume"
+                description="Compact format for networking events"
+                template="mini"
+              />
+              
+              <Card className="bg-gray-50">
+                <CardHeader>
+                  <CardTitle>Video Resume</CardTitle>
+                  <CardDescription>Coming soon - Dynamic video presentation of your skills</CardDescription>
+                </CardHeader>
+                <CardContent className="h-80 flex items-center justify-center">
+                  <p className="text-gray-500 text-center italic">Premium feature coming soon</p>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full bg-gray-300 hover:bg-gray-400 cursor-not-allowed">
+                    Coming Soon
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
           </div>
         </div>
       </main>

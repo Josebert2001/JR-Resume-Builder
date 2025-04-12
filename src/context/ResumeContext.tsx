@@ -29,7 +29,17 @@ export type Project = {
   url?: string;
 };
 
-export type TemplateType = 'professional' | 'modern' | 'minimal';
+export type TemplateType = 
+  | 'professional' 
+  | 'modern' 
+  | 'minimal' 
+  | 'chronological'
+  | 'functional'
+  | 'combination'
+  | 'infographic'
+  | 'profile'
+  | 'targeted'
+  | 'mini';
 
 export type ResumeData = {
   name: string;
