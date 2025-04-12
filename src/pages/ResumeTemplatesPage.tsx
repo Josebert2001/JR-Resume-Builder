@@ -431,15 +431,15 @@ const TemplateCard = ({
   };
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg md:text-xl">{title}</CardTitle>
+        <CardDescription className="text-sm">{description}</CardDescription>
       </CardHeader>
-      <CardContent className="h-80 overflow-hidden">
+      <CardContent className="flex-grow h-64 sm:h-72 overflow-hidden">
         <TemplatePreview template={template} />
       </CardContent>
-      <CardFooter className="flex gap-3">
+      <CardFooter className="flex flex-col sm:flex-row gap-2 pt-2">
         <Button 
           className="w-full bg-resume-primary hover:bg-resume-secondary"
           onClick={handleSelect}
@@ -461,15 +461,15 @@ const TemplatesContent = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm py-4 border-b border-gray-200">
         <div className="container mx-auto px-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-4">
+          <Link to="/" className="flex items-center space-x-2 sm:space-x-4">
             <img 
               src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
               alt="JR Resume Builder Logo" 
-              className="h-12 w-auto"
+              className="h-8 md:h-12 w-auto"
             />
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text">JR Resume Builder</h1>
-              <p className="text-gray-600 text-sm">Create professional resumes with ease</p>
+              <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text">JR Resume Builder</h1>
+              <p className="text-gray-600 text-xs md:text-sm">Create professional resumes with ease</p>
             </div>
           </Link>
           <nav className="hidden md:flex items-center space-x-4">
@@ -479,14 +479,14 @@ const TemplatesContent = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-6 md:py-12">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-resume-primary mb-6">Resume Templates</h2>
-          <p className="text-gray-600 mb-10">Choose from our professionally designed resume templates to get started with your job application.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-resume-primary mb-4 md:mb-6">Resume Templates</h2>
+          <p className="text-gray-600 mb-6 md:mb-10 text-sm md:text-base">Choose from our professionally designed resume templates to get started with your job application.</p>
           
-          <div className="mb-10">
-            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Most Popular Resume Formats</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mb-8 md:mb-10">
+            <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">Most Popular Resume Formats</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <TemplateCard 
                 title="Chronological" 
                 description="Emphasizes your career path and work history" 
@@ -507,9 +507,9 @@ const TemplatesContent = () => {
             </div>
           </div>
           
-          <div className="mb-10">
-            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Specialized Resume Formats</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mb-8 md:mb-10">
+            <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">Specialized Resume Formats</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <TemplateCard 
                 title="Targeted" 
                 description="Customized for a specific job or company" 
@@ -530,9 +530,9 @@ const TemplatesContent = () => {
             </div>
           </div>
           
-          <div className="mb-10">
-            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Traditional Templates</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mb-8 md:mb-10">
+            <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">Traditional Templates</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <TemplateCard 
                 title="Professional" 
                 description="Clean and traditional design" 
@@ -553,24 +553,24 @@ const TemplatesContent = () => {
             </div>
           </div>
           
-          <div className="mb-10">
-            <h3 className="text-xl font-semibold mb-6 text-resume-secondary">Special Formats</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-2xl mx-auto">
+          <div className="mb-8 md:mb-10">
+            <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">Special Formats</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 max-w-2xl mx-auto">
               <TemplateCard
                 title="Mini Resume"
                 description="Compact format for networking events"
                 template="mini"
               />
               
-              <Card className="bg-gray-50">
-                <CardHeader>
-                  <CardTitle>Video Resume</CardTitle>
-                  <CardDescription>Coming soon - Dynamic video presentation of your skills</CardDescription>
+              <Card className="h-full flex flex-col bg-gray-50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg md:text-xl">Video Resume</CardTitle>
+                  <CardDescription className="text-sm">Coming soon - Dynamic video presentation of your skills</CardDescription>
                 </CardHeader>
-                <CardContent className="h-80 flex items-center justify-center">
+                <CardContent className="flex-grow h-64 sm:h-72 flex items-center justify-center">
                   <p className="text-gray-500 text-center italic">Premium feature coming soon</p>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="pt-2">
                   <Button className="w-full bg-gray-300 hover:bg-gray-400 cursor-not-allowed">
                     Coming Soon
                   </Button>
