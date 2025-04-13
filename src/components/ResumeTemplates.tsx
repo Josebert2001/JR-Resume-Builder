@@ -377,12 +377,13 @@ const TemplatePreview = ({ template }: { template: TemplateType }) => {
 };
 
 const ResumeTemplates = () => {
-  const { resumeData, setTemplate } = useResumeContext();
+  const { resumeData, setTemplate, setCurrentStep } = useResumeContext();
   const selectedTemplate = resumeData.template || 'professional';
   
   const handleSelectTemplate = (template: TemplateType) => {
     setTemplate(template);
     toast.success(`${template.charAt(0).toUpperCase() + template.slice(1)} template selected!`);
+    setCurrentStep(2); // Navigate back to the personal info form
   };
   
   return (
