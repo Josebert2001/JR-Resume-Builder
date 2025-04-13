@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,10 @@ import {
 } from '@/components/ui/card';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
-import { generateJobResponsibilities } from '@/services/aiService';
+import { Groq } from "groq-sdk";
+
+const groq = new Groq();
+groq.apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
 const WorkExperienceForm = () => {
   const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
@@ -58,34 +60,46 @@ const WorkExperienceForm = () => {
       toast.error("Please fill in the job title and company first");
       return;
     }
-    
+
     setIsGenerating(prev => ({ ...prev, [id]: true }));
     
     try {
-      const responsibilities = await generateJobResponsibilities({
-        position: experience.position,
-        company: experience.company
+      const prompt = `Generate 4-5 detailed and specific bullet points for a ${experience.position} role at ${experience.company}. 
+Focus on quantifiable achievements and key responsibilities that demonstrate impact.
+Include relevant technical skills and soft skills.
+Format each bullet point to start with "• " and separate with newlines.
+Make them specific to the role and industry, avoiding generic statements.
+Example format:
+• Increased team productivity by 40% through implementation of agile methodologies
+• Led development of customer-facing application serving 100,000+ users`;
+
+      const completion = await groq.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "mixtral-8x7b-32768",
+        temperature: 0.7,
+        max_tokens: 1024,
       });
-      
+
+      const responsibilities = completion.choices[0]?.message?.content || "Failed to generate responsibilities";
       updateExperience(id, 'description', responsibilities);
       toast.success("Responsibilities generated!");
     } catch (error) {
+      console.error('Error generating responsibilities:', error);
       toast.error("Failed to generate responsibilities. Please try again.");
-      console.error(error);
     } finally {
       setIsGenerating(prev => ({ ...prev, [id]: false }));
     }
   };
 
   const handleBack = () => {
-    setCurrentStep(2);
+    setCurrentStep(3);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateResumeData({ workExperience: experiences });
     toast.success("Work experience updated!");
-    setCurrentStep(4);
+    setCurrentStep(5);
   };
 
   return (
@@ -97,7 +111,7 @@ const WorkExperienceForm = () => {
             <CardTitle>Work Experience</CardTitle>
           </div>
           <CardDescription className="text-gray-100">
-            Add your work history to showcase your professional experience
+            Add your relevant work experience
           </CardDescription>
         </CardHeader>
         
@@ -106,7 +120,6 @@ const WorkExperienceForm = () => {
             <div className="text-center py-8 text-gray-500">
               <Briefcase className="mx-auto h-12 w-12 text-gray-400 mb-3" />
               <p>No work experience added yet</p>
-              <p className="text-sm text-gray-400 mt-1">Add your work history to strengthen your resume</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -114,18 +127,19 @@ const WorkExperienceForm = () => {
                 <Card key={exp.id} className="border border-gray-200">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-center">
-                      <CardTitle className="text-lg font-medium">Experience {index + 1}</CardTitle>
+                      <CardTitle className="text-lg font-medium">Position {index + 1}</CardTitle>
                       <Button 
                         type="button"
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="text-gray-500 hover:text-red-500"
                         onClick={() => removeExperience(exp.id)}
-                        className="text-gray-400 hover:text-red-500"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </Button>
                     </div>
                   </CardHeader>
+                  
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -138,6 +152,7 @@ const WorkExperienceForm = () => {
                           className="w-full"
                         />
                       </div>
+                      
                       <div>
                         <Label htmlFor={`company-${exp.id}`} className="block mb-2">Company</Label>
                         <Input
@@ -161,6 +176,7 @@ const WorkExperienceForm = () => {
                           className="w-full"
                         />
                       </div>
+                      
                       <div>
                         <Label htmlFor={`startDate-${exp.id}`} className="block mb-2">Start Date</Label>
                         <Input
@@ -171,6 +187,7 @@ const WorkExperienceForm = () => {
                           className="w-full"
                         />
                       </div>
+                      
                       <div>
                         <Label htmlFor={`endDate-${exp.id}`} className="block mb-2">End Date</Label>
                         <Input
@@ -186,7 +203,7 @@ const WorkExperienceForm = () => {
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <Label htmlFor={`description-${exp.id}`} className="block">
-                          Responsibilities (use bullet points for better readability)
+                          Responsibilities
                         </Label>
                         <Button 
                           type="button" 
@@ -200,7 +217,7 @@ const WorkExperienceForm = () => {
                             <>Generating...</>
                           ) : (
                             <>
-                              <Wand2 size={14} className="mr-1" /> 
+                              <Wand2 size={14} className="mr-1" />
                               Generate
                             </>
                           )}
@@ -210,9 +227,8 @@ const WorkExperienceForm = () => {
                         id={`description-${exp.id}`}
                         value={exp.description}
                         onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
-                        placeholder="• Increased website traffic by 40% through implementing SEO strategies
-• Led a team of 5 developers to deliver projects on time"
-                        className="w-full min-h-[120px]"
+                        placeholder="List your key responsibilities and achievements..."
+                        className="min-h-[150px]"
                       />
                     </div>
                   </CardContent>

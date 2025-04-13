@@ -1,6 +1,7 @@
+import { Groq } from "groq-sdk";
 
-// This is a mock service that simulates AI API calls
-// In a real app, this would make actual API calls to your backend
+const groq = new Groq();
+groq.apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
 export type GenerationRequest = {
   name: string;
@@ -22,92 +23,201 @@ export type ResponsibilityGenerationRequest = {
   industry?: string;
 };
 
-// Mock function to simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export type ResumeAnalysisResponse = {
+  score: number;
+  matchedKeywords: string[];
+  missedKeywords: string[];
+  suggestions: string[];
+};
 
-export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
-  // Simulate API call delay
-  await delay(2000);
-  
-  // Mock AI-generated content
-  const summaries = [
-    `A motivated and dedicated ${data.course} graduate from ${data.school} with a passion for ${data.interests}. Seeking to leverage my academic knowledge and enthusiasm to contribute to a progressive organization where I can utilize my skills and gain valuable industry experience while driving organizational success.`,
-    `Result-oriented ${data.course} professional with a strong educational foundation from ${data.school}. Passionate about ${data.interests} and committed to applying theoretical knowledge in practical settings. Looking to secure a challenging position in a reputable organization to expand my learning, knowledge, and skills.`,
-    `A dynamic and diligent ${data.course} graduate from ${data.school} with interest in ${data.interests}. Eager to contribute my academic qualifications and enthusiasm to a forward-thinking organization that offers opportunities for professional growth and skill enhancement.`
-  ];
-  
-  const skillSets = {
-    "Computer Science": ["Programming (Java, Python, JavaScript)", "Database Management", "Software Development", "Data Structures & Algorithms", "Web Development"],
-    "Engineering": ["Technical Drawing", "CAD Software", "Project Management", "Problem Solving", "Quality Assurance"],
-    "Business Administration": ["Financial Analysis", "Marketing Strategy", "Human Resource Management", "Business Communication", "Strategic Planning"],
-    "Medicine": ["Patient Care", "Medical Documentation", "Clinical Assessment", "Healthcare Management", "Medical Ethics"],
-    "Arts": ["Creative Writing", "Design Principles", "Critical Analysis", "Research Methodology", "Digital Media"],
-    "Default": ["Communication Skills", "Team Collaboration", "Critical Thinking", "Problem Solving", "Microsoft Office Suite"]
+export type DetailedResumeAnalysis = ResumeAnalysisResponse & {
+  industryInsights: {
+    trendsAndDemand: string;
+    salaryRange: string;
+    keyCompetitors: string[];
   };
-  
-  // Select random summary
-  const summary = summaries[Math.floor(Math.random() * summaries.length)];
-  
-  // Select skills based on course or default
-  const skills = skillSets[data.course as keyof typeof skillSets] || skillSets.Default;
-  
-  return {
-    summary,
-    skills
+  atsCompatibility: {
+    score: number;
+    issues: string[];
+    formatting: string[];
+  };
+  coverLetterSuggestions: {
+    keyPoints: string[];
+    uniqueSellingPoints: string[];
+    customization: string;
   };
 };
 
+export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
+  const prompt = `Create a professional resume summary and relevant skills list for:
+Name: ${data.name}
+Education: ${data.course} from ${data.school}
+Interests: ${data.interests}
+
+Format the response as JSON with:
+1. A concise, professional summary highlighting education and career aspirations (max 100 words)
+2. A list of 5-7 relevant technical and soft skills based on the course and interests
+
+Response format:
+{
+  "summary": "...",
+  "skills": ["skill1", "skill2", ...]
+}`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "mixtral-8x7b-32768",
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
+    const response = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    return {
+      summary: response.summary || "Failed to generate summary",
+      skills: response.skills || []
+    };
+  } catch (error) {
+    console.error('Error generating resume content:', error);
+    throw new Error('Failed to generate resume content');
+  }
+};
+
 export const generateJobResponsibilities = async (data: ResponsibilityGenerationRequest): Promise<string> => {
-  // Simulate API call delay
-  await delay(1500);
-  
-  // Generate mock responsibilities based on job title
-  const responsibilitiesMap: Record<string, string[]> = {
-    "Software Engineer": [
-      "• Developed and maintained web applications using React.js, Node.js, and TypeScript",
-      "• Collaborated with cross-functional teams to define, design, and ship new features",
-      "• Implemented responsive design and ensured cross-browser compatibility",
-      "• Participated in code reviews and provided constructive feedback to other developers"
-    ],
-    "Project Manager": [
-      "• Led project planning sessions and created detailed project schedules",
-      "• Managed project resources, budget, and timeline to ensure on-time delivery",
-      "• Conducted regular status meetings with stakeholders to communicate progress",
-      "• Identified and mitigated project risks to ensure successful completion"
-    ],
-    "Marketing Specialist": [
-      "• Created and executed marketing campaigns across multiple channels",
-      "• Analyzed campaign performance and provided data-driven recommendations",
-      "• Managed social media accounts and increased follower engagement by 40%",
-      "• Collaborated with design team to develop marketing materials and brand assets"
-    ],
-    "Data Analyst": [
-      "• Collected, processed, and analyzed large datasets using SQL and Python",
-      "• Created visualizations and dashboards to communicate insights to stakeholders",
-      "• Developed automated reporting solutions to streamline data analysis processes",
-      "• Identified trends and patterns in data to support business decision-making"
-    ],
-    "Customer Support": [
-      "• Resolved customer inquiries and issues through phone, email, and chat support",
-      "• Maintained a high customer satisfaction rate of 95% consistently",
-      "• Documented customer feedback and escalated recurring issues to appropriate teams",
-      "• Trained new team members on support processes and best practices"
-    ]
-  };
-  
-  // Default responsibilities if the job title doesn't match any in our map
-  const defaultResponsibilities = [
-    "• Collaborated effectively with team members to achieve department goals",
-    "• Implemented process improvements resulting in increased efficiency",
-    "• Managed multiple priorities simultaneously in a fast-paced environment",
-    "• Delivered high-quality work consistently while meeting all deadlines"
-  ];
-  
-  // Find matching responsibilities or use default
-  const matchedResponsibilities = Object.entries(responsibilitiesMap).find(
-    ([key]) => data.position.toLowerCase().includes(key.toLowerCase())
-  );
-  
-  // Join the responsibilities into a single string with line breaks
-  return (matchedResponsibilities ? matchedResponsibilities[1] : defaultResponsibilities).join('\n');
+  const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}.
+  Focus on specific, measurable achievements and key responsibilities.
+  Format each bullet point starting with "• " and separate with newlines.`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "mixtral-8x7b-32768",
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
+    return completion.choices[0]?.message?.content || "Failed to generate responsibilities";
+  } catch (error) {
+    console.error('Error generating job responsibilities:', error);
+    throw new Error('Failed to generate job responsibilities');
+  }
+};
+
+export const analyzeResume = async (resumeContent: string, jobDescription: string): Promise<ResumeAnalysisResponse> => {
+  const prompt = `Analyze this resume against a job description and provide feedback in JSON format.
+
+Resume Content:
+${resumeContent}
+
+Job Description:
+${jobDescription}
+
+Return a JSON object with:
+1. score (0-100): match percentage between resume and job requirements
+2. matchedKeywords: array of skills/keywords from resume that match job requirements
+3. missedKeywords: array of important keywords from job description missing in resume
+4. suggestions: array of specific improvement suggestions
+
+Format:
+{
+  "score": number,
+  "matchedKeywords": string[],
+  "missedKeywords": string[],
+  "suggestions": string[]
+}`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "mixtral-8x7b-32768",
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
+    const response = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    return {
+      score: response.score || 0,
+      matchedKeywords: response.matchedKeywords || [],
+      missedKeywords: response.missedKeywords || [],
+      suggestions: response.suggestions || []
+    };
+  } catch (error) {
+    console.error('Error analyzing resume:', error);
+    throw new Error('Failed to analyze resume');
+  }
+};
+
+export const getDetailedAnalysis = async (resumeContent: string, jobDescription: string): Promise<DetailedResumeAnalysis> => {
+  const prompt = `Perform a detailed analysis of this resume against a job description. Include industry insights, ATS compatibility, and cover letter suggestions.
+
+Resume Content:
+${resumeContent}
+
+Job Description:
+${jobDescription}
+
+Return a comprehensive JSON object that includes:
+1. Basic match analysis (score, keywords, suggestions)
+2. Industry insights (trends, salary ranges, key competitors)
+3. ATS compatibility check (formatting issues, structure)
+4. Cover letter customization suggestions
+
+Format the response as:
+{
+  "score": number,
+  "matchedKeywords": string[],
+  "missedKeywords": string[],
+  "suggestions": string[],
+  "industryInsights": {
+    "trendsAndDemand": string,
+    "salaryRange": string,
+    "keyCompetitors": string[]
+  },
+  "atsCompatibility": {
+    "score": number,
+    "issues": string[],
+    "formatting": string[]
+  },
+  "coverLetterSuggestions": {
+    "keyPoints": string[],
+    "uniqueSellingPoints": string[],
+    "customization": string
+  }
+}`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "mixtral-8x7b-32768",
+      temperature: 0.7,
+      max_tokens: 2048,
+    });
+
+    const response = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    return {
+      ...response,
+      score: response.score || 0,
+      matchedKeywords: response.matchedKeywords || [],
+      missedKeywords: response.missedKeywords || [],
+      suggestions: response.suggestions || [],
+      industryInsights: {
+        trendsAndDemand: response.industryInsights?.trendsAndDemand || 'No industry insights available',
+        salaryRange: response.industryInsights?.salaryRange || 'Salary information unavailable',
+        keyCompetitors: response.industryInsights?.keyCompetitors || []
+      },
+      atsCompatibility: {
+        score: response.atsCompatibility?.score || 0,
+        issues: response.atsCompatibility?.issues || [],
+        formatting: response.atsCompatibility?.formatting || []
+      },
+      coverLetterSuggestions: {
+        keyPoints: response.coverLetterSuggestions?.keyPoints || [],
+        uniqueSellingPoints: response.coverLetterSuggestions?.uniqueSellingPoints || [],
+        customization: response.coverLetterSuggestions?.customization || 'No customization suggestions available'
+      }
+    };
+  } catch (error) {
+    console.error('Error performing detailed analysis:', error);
+    throw new Error('Failed to perform detailed resume analysis');
+  }
 };

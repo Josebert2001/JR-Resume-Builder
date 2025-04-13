@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Project } from '@/context/ResumeContext';
-import { FileCode, Plus, Trash2, Link } from 'lucide-react';
+import { FileCode, Plus, Trash2, Link, Wand2 } from 'lucide-react';
 import { 
   Card,
   CardContent,
@@ -17,12 +16,17 @@ import {
 } from '@/components/ui/card';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { Groq } from "groq-sdk";
+
+const groq = new Groq();
+groq.apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
 const ProjectsForm = () => {
   const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
   const [projects, setProjects] = useState<Project[]>(
     resumeData.projects || []
   );
+  const [isGenerating, setIsGenerating] = useState<Record<string, boolean>>({});
 
   const addProject = () => {
     const newProject: Project = {
@@ -45,6 +49,48 @@ const ProjectsForm = () => {
         project.id === id ? { ...project, [field]: value } : project
       )
     );
+  };
+
+  const generateDescription = async (id: string) => {
+    const project = projects.find(p => p.id === id);
+    
+    if (!project || !project.name || !project.technologies) {
+      toast.error("Please fill in the project name and technologies first");
+      return;
+    }
+
+    setIsGenerating(prev => ({ ...prev, [id]: true }));
+    
+    try {
+      const prompt = `Create a compelling project description for:
+Project: ${project.name}
+Technologies: ${project.technologies}
+
+Generate a detailed description that:
+1. Explains the project's purpose and impact
+2. Highlights technical challenges overcome
+3. Mentions key features and achievements
+4. Uses specific metrics where relevant (e.g. users served, performance improvements)
+5. Demonstrates both technical skills and soft skills
+
+Format as a concise paragraph focused on achievements and technical details.`;
+
+      const completion = await groq.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "mixtral-8x7b-32768",
+        temperature: 0.7,
+        max_tokens: 1024,
+      });
+
+      const description = completion.choices[0]?.message?.content || "Failed to generate description";
+      updateProject(id, 'description', description);
+      toast.success("Description generated!");
+    } catch (error) {
+      console.error('Error generating project description:', error);
+      toast.error("Failed to generate description. Please try again.");
+    } finally {
+      setIsGenerating(prev => ({ ...prev, [id]: false }));
+    }
   };
 
   const handleBack = () => {
@@ -88,14 +134,15 @@ const ProjectsForm = () => {
                       <Button 
                         type="button"
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="text-gray-500 hover:text-red-500"
                         onClick={() => removeProject(project.id)}
-                        className="text-gray-400 hover:text-red-500"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </Button>
                     </div>
                   </CardHeader>
+                  
                   <CardContent className="space-y-4">
                     <div>
                       <Label htmlFor={`name-${project.id}`} className="block mb-2">Project Name</Label>
@@ -103,21 +150,38 @@ const ProjectsForm = () => {
                         id={`name-${project.id}`}
                         value={project.name}
                         onChange={(e) => updateProject(project.id, 'name', e.target.value)}
-                        placeholder="e.g. E-commerce Website"
+                        placeholder="e.g. E-commerce Platform"
                         className="w-full"
                       />
                     </div>
-                    
+
                     <div>
-                      <Label htmlFor={`description-${project.id}`} className="block mb-2">
-                        Description
-                      </Label>
+                      <div className="flex justify-between items-center mb-2">
+                        <Label htmlFor={`description-${project.id}`} className="block">Description</Label>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          className="text-xs border-resume-primary text-resume-primary"
+                          onClick={() => generateDescription(project.id)}
+                          disabled={isGenerating[project.id] || !project.name || !project.technologies}
+                        >
+                          {isGenerating[project.id] ? (
+                            <>Generating...</>
+                          ) : (
+                            <>
+                              <Wand2 size={14} className="mr-1" />
+                              Generate
+                            </>
+                          )}
+                        </Button>
+                      </div>
                       <Textarea
                         id={`description-${project.id}`}
                         value={project.description}
                         onChange={(e) => updateProject(project.id, 'description', e.target.value)}
-                        placeholder="Describe the project, your role, and significant achievements"
-                        className="w-full min-h-[100px]"
+                        placeholder="Describe the project, its impact, and your role..."
+                        className="w-full min-h-[150px]"
                       />
                     </div>
                     

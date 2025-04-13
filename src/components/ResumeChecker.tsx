@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle, ArrowRight, Upload, Building, Coins, FileText, CheckSquare } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { 
@@ -14,85 +13,60 @@ import {
   CardDescription,
   CardFooter,
 } from '@/components/ui/card';
+import { getDetailedAnalysis, DetailedResumeAnalysis } from '@/services/aiService';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 const ResumeChecker = () => {
   const { resumeData } = useResumeContext();
   const [jobDescription, setJobDescription] = useState('');
   const [isChecking, setIsChecking] = useState(false);
-  const [checkResult, setCheckResult] = useState<null | {
-    score: number;
-    matchedKeywords: string[];
-    missedKeywords: string[];
-    suggestions: string[];
-  }>(null);
+  const [checkResult, setCheckResult] = useState<DetailedResumeAnalysis | null>(null);
 
-  const handleCheck = () => {
+  // Convert resume data to a string format for analysis
+  const getResumeContent = () => {
+    const sections = [
+      `Name: ${resumeData.name}`,
+      `Summary: ${resumeData.summary || ''}`,
+      `Skills: ${resumeData.skills?.join(', ') || ''}`,
+      'Work Experience:',
+      ...resumeData.workExperience?.map(exp => 
+        `${exp.position} at ${exp.company}\n${exp.description}`
+      ) || [],
+      'Education:',
+      `${resumeData.course} at ${resumeData.school}`,
+      'Projects:',
+      ...resumeData.projects?.map(project => 
+        `${project.name}: ${project.description}\nTechnologies: ${project.technologies}`
+      ) || []
+    ];
+    
+    return sections.join('\n\n');
+  };
+
+  const handleCheck = async () => {
     if (!jobDescription.trim()) {
       toast.error("Please enter a job description");
       return;
     }
+
+    if (!resumeData.name || !resumeData.skills?.length) {
+      toast.error("Please complete your resume first");
+      return;
+    }
     
     setIsChecking(true);
-    
-    // Simulate resume check process
-    setTimeout(() => {
-      // This would normally be an API call to analyze the resume against the job description
-      // For this example, we'll create a simulated result
-      
-      // Extract some keywords from the job description
-      let allWords = jobDescription.toLowerCase().split(/\s+/);
-      allWords = allWords.filter(word => word.length > 3);
-      
-      // Check which skills from the resume match keywords in the job description
-      const resumeSkills = resumeData.skills || [];
-      const matchedKeywords = resumeSkills.filter(skill => 
-        jobDescription.toLowerCase().includes(skill.toLowerCase())
-      );
-      
-      // Generate some missed keywords that might be in the job description
-      // In a real implementation, this would use NLP to extract key job requirements
-      const commonJobKeywords = [
-        "leadership", "communication", "teamwork", "problem-solving",
-        "project management", "JavaScript", "React", "Node.js",
-        "agile", "scrum", "data analysis", "customer service"
-      ];
-      
-      const missedKeywords = commonJobKeywords.filter(keyword => 
-        jobDescription.toLowerCase().includes(keyword.toLowerCase()) && 
-        !resumeSkills.some(skill => skill.toLowerCase().includes(keyword.toLowerCase()))
-      ).slice(0, 5);
-      
-      // Calculate match score (0-100)
-      const score = Math.min(100, Math.round((matchedKeywords.length / (matchedKeywords.length + missedKeywords.length)) * 100));
-      
-      // Generate suggestions
-      const suggestions = [
-        "Add more specific skills that match the job description",
-        "Quantify your achievements with numbers and percentages",
-        "Include relevant industry keywords from the job posting"
-      ];
-      
-      if (missedKeywords.length > 0) {
-        suggestions.push(`Consider adding these keywords: ${missedKeywords.join(', ')}`);
-      }
-      
-      if (score < 40) {
-        suggestions.push("Your resume needs significant improvement to pass screening systems");
-      } else if (score < 70) {
-        suggestions.push("Your resume may pass some screening systems but could be improved");
-      } else {
-        suggestions.push("Your resume is well-optimized for job applications");
-      }
-      
-      setCheckResult({
-        score,
-        matchedKeywords,
-        missedKeywords,
-        suggestions
-      });
-      
+    try {
+      const result = await getDetailedAnalysis(getResumeContent(), jobDescription);
+      setCheckResult(result);
+      toast.success("Analysis complete!");
+    } catch (error) {
+      console.error('Resume analysis error:', error);
+      toast.error("Failed to analyze resume. Please try again.");
+    } finally {
       setIsChecking(false);
-    }, 2000);
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -100,7 +74,7 @@ const ResumeChecker = () => {
     if (score < 70) return "text-orange-500";
     return "text-green-500";
   };
-  
+
   const getScoreBackground = (score: number) => {
     if (score < 40) return "bg-red-500";
     if (score < 70) return "bg-orange-500";
@@ -111,130 +85,240 @@ const ResumeChecker = () => {
     <div className="max-w-4xl mx-auto">
       <Card className="border-none shadow-sm">
         <CardHeader className="bg-gradient-to-r from-resume-primary to-resume-secondary text-white rounded-t-lg">
-          <CardTitle>Resume Compatibility Checker</CardTitle>
+          <div className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            <CardTitle>Resume Compatibility Checker</CardTitle>
+          </div>
           <CardDescription className="text-gray-100">
             Check how well your resume matches a specific job description
           </CardDescription>
         </CardHeader>
         
         <CardContent className="pt-6">
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Paste the job description here:</h3>
-            <Textarea
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Copy and paste the full job description here to check your resume's compatibility..."
-              className="min-h-[200px]"
-            />
-          </div>
-          
-          <Button
-            onClick={handleCheck}
-            disabled={isChecking || jobDescription.trim().length === 0}
-            className="bg-resume-primary hover:bg-resume-secondary w-full"
-          >
-            {isChecking ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing Resume
-              </>
-            ) : (
-              <>
-                Check Compatibility <ArrowRight className="ml-2 h-4 w-4" />
-              </>
+          <div className="space-y-6">
+            {(!resumeData.name || !resumeData.skills?.length) && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Resume Incomplete</AlertTitle>
+                <AlertDescription>
+                  Please complete your resume before checking compatibility.
+                </AlertDescription>
+              </Alert>
             )}
-          </Button>
-          
-          {checkResult && (
-            <div className="mt-8 space-y-6">
-              <div className="flex flex-col items-center">
-                <div className="text-center mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Your Resume Compatibility Score</p>
-                  <div className={`text-4xl font-bold ${getScoreColor(checkResult.score)}`}>
-                    {checkResult.score}%
-                  </div>
-                </div>
-                <Progress 
-                  value={checkResult.score} 
-                  className="w-full h-3" 
-                  indicatorClassName={getScoreBackground(checkResult.score)}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-medium text-green-600 flex items-center gap-2 mb-3">
-                    <CheckCircle size={18} />
-                    <span>Matched Keywords</span>
-                  </h3>
-                  {checkResult.matchedKeywords.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {checkResult.matchedKeywords.map((keyword, index) => (
-                        <span key={index} className="bg-green-50 text-green-700 px-2 py-1 rounded text-sm">
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">No matching keywords found</p>
-                  )}
-                </div>
-                
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-medium text-orange-600 flex items-center gap-2 mb-3">
-                    <AlertCircle size={18} />
-                    <span>Missing Keywords</span>
-                  </h3>
-                  {checkResult.missedKeywords.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {checkResult.missedKeywords.map((keyword, index) => (
-                        <span key={index} className="bg-orange-50 text-orange-700 px-2 py-1 rounded text-sm">
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">No missing keywords detected</p>
-                  )}
-                </div>
-              </div>
-              
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium text-gray-800 mb-3">Suggestions for Improvement</h3>
-                <ul className="space-y-2">
-                  {checkResult.suggestions.map((suggestion, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <ArrowRight size={16} className="mt-1 flex-shrink-0 text-resume-primary" />
-                      <span className="text-gray-700">{suggestion}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Paste the job description here:</h3>
+              <Textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Copy and paste the full job description here to check your resume's compatibility..."
+                className="min-h-[200px]"
+              />
             </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg border">
-        <h3 className="text-xl font-semibold text-gray-900 mb-3">Resume Tips</h3>
-        <div className="space-y-3">
-          <p className="text-gray-700">
-            <strong>What makes a good resume?</strong> A good resume clearly showcases your skills, experience, and achievements in a concise, professional format.
-          </p>
-          <p className="text-gray-700">
-            <strong>Why it matters:</strong> 75% of resumes are rejected by automated screening systems before a human sees them. Optimizing your resume is crucial for getting past this first filter.
-          </p>
-          <div className="text-gray-700">
-            <strong>Quick resume tips:</strong>
-            <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Use a simple, clean format without tables or complicated graphics</li>
-              <li>Include keywords directly from the job description</li>
-              <li>Use standard section headings (Experience, Education, Skills)</li>
-              <li>Submit in PDF format (unless requested otherwise)</li>
-              <li>Include your name and contact information at the top</li>
-            </ul>
+          
+            <Button
+              onClick={handleCheck}
+              disabled={isChecking || !jobDescription.trim() || !resumeData.name || !resumeData.skills?.length}
+              className="bg-resume-primary hover:bg-resume-secondary w-full"
+            >
+              {isChecking ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing Resume
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="mr-2 h-4 w-4" /> Check Compatibility
+                </>
+              )}
+            </Button>
+
+            {checkResult && (
+              <div className="mt-8 space-y-6 animate-fade-in">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full border-4 border-gray-200">
+                    <span className={`text-3xl font-bold ${getScoreColor(checkResult.score)}`}>
+                      {checkResult.score}%
+                    </span>
+                  </div>
+                  <Progress 
+                    value={checkResult.score} 
+                    className="w-full mt-4" 
+                    indicatorClassName={getScoreBackground(checkResult.score)} 
+                  />
+                </div>
+
+                <Tabs defaultValue="match" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="match">Match Analysis</TabsTrigger>
+                    <TabsTrigger value="industry">Industry Insights</TabsTrigger>
+                    <TabsTrigger value="ats">ATS Check</TabsTrigger>
+                    <TabsTrigger value="cover">Cover Letter</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="match" className="space-y-6 mt-6">
+                    <div>
+                      <h3 className="font-medium text-gray-800 mb-3">Matched Keywords</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {checkResult.matchedKeywords.map((keyword, index) => (
+                          <Badge key={index} variant="secondary" className="bg-green-50 text-green-700">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium text-gray-800 mb-3">Missing Keywords</h3>
+                      {checkResult.missedKeywords.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {checkResult.missedKeywords.map((keyword, index) => (
+                            <Badge key={index} variant="secondary" className="bg-orange-50 text-orange-700">
+                              {keyword}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No missing keywords detected</p>
+                      )}
+                    </div>
+
+                    <div className="border rounded-lg p-4">
+                      <h3 className="font-medium text-gray-800 mb-3">Suggestions for Improvement</h3>
+                      <ul className="space-y-2">
+                        {checkResult.suggestions.map((suggestion, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <ArrowRight size={16} className="mt-1 flex-shrink-0 text-resume-primary" />
+                            <span className="text-gray-700">{suggestion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="industry" className="space-y-6 mt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center gap-2">
+                            <Building className="h-4 w-4 text-resume-primary" />
+                            <CardTitle className="text-base">Industry Trends</CardTitle>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gray-700">{checkResult.industryInsights.trendsAndDemand}</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center gap-2">
+                            <Coins className="h-4 w-4 text-resume-primary" />
+                            <CardTitle className="text-base">Salary Information</CardTitle>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gray-700">{checkResult.industryInsights.salaryRange}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <div>
+                      <h3 className="font-medium text-gray-800 mb-3">Key Competitors in the Industry</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {checkResult.industryInsights.keyCompetitors.map((competitor, index) => (
+                          <Badge key={index} variant="outline">
+                            {competitor}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="ats" className="space-y-6 mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-medium text-gray-800">ATS Compatibility Score</h3>
+                      <Badge variant="secondary" className={`${getScoreColor(checkResult.atsCompatibility.score)}`}>
+                        {checkResult.atsCompatibility.score}%
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Formatting Issues</h4>
+                        <ul className="space-y-2">
+                          {checkResult.atsCompatibility.formatting.map((issue, index) => (
+                            <li key={index} className="flex items-start gap-2 text-sm">
+                              <CheckSquare size={16} className="mt-1 flex-shrink-0 text-resume-primary" />
+                              <span className="text-gray-700">{issue}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Content Issues</h4>
+                        <ul className="space-y-2">
+                          {checkResult.atsCompatibility.issues.map((issue, index) => (
+                            <li key={index} className="flex items-start gap-2 text-sm">
+                              <AlertCircle size={16} className="mt-1 flex-shrink-0 text-orange-500" />
+                              <span className="text-gray-700">{issue}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="cover" className="space-y-6 mt-6">
+                    <div>
+                      <h3 className="font-medium text-gray-800 mb-3">Key Points to Address</h3>
+                      <ul className="space-y-2">
+                        {checkResult.coverLetterSuggestions.keyPoints.map((point, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <ArrowRight size={16} className="mt-1 flex-shrink-0 text-resume-primary" />
+                            <span className="text-gray-700">{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="font-medium text-gray-800 mb-3">Your Unique Selling Points</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {checkResult.coverLetterSuggestions.uniqueSellingPoints.map((point, index) => (
+                          <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700">
+                            {point}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-resume-primary" />
+                          <CardTitle className="text-base">Customization Guide</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-700">{checkResult.coverLetterSuggestions.customization}</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+        
+        {checkResult && (
+          <CardFooter className="border-t pt-6">
+            <p className="text-sm text-gray-500">
+              This analysis is powered by AI and should be used as a guide. Always review and customize your resume for each application.
+            </p>
+          </CardFooter>
+        )}
+      </Card>
     </div>
   );
 };
