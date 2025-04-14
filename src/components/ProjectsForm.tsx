@@ -83,7 +83,7 @@ Format as a concise paragraph focused on achievements and technical details.`;
 
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "mixtral-8x7b-32768",
+        model: "llama3-8b-8192",
         temperature: 0.7,
         max_tokens: 1024,
       });

@@ -1,7 +1,7 @@
 import { Groq } from "groq-sdk";
 
 const groq = new Groq({
-  apiKey: process.env.VITE_GROQ_API_KEY || '',
+  apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
   dangerouslyAllowBrowser: true
 });
 
@@ -69,15 +69,30 @@ Response format:
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "mixtral-8x7b-32768",
+      model: "llama3-8b-8192",
       temperature: 0.7,
       max_tokens: 1024,
     });
 
-    const response = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    let response;
+    const content = completion.choices[0]?.message?.content;
+    
+    try {
+      // Only parse if it's a string and looks like JSON
+      if (typeof content === 'string' && content.trim().startsWith('{')) {
+        response = JSON.parse(content);
+      } else {
+        console.error('Invalid response format from API');
+        response = {};
+      }
+    } catch (parseError) {
+      console.error('Error parsing API response:', parseError);
+      response = {};
+    }
+
     return {
-      summary: response.summary || "Failed to generate summary",
-      skills: response.skills || []
+      summary: response?.summary || "Failed to generate summary",
+      skills: Array.isArray(response?.skills) ? response.skills : []
     };
   } catch (error) {
     console.error('Error generating resume content:', error);
@@ -93,7 +108,7 @@ export const generateJobResponsibilities = async (data: ResponsibilityGeneration
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "mixtral-8x7b-32768",
+      model: "llama3-8b-8192",
       temperature: 0.7,
       max_tokens: 1024,
     });
@@ -131,17 +146,31 @@ Format:
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "mixtral-8x7b-32768",
+      model: "llama3-8b-8192",
       temperature: 0.7,
       max_tokens: 1024,
     });
 
-    const response = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    let response;
+    const content = completion.choices[0]?.message?.content;
+    
+    try {
+      if (typeof content === 'string' && content.trim().startsWith('{')) {
+        response = JSON.parse(content);
+      } else {
+        console.error('Invalid response format from API');
+        response = {};
+      }
+    } catch (parseError) {
+      console.error('Error parsing API response:', parseError);
+      response = {};
+    }
+
     return {
-      score: response.score || 0,
-      matchedKeywords: response.matchedKeywords || [],
-      missedKeywords: response.missedKeywords || [],
-      suggestions: response.suggestions || []
+      score: response?.score || 0,
+      matchedKeywords: Array.isArray(response?.matchedKeywords) ? response.matchedKeywords : [],
+      missedKeywords: Array.isArray(response?.missedKeywords) ? response.missedKeywords : [],
+      suggestions: Array.isArray(response?.suggestions) ? response.suggestions : []
     };
   } catch (error) {
     console.error('Error analyzing resume:', error);
@@ -190,32 +219,45 @@ Format the response as:
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "mixtral-8x7b-32768",
+      model: "llama3-8b-8192",
       temperature: 0.7,
       max_tokens: 2048,
     });
 
-    const response = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    let response;
+    const content = completion.choices[0]?.message?.content;
+    
+    try {
+      if (typeof content === 'string' && content.trim().startsWith('{')) {
+        response = JSON.parse(content);
+      } else {
+        console.error('Invalid response format from API');
+        response = {};
+      }
+    } catch (parseError) {
+      console.error('Error parsing API response:', parseError);
+      response = {};
+    }
+
     return {
-      ...response,
-      score: response.score || 0,
-      matchedKeywords: response.matchedKeywords || [],
-      missedKeywords: response.missedKeywords || [],
-      suggestions: response.suggestions || [],
+      score: response?.score || 0,
+      matchedKeywords: Array.isArray(response?.matchedKeywords) ? response.matchedKeywords : [],
+      missedKeywords: Array.isArray(response?.missedKeywords) ? response.missedKeywords : [],
+      suggestions: Array.isArray(response?.suggestions) ? response.suggestions : [],
       industryInsights: {
-        trendsAndDemand: response.industryInsights?.trendsAndDemand || 'No industry insights available',
-        salaryRange: response.industryInsights?.salaryRange || 'Salary information unavailable',
-        keyCompetitors: response.industryInsights?.keyCompetitors || []
+        trendsAndDemand: response?.industryInsights?.trendsAndDemand || 'No industry insights available',
+        salaryRange: response?.industryInsights?.salaryRange || 'Salary information unavailable',
+        keyCompetitors: Array.isArray(response?.industryInsights?.keyCompetitors) ? response.industryInsights.keyCompetitors : []
       },
       atsCompatibility: {
-        score: response.atsCompatibility?.score || 0,
-        issues: response.atsCompatibility?.issues || [],
-        formatting: response.atsCompatibility?.formatting || []
+        score: response?.atsCompatibility?.score || 0,
+        issues: Array.isArray(response?.atsCompatibility?.issues) ? response.atsCompatibility.issues : [],
+        formatting: Array.isArray(response?.atsCompatibility?.formatting) ? response.atsCompatibility.formatting : []
       },
       coverLetterSuggestions: {
-        keyPoints: response.coverLetterSuggestions?.keyPoints || [],
-        uniqueSellingPoints: response.coverLetterSuggestions?.uniqueSellingPoints || [],
-        customization: response.coverLetterSuggestions?.customization || 'No customization suggestions available'
+        keyPoints: Array.isArray(response?.coverLetterSuggestions?.keyPoints) ? response.coverLetterSuggestions.keyPoints : [],
+        uniqueSellingPoints: Array.isArray(response?.coverLetterSuggestions?.uniqueSellingPoints) ? response.coverLetterSuggestions.uniqueSellingPoints : [],
+        customization: response?.coverLetterSuggestions?.customization || 'No customization suggestions available'
       }
     };
   } catch (error) {
