@@ -18,8 +18,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { Groq } from "groq-sdk";
 
-const groq = new Groq();
-groq.apiKey = import.meta.env.VITE_GROQ_API_KEY;
+const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+if (!apiKey) {
+  console.error("GROQ_API_KEY is missing. Please set it in the .env file.");
+}
+const groq = new Groq({ apiKey });
 
 const WorkExperienceForm = () => {
   const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();

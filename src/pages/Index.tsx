@@ -1,6 +1,4 @@
-
-import React, { useState } from 'react';
-import { ResumeProvider } from '@/context/ResumeContext';
+import React from 'react';
 import PersonalInfoForm from '@/components/PersonalInfoForm';
 import EducationForm from '@/components/EducationForm';
 import ResumePreview from '@/components/ResumePreview';
@@ -8,12 +6,10 @@ import StepIndicator from '@/components/StepIndicator';
 import { useResumeContext } from '@/context/ResumeContext';
 import WorkExperienceForm from '@/components/WorkExperienceForm';
 import SkillsForm from '@/components/SkillsForm';
-import ProjectsForm from '@/components/ProjectsForm';
 import ResumeTemplates from '@/components/ResumeTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ResumeChecker from '@/components/ResumeChecker';
 import { Link } from 'react-router-dom';
-import { Menu } from 'lucide-react';
 import Footer from '@/components/Footer';
 import {
   DropdownMenu,
@@ -24,10 +20,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 const ResumeBuilder = () => {
-  const {
-    currentStep
-  } = useResumeContext();
-  return <div className="min-h-screen bg-gray-50">
+  const { currentStep } = useResumeContext();
+  
+  console.log("Current step:", currentStep);
+
+  return (
+    <div className="min-h-screen bg-gray-50" style={{ border: '2px solid red' }}>
+      <h1 className="text-4xl font-bold text-center py-8">Resume Builder</h1>
       <StepIndicator />
       
       {/* Step 1: Template Selection */}
@@ -46,29 +45,31 @@ const ResumeBuilder = () => {
       {currentStep === 5 && <SkillsForm />}
       
       {/* Step 6: Projects and Final Preview */}
-      {currentStep === 6 && <>
-          <Tabs defaultValue="preview" className="max-w-4xl mx-auto">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="preview">Resume Preview</TabsTrigger>
-              <TabsTrigger value="templates">Change Template</TabsTrigger>
-              <TabsTrigger value="check">Resume Check</TabsTrigger>
-            </TabsList>
-            <TabsContent value="preview">
-              <ResumePreview />
-            </TabsContent>
-            <TabsContent value="templates">
-              <ResumeTemplates />
-            </TabsContent>
-            <TabsContent value="check">
-              <ResumeChecker />
-            </TabsContent>
-          </Tabs>
-        </>}
-    </div>;
+      {currentStep === 6 && (
+        <Tabs defaultValue="preview" className="max-w-4xl mx-auto">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="preview">Resume Preview</TabsTrigger>
+            <TabsTrigger value="templates">Change Template</TabsTrigger>
+            <TabsTrigger value="check">Resume Check</TabsTrigger>
+          </TabsList>
+          <TabsContent value="preview">
+            <ResumePreview />
+          </TabsContent>
+          <TabsContent value="templates">
+            <ResumeTemplates />
+          </TabsContent>
+          <TabsContent value="check">
+            <ResumeChecker />
+          </TabsContent>
+        </Tabs>
+      )}
+    </div>
+  );
 };
 
 const Index = () => {
-  return <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow-sm py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -111,12 +112,11 @@ const Index = () => {
         </div>
       </header>
       
-      <ResumeProvider>
-        <ResumeBuilder />
-      </ResumeProvider>
+      <ResumeBuilder />
       
       <Footer />
-    </div>;
+    </div>
+  );
 };
 
 export default Index;

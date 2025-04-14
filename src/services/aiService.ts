@@ -1,7 +1,8 @@
 import { Groq } from "groq-sdk";
 
-const groq = new Groq();
-groq.apiKey = import.meta.env.VITE_GROQ_API_KEY;
+const groq = new Groq({
+  apiKey: process.env.VITE_GROQ_API_KEY || ''
+});
 
 export type GenerationRequest = {
   name: string;
