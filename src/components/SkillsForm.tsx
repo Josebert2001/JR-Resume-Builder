@@ -16,8 +16,14 @@ import {
 import { toast } from 'sonner';
 import { Groq } from "groq-sdk";
 
-const groq = new Groq();
-groq.apiKey = import.meta.env.VITE_GROQ_API_KEY;
+const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+if (!apiKey) {
+  console.error("GROQ_API_KEY is missing. Please set it in the .env file.");
+}
+const groq = new Groq({ 
+  apiKey, 
+  dangerousAllowBrowser: true 
+});
 
 const SkillsForm = () => {
   const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();

@@ -22,7 +22,10 @@ const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 if (!apiKey) {
   console.error("GROQ_API_KEY is missing. Please set it in the .env file.");
 }
-const groq = new Groq({ apiKey });
+const groq = new Groq({ 
+  apiKey,
+  dangerouslyAllowBrowser: true 
+});
 
 const WorkExperienceForm = () => {
   const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
