@@ -6,9 +6,9 @@ export type WorkExperience = {
   id: string;
   position: string;
   company: string;
-  location: string;
+  location?: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   description: string;
 };
 
@@ -38,26 +38,31 @@ export type TemplateType =
   | 'infographic'
   | 'profile'
   | 'targeted'
-  | 'mini';
+  | 'mini'
+  | 'creative';
 
 export type ResumeData = {
   name: string;
   email: string;
   phone: string;
-  course: string;
-  school: string;
-  interests: string;
+  location?: string;
+  degree?: string;
+  fieldOfStudy?: string;
+  school?: string;
+  graduationYear?: string;
+  relevantCourses?: string[];
+  achievements?: string[];
   summary?: string;
   skills?: string[];
   workExperience?: WorkExperience[];
   certifications?: Certification[];
   projects?: Project[];
-  location?: string;
   canRelocate?: boolean;
   openToRemote?: boolean;
   linkedIn?: string;
   githubUrl?: string;
   template?: TemplateType;
+  interests?: string;
 };
 
 type ResumeContextType = {
@@ -79,7 +84,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     name: '',
     email: '',
     phone: '',
-    course: '',
+    fieldOfStudy: '',
     school: '',
     interests: '',
     workExperience: [],

@@ -1,121 +1,84 @@
-
-import React from 'react';
-import { useResumeContext } from '@/context/ResumeContext';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { generateResumeContent } from '@/services/aiService';
-import { toast } from 'sonner';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useResumeContext } from '@/context/ResumeContext';
 
-const EducationForm = () => {
-  const { 
-    resumeData, 
-    updateResumeData, 
-    setCurrentStep, 
-    setAiGenerated,
-    isGenerating,
-    setIsGenerating
-  } = useResumeContext();
+export default function EducationForm() {
+  const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
 
   const handleBack = () => {
-    setCurrentStep(1);
+    setCurrentStep(2);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      setIsGenerating(true);
-      toast.info("Generating your resume content with AI...");
-      
-      const generatedContent = await generateResumeContent({
-        name: resumeData.name,
-        email: resumeData.email,
-        phone: resumeData.phone,
-        course: resumeData.course,
-        school: resumeData.school,
-        interests: resumeData.interests
-      });
-      
-      setAiGenerated(generatedContent);
-      updateResumeData({
-        summary: generatedContent.summary,
-        skills: generatedContent.skills
-      });
-      
-      toast.success("AI content generated successfully!");
-      setCurrentStep(3);
-    } catch (error) {
-      toast.error("Failed to generate content. Please try again.");
-      console.error("AI generation error:", error);
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleNext = () => {
+    setCurrentStep(4);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="resume-form animate-fade-in">
-      <h2 className="text-2xl font-bold text-resume-primary mb-6">Education & Interests</h2>
+    <div className="max-w-3xl mx-auto p-6">
+      <Card className="border-none shadow-sm">
+        <CardHeader className="bg-gradient-to-r from-resume-primary to-resume-secondary text-white rounded-t-lg">
+          <h2 className="text-xl font-semibold">Education</h2>
+        </CardHeader>
+        
+        <CardContent className="space-y-4 pt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              placeholder="Degree (e.g., Bachelor of Science)"
+              value={resumeData.degree || ''}
+              onChange={(e) => updateResumeData({ degree: e.target.value })}
+            />
+            <Input
+              placeholder="Field of Study (e.g., Cyber Security)"
+              value={resumeData.fieldOfStudy || ''}
+              onChange={(e) => updateResumeData({ fieldOfStudy: e.target.value })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              placeholder="School/University"
+              value={resumeData.school || ''}
+              onChange={(e) => updateResumeData({ school: e.target.value })}
+            />
+            <Input
+              placeholder="Graduation Year (e.g., 2024)"
+              value={resumeData.graduationYear || ''}
+              onChange={(e) => updateResumeData({ graduationYear: e.target.value })}
+            />
+          </div>
+          <Input
+            placeholder="Relevant Courses (comma-separated)"
+            value={resumeData.relevantCourses?.join(', ') || ''}
+            onChange={(e) => updateResumeData({ 
+              relevantCourses: e.target.value.split(',').map(course => course.trim()).filter(Boolean)
+            })}
+          />
+          <Input
+            placeholder="Achievements (comma-separated)"
+            value={resumeData.achievements?.join(', ') || ''}
+            onChange={(e) => updateResumeData({ 
+              achievements: e.target.value.split(',').map(achievement => achievement.trim()).filter(Boolean)
+            })}
+          />
+        </CardContent>
 
-      <div className="input-group">
-        <Label htmlFor="course" className="block mb-2">Course/Degree</Label>
-        <Input
-          id="course"
-          type="text"
-          value={resumeData.course}
-          onChange={(e) => updateResumeData({ course: e.target.value })}
-          placeholder="e.g. Computer Science, Engineering, Business Administration"
-          required
-          className="w-full"
-        />
-      </div>
-
-      <div className="input-group">
-        <Label htmlFor="school" className="block mb-2">School/University</Label>
-        <Input
-          id="school"
-          type="text"
-          value={resumeData.school}
-          onChange={(e) => updateResumeData({ school: e.target.value })}
-          placeholder="e.g. University of Lagos"
-          required
-          className="w-full"
-        />
-      </div>
-
-      <div className="input-group">
-        <Label htmlFor="interests" className="block mb-2">Professional Interests</Label>
-        <Textarea
-          id="interests"
-          value={resumeData.interests}
-          onChange={(e) => updateResumeData({ interests: e.target.value })}
-          placeholder="e.g. software development, artificial intelligence, data analysis"
-          required
-          className="w-full"
-          rows={3}
-        />
-      </div>
-
-      <div className="flex justify-between mt-8">
-        <Button 
-          type="button" 
-          onClick={handleBack}
-          variant="outline"
-          className="border-resume-primary text-resume-primary"
-        >
-          Back
-        </Button>
-        <Button 
-          type="submit" 
-          className="bg-resume-primary hover:bg-resume-secondary text-white"
-          disabled={isGenerating}
-        >
-          {isGenerating ? "Generating..." : "Generate with AI"}
-        </Button>
-      </div>
-    </form>
+        <CardFooter className="flex justify-between pt-4 border-t">
+          <Button 
+            type="button" 
+            onClick={handleBack}
+            variant="outline"
+            className="border-resume-primary text-resume-primary"
+          >
+            Back
+          </Button>
+          <Button 
+            onClick={handleNext}
+            className="bg-resume-primary hover:bg-resume-secondary text-white"
+          >
+            Next
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
-};
-
-export default EducationForm;
+}

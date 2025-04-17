@@ -70,14 +70,26 @@ const WorkExperienceForm = () => {
     setIsGenerating(prev => ({ ...prev, [id]: true }));
     
     try {
-      const prompt = `Generate 4-5 detailed and specific bullet points for a ${experience.position} role at ${experience.company}. 
-Focus on quantifiable achievements and key responsibilities that demonstrate impact.
-Include relevant technical skills and soft skills.
-Format each bullet point to start with "• " and separate with newlines.
-Make them specific to the role and industry, avoiding generic statements.
-Example format:
-• Increased team productivity by 40% through implementation of agile methodologies
-• Led development of customer-facing application serving 100,000+ users`;
+      const prompt = `You are an expert resume writer. Based on the following information, generate 4–5 impactful, resume-ready bullet points for the role of ${experience.position} at ${experience.company}.
+
+Guidelines:
+• Focus on quantifiable achievements and key responsibilities relevant to the role.  
+• Highlight both technical and soft skills where applicable.  
+• Begin each bullet point with "• " and limit to a maximum of 2 lines.  
+• Use strong action verbs and include metrics or results whenever possible.  
+• Tailor the content to the role, industry, and tools/technologies mentioned.  
+• Avoid generic phrases or vague accomplishments.  
+
+Format Example:
+• Increased team productivity by 40% through implementation of agile methodologies  
+• Led development of customer-facing application serving 100,000+ users
+
+**Important:**  
+❌ Do NOT include any introductory or concluding text (e.g., “Here are the bullet points for… or Here are 4-5 impactful, resume-ready bullet points for the role of Software Engineer at Google:”).  
+I repeat DO NOT include any introductory or concluding text.
+❌ Do NOT include any additional information or context outside of the bullet points.
+❌ Do NOT include any personal opinions or subjective statements.
+✅ Return ONLY the bullet points, each on a new line properly formatted`;
 
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
@@ -103,8 +115,18 @@ Example format:
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (experiences.length === 0) {
+      toast.error("Please add at least one work experience");
+      return;
+    }
     updateResumeData({ workExperience: experiences });
-    toast.success("Work experience updated!");
+    toast.success("Work experience saved successfully!");
+    setCurrentStep(5);
+  };
+
+  const handleContinue = () => {
+    updateResumeData({ workExperience: experiences });
+    toast.success("Work experience saved!");
     setCurrentStep(5);
   };
 
@@ -237,6 +259,17 @@ Example format:
                         className="min-h-[150px]"
                       />
                     </div>
+                    {exp.description && (
+                      <div className="flex justify-end mt-2">
+                        <Button 
+                          type="button"
+                          onClick={handleContinue}
+                          className="bg-resume-primary hover:bg-resume-secondary text-white"
+                        >
+                          Continue to Next Section
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}

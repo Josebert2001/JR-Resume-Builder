@@ -24,12 +24,6 @@ export const MobileMenu = () => {
             Home
           </Link>
           <Link 
-            to="/templates"
-            className="text-resume-muted hover:text-resume-primary transition-colors duration-200 px-2 py-1.5 rounded-md hover:bg-resume-light"
-          >
-            Templates
-          </Link>
-          <Link 
             to="/job-search"
             className="text-resume-muted hover:text-resume-primary transition-colors duration-200 px-2 py-1.5 rounded-md hover:bg-resume-light"
           >

@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ResumeChecker from '@/components/ResumeChecker';
 import { Link } from 'react-router-dom';
 import Footer from '@/components/Footer';
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,20 +82,12 @@ const Index = () => {
           </div>
           <div className="md:flex items-center">
             <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none">
-                <div className="flex flex-col space-y-1.5 cursor-pointer">
-                  <Separator className="w-6 h-0.5 bg-gray-600 dark:bg-gray-400" />
-                  <Separator className="w-6 h-0.5 bg-gray-600 dark:bg-gray-400" />
-                  <Separator className="w-6 h-0.5 bg-gray-600 dark:bg-gray-400" />
-                </div>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  Resources <ChevronDown size={16} className="ml-1" />
+                </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <a href="#features" className="cursor-pointer">Features</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/templates" className="cursor-pointer">Templates</Link>
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
                   <a href="#tips" className="cursor-pointer">Resume Tips</a>
                 </DropdownMenuItem>

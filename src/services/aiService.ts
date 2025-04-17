@@ -50,53 +50,84 @@ export type DetailedResumeAnalysis = ResumeAnalysisResponse & {
   };
 };
 
+export type ProfessionalInterestsResponse = {
+  interests: string[];
+  descriptions: Record<string, string>;
+};
+
 export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
+  if (!data.course || !data.school || !data.interests) {
+    throw new Error('Missing required fields for resume content generation');
+  }
+
   const prompt = `Create a professional resume summary and relevant skills list for:
 Name: ${data.name}
 Education: ${data.course} from ${data.school}
 Interests: ${data.interests}
 
-Format the response as JSON with:
-1. A concise, professional summary highlighting education and career aspirations (max 100 words)
+Generate:
+1. A compelling career objective/professional summary (2-3 sentences) that:
+   - Highlights educational background
+   - Mentions career aspirations
+   - Connects interests with professional goals
 2. A list of 5-7 relevant technical and soft skills based on the course and interests
 
-Response format:
+Return ONLY a JSON object with the following structure, nothing else:
 {
-  "summary": "...",
+  "summary": "career objective here",
   "skills": ["skill1", "skill2", ...]
 }`;
 
   try {
     const completion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a professional resume writer. Return ONLY properly formatted JSON with a summary and skills array. Do not include any other text or explanations."
+        },
+        { 
+          role: "user", 
+          content: prompt 
+        }
+      ],
       model: "llama3-8b-8192",
       temperature: 0.7,
       max_tokens: 1024,
     });
 
-    let response;
     const content = completion.choices[0]?.message?.content;
-    
-    try {
-      // Only parse if it's a string and looks like JSON
-      if (typeof content === 'string' && content.trim().startsWith('{')) {
-        response = JSON.parse(content);
-      } else {
-        console.error('Invalid response format from API');
-        response = {};
-      }
-    } catch (parseError) {
-      console.error('Error parsing API response:', parseError);
-      response = {};
+    if (!content) {
+      throw new Error('No content received from AI service');
     }
 
-    return {
-      summary: response?.summary || "Failed to generate summary",
-      skills: Array.isArray(response?.skills) ? response.skills : []
-    };
+    let response;
+    try {
+      // Clean the response - remove any text before and after the JSON object
+      const jsonStart = content.indexOf('{');
+      const jsonEnd = content.lastIndexOf('}') + 1;
+      if (jsonStart === -1 || jsonEnd === -1) {
+        throw new Error('No JSON object found in response');
+      }
+      const jsonContent = content.slice(jsonStart, jsonEnd);
+      
+      response = JSON.parse(jsonContent);
+      
+      // Validate response structure
+      if (!response.summary || !Array.isArray(response.skills)) {
+        throw new Error('Invalid response structure');
+      }
+
+      return {
+        summary: response.summary,
+        skills: response.skills
+      };
+    } catch (parseError) {
+      console.error('Error parsing AI response:', parseError, 'Raw content:', content);
+      throw new Error('Failed to parse AI response');
+    }
   } catch (error) {
     console.error('Error generating resume content:', error);
-    throw new Error('Failed to generate resume content');
+    throw new Error(error instanceof Error ? error.message : 'Failed to generate resume content');
   }
 };
 
@@ -263,5 +294,72 @@ Format the response as:
   } catch (error) {
     console.error('Error performing detailed analysis:', error);
     throw new Error('Failed to perform detailed resume analysis');
+  }
+};
+
+export const generateProfessionalInterests = async (field: string, skills: string[]): Promise<ProfessionalInterestsResponse> => {
+  const prompt = `Generate a list of relevant professional interests for someone in ${field} with skills in ${skills.join(', ')}.
+  Return a JSON object with:
+  1. An array of 10-12 specific professional interests
+  2. A brief description for each interest explaining its relevance to the field
+  
+  Format as:
+  {
+    "interests": ["interest1", "interest2", ...],
+    "descriptions": {
+      "interest1": "description1",
+      "interest2": "description2",
+      ...
+    }
+  }`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a career counselor specializing in professional development. Return ONLY properly formatted JSON."
+        },
+        { 
+          role: "user", 
+          content: prompt 
+        }
+      ],
+      model: "llama3-8b-8192",
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content received from AI service');
+    }
+
+    let response;
+    try {
+      const jsonStart = content.indexOf('{');
+      const jsonEnd = content.lastIndexOf('}') + 1;
+      if (jsonStart === -1 || jsonEnd === -1) {
+        throw new Error('No JSON object found in response');
+      }
+      const jsonContent = content.slice(jsonStart, jsonEnd);
+      
+      response = JSON.parse(jsonContent);
+      
+      if (!Array.isArray(response.interests) || typeof response.descriptions !== 'object') {
+        throw new Error('Invalid response structure');
+      }
+
+      return {
+        interests: response.interests,
+        descriptions: response.descriptions
+      };
+    } catch (parseError) {
+      console.error('Error parsing AI response:', parseError, 'Raw content:', content);
+      throw new Error('Failed to parse AI response');
+    }
+  } catch (error) {
+    console.error('Error generating professional interests:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to generate professional interests');
   }
 };

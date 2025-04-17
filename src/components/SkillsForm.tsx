@@ -33,25 +33,66 @@ const SkillsForm = () => {
   const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
 
   const generateSkillSuggestions = async () => {
-    if (!resumeData.course || !resumeData.interests) {
-      toast.error("Please fill in your course and interests first");
+    // Gather all available context from resume data
+    const context = {
+      education: resumeData.fieldOfStudy ? `Field of Study: ${resumeData.fieldOfStudy}` : '',
+      degree: resumeData.degree ? `Degree: ${resumeData.degree}` : '',
+      interests: resumeData.interests ? `Interests: ${resumeData.interests}` : '',
+      workExperience: resumeData.workExperience?.map(exp => 
+        `${exp.position} at ${exp.company}: ${exp.description}`
+      ).join('\n') || ''
+    };
+
+    // Check if we have enough context
+    if (!context.education && !context.degree && !context.workExperience) {
+      toast.error("Please fill in either education details or work experience first");
       return;
     }
 
     setIsGenerating(true);
     try {
-      const prompt = `Based on a ${resumeData.course} background and interests in ${resumeData.interests}, suggest 10 relevant professional skills. Include both technical and soft skills. Format as a JSON array of strings.`;
-      
+      const prompt = `Based on the following background:
+${context.education}
+${context.degree}
+${context.interests}
+Work Experience:
+${context.workExperience}
+
+Generate exactly 10 relevant professional skills that would be valuable for their career. Include both technical and soft skills based on their background.
+Return ONLY a JSON array of strings, nothing else. Example format: ["Skill 1", "Skill 2", "Skill 3"]`;
+
       const completion = await groq.chat.completions.create({
-        messages: [{ role: "user", content: prompt }],
+        messages: [
+          { 
+            role: "system", 
+            content: "You are a professional skills advisor. Always respond with properly formatted JSON arrays of strings only."
+          },
+          { 
+            role: "user", 
+            content: prompt 
+          }
+        ],
         model: "llama3-8b-8192",
         temperature: 0.7,
         max_tokens: 1024,
       });
 
-      const suggestions = JSON.parse(completion.choices[0]?.message?.content || '[]');
-      setSuggestedSkills(suggestions);
-      toast.success("Generated skill suggestions!");
+      const response = completion.choices[0]?.message?.content || '[]';
+      // Clean the response to ensure it only contains the JSON array
+      const cleanedResponse = response.trim().replace(/^```json\n|\n```$/g, '');
+      
+      try {
+        const suggestions = JSON.parse(cleanedResponse);
+        if (Array.isArray(suggestions)) {
+          setSuggestedSkills(suggestions);
+          toast.success("Generated skill suggestions!");
+        } else {
+          throw new Error('Response is not an array');
+        }
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', cleanedResponse);
+        toast.error("Failed to process suggestions");
+      }
     } catch (error) {
       console.error('Error generating skill suggestions:', error);
       toast.error("Failed to generate suggestions");
@@ -92,7 +133,7 @@ const SkillsForm = () => {
     e.preventDefault();
     updateResumeData({ skills });
     toast.success("Skills updated!");
-    setCurrentStep(5);
+    setCurrentStep(6);  // Changed from 5 to 6 to advance to Preview & Download
   };
 
   return (

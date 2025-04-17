@@ -11,6 +11,7 @@ import ResumeTemplatesPage from "./pages/ResumeTemplatesPage";
 import CoverLetterGuide from "./pages/CoverLetterGuide";
 import JobSearchTips from "./pages/JobSearchTips";
 import InterviewPreparation from "./pages/InterviewPreparation";
+import FontLoader from "./components/FontLoader";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -28,6 +29,7 @@ const App = () => {
       <React.StrictMode>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
+            <FontLoader />
             <Toaster />
             <Sonner position="top-right" />
             <BrowserRouter>
