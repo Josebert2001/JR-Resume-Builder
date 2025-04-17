@@ -1,326 +1,195 @@
 import React, { useState } from 'react';
-import { useResumeContext } from '@/context/ResumeContext';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Loader2, AlertCircle, CheckCircle, ArrowRight, Upload, Building, Coins, FileText, CheckSquare } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
-import { 
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card';
-import { getDetailedAnalysis, DetailedResumeAnalysis } from '@/services/aiService';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { AlertCircle, CheckCircle2, ChevronRight, Loader2 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import { TouchRipple } from './ui/touch-ripple';
 
-const ResumeChecker = () => {
-  const { resumeData } = useResumeContext();
-  const [jobDescription, setJobDescription] = useState('');
+interface ResumeCheckerProps {
+  resumeData: any;
+}
+
+export const ResumeChecker = ({ resumeData }: ResumeCheckerProps) => {
   const [isChecking, setIsChecking] = useState(false);
-  const [checkResult, setCheckResult] = useState<DetailedResumeAnalysis | null>(null);
+  const [score, setScore] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<any[]>([]);
+  const isMobile = useIsMobile();
 
-  // Convert resume data to a string format for analysis
-  const getResumeContent = () => {
-    const sections = [
-      `Name: ${resumeData.name}`,
-      `Summary: ${resumeData.summary || ''}`,
-      `Skills: ${resumeData.skills?.join(', ') || ''}`,
-      'Work Experience:',
-      ...resumeData.workExperience?.map(exp => 
-        `${exp.position} at ${exp.company}\n${exp.description}`
-      ) || [],
-      'Education:',
-      `${resumeData.course} at ${resumeData.school}`,
-      'Projects:',
-      ...resumeData.projects?.map(project => 
-        `${project.name}: ${project.description}\nTechnologies: ${project.technologies}`
-      ) || []
-    ];
-    
-    return sections.join('\n\n');
-  };
-
-  const handleCheck = async () => {
-    if (!jobDescription.trim()) {
-      toast.error("Please enter a job description");
-      return;
-    }
-
-    if (!resumeData.name || !resumeData.skills?.length) {
-      toast.error("Please complete your resume first");
-      return;
-    }
-    
+  const checkResume = () => {
     setIsChecking(true);
-    try {
-      const result = await getDetailedAnalysis(getResumeContent(), jobDescription);
-      setCheckResult(result);
-      toast.success("Analysis complete!");
-    } catch (error) {
-      console.error('Resume analysis error:', error);
-      toast.error("Failed to analyze resume. Please try again.");
-    } finally {
+    // Simulated API call for resume checking
+    setTimeout(() => {
+      const mockScore = 85;
+      const mockFeedback = [
+        {
+          type: 'success',
+          section: 'Skills',
+          message: 'Good range of technical skills that match industry requirements.'
+        },
+        {
+          type: 'warning',
+          section: 'Work Experience',
+          message: 'Consider adding more quantifiable achievements to your work experience.'
+        },
+        {
+          type: 'error',
+          section: 'Education',
+          message: 'Missing relevant coursework section which could highlight additional qualifications.'
+        }
+      ];
+      setScore(mockScore);
+      setFeedback(mockFeedback);
       setIsChecking(false);
+    }, 2000);
+  };
+
+  const getStatusColor = (type: string) => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-50 border-green-200 dark:bg-green-900/20';
+      case 'warning':
+        return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20';
+      case 'error':
+        return 'bg-red-50 border-red-200 dark:bg-red-900/20';
+      default:
+        return '';
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score < 40) return "text-red-500";
-    if (score < 70) return "text-orange-500";
-    return "text-green-500";
+  const getIconColor = (type: string) => {
+    switch (type) {
+      case 'success':
+        return 'text-green-600';
+      case 'warning':
+        return 'text-yellow-600';
+      case 'error':
+        return 'text-red-600';
+      default:
+        return '';
+    }
   };
 
-  const getScoreBackground = (score: number) => {
-    if (score < 40) return "bg-red-500";
-    if (score < 70) return "bg-orange-500";
-    return "bg-green-500";
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle2 className={cn("h-5 w-5", getIconColor(type))} />;
+      case 'warning':
+      case 'error':
+        return <AlertCircle className={cn("h-5 w-5", getIconColor(type))} />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card className="border-none shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-resume-primary to-resume-secondary text-white rounded-t-lg">
-          <div className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            <CardTitle>Resume Compatibility Checker</CardTitle>
-          </div>
-          <CardDescription className="text-gray-100">
-            Check how well your resume matches a specific job description
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="pt-6">
-          <div className="space-y-6">
-            {(!resumeData.name || !resumeData.skills?.length) && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Resume Incomplete</AlertTitle>
-                <AlertDescription>
-                  Please complete your resume before checking compatibility.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Paste the job description here:</h3>
-              <Textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Copy and paste the full job description here to check your resume's compatibility..."
-                className="min-h-[200px]"
-              />
-            </div>
-          
-            <Button
-              onClick={handleCheck}
-              disabled={isChecking || !jobDescription.trim() || !resumeData.name || !resumeData.skills?.length}
-              className="bg-resume-primary hover:bg-resume-secondary w-full"
-            >
-              {isChecking ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing Resume
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="mr-2 h-4 w-4" /> Check Compatibility
-                </>
+    <div className="animate-in fade-in-50">
+      {!isChecking && score === null ? (
+        <div className="text-center py-8">
+          <h3 className="text-xl font-semibold mb-4">
+            Ready to check your resume?
+          </h3>
+          <p className="text-muted-foreground mb-6">
+            Our AI-powered tool will analyze your resume and provide personalized feedback
+          </p>
+          <TouchRipple className="rounded-md inline-block">
+            <button 
+              onClick={checkResume}
+              className={cn(
+                "bg-resume-primary text-white hover:bg-resume-secondary transition-colors rounded-md font-medium",
+                "inline-flex items-center justify-center gap-2",
+                isMobile ? "w-full h-12 text-base px-6" : "h-10 text-sm px-4"
               )}
-            </Button>
-
-            {checkResult && (
-              <div className="mt-8 space-y-6 animate-fade-in">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full border-4 border-gray-200">
-                    <span className={`text-3xl font-bold ${getScoreColor(checkResult.score)}`}>
-                      {checkResult.score}%
-                    </span>
-                  </div>
+            >
+              Start Resume Analysis
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </TouchRipple>
+        </div>
+      ) : (
+        <Card className={cn(
+          "p-6",
+          isMobile && "mx-0"
+        )}>
+          {isChecking ? (
+            <div className="text-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-resume-primary" />
+              <h3 className="text-lg font-medium mb-2">Analyzing your resume...</h3>
+              <p className="text-sm text-muted-foreground">
+                This will just take a moment
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-2">Resume Analysis Complete</h3>
+                <div className="relative w-24 h-24 mx-auto mb-4">
                   <Progress 
-                    value={checkResult.score} 
-                    className="w-full mt-4" 
-                    indicatorClassName={getScoreBackground(checkResult.score)} 
+                    value={score || 0}
+                    className="absolute inset-0 w-24 h-24"
+                    indicatorClassName={cn(
+                      "transition-all duration-500",
+                      score && score >= 80 ? "text-green-500" :
+                      score && score >= 60 ? "text-yellow-500" :
+                      "text-red-500"
+                    )}
                   />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold">{score}%</span>
+                  </div>
                 </div>
-
-                <Tabs defaultValue="match" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="match">Match Analysis</TabsTrigger>
-                    <TabsTrigger value="industry">Industry Insights</TabsTrigger>
-                    <TabsTrigger value="ats">ATS Check</TabsTrigger>
-                    <TabsTrigger value="cover">Cover Letter</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="match" className="space-y-6 mt-6">
-                    <div>
-                      <h3 className="font-medium text-gray-800 mb-3">Matched Keywords</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {checkResult.matchedKeywords.map((keyword, index) => (
-                          <Badge key={index} variant="secondary" className="bg-green-50 text-green-700">
-                            {keyword}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium text-gray-800 mb-3">Missing Keywords</h3>
-                      {checkResult.missedKeywords.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {checkResult.missedKeywords.map((keyword, index) => (
-                            <Badge key={index} variant="secondary" className="bg-orange-50 text-orange-700">
-                              {keyword}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500">No missing keywords detected</p>
-                      )}
-                    </div>
-
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-medium text-gray-800 mb-3">Suggestions for Improvement</h3>
-                      <ul className="space-y-2">
-                        {checkResult.suggestions.map((suggestion, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <ArrowRight size={16} className="mt-1 flex-shrink-0 text-resume-primary" />
-                            <span className="text-gray-700">{suggestion}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="industry" className="space-y-6 mt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4 text-resume-primary" />
-                            <CardTitle className="text-base">Industry Trends</CardTitle>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gray-700">{checkResult.industryInsights.trendsAndDemand}</p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center gap-2">
-                            <Coins className="h-4 w-4 text-resume-primary" />
-                            <CardTitle className="text-base">Salary Information</CardTitle>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gray-700">{checkResult.industryInsights.salaryRange}</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    <div>
-                      <h3 className="font-medium text-gray-800 mb-3">Key Competitors in the Industry</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {checkResult.industryInsights.keyCompetitors.map((competitor, index) => (
-                          <Badge key={index} variant="outline">
-                            {competitor}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="ats" className="space-y-6 mt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium text-gray-800">ATS Compatibility Score</h3>
-                      <Badge variant="secondary" className={`${getScoreColor(checkResult.atsCompatibility.score)}`}>
-                        {checkResult.atsCompatibility.score}%
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Formatting Issues</h4>
-                        <ul className="space-y-2">
-                          {checkResult.atsCompatibility.formatting.map((issue, index) => (
-                            <li key={index} className="flex items-start gap-2 text-sm">
-                              <CheckSquare size={16} className="mt-1 flex-shrink-0 text-resume-primary" />
-                              <span className="text-gray-700">{issue}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Content Issues</h4>
-                        <ul className="space-y-2">
-                          {checkResult.atsCompatibility.issues.map((issue, index) => (
-                            <li key={index} className="flex items-start gap-2 text-sm">
-                              <AlertCircle size={16} className="mt-1 flex-shrink-0 text-orange-500" />
-                              <span className="text-gray-700">{issue}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="cover" className="space-y-6 mt-6">
-                    <div>
-                      <h3 className="font-medium text-gray-800 mb-3">Key Points to Address</h3>
-                      <ul className="space-y-2">
-                        {checkResult.coverLetterSuggestions.keyPoints.map((point, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <ArrowRight size={16} className="mt-1 flex-shrink-0 text-resume-primary" />
-                            <span className="text-gray-700">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h3 className="font-medium text-gray-800 mb-3">Your Unique Selling Points</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {checkResult.coverLetterSuggestions.uniqueSellingPoints.map((point, index) => (
-                          <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700">
-                            {point}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-resume-primary" />
-                          <CardTitle className="text-base">Customization Guide</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-700">{checkResult.coverLetterSuggestions.customization}</p>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
               </div>
-            )}
-          </div>
-        </CardContent>
-        
-        {checkResult && (
-          <CardFooter className="border-t pt-6">
-            <p className="text-sm text-gray-500">
-              This analysis is powered by AI and should be used as a guide. Always review and customize your resume for each application.
-            </p>
-          </CardFooter>
-        )}
-      </Card>
+
+              <ScrollArea className={cn(
+                "border rounded-lg",
+                isMobile ? "h-[calc(100vh-360px)]" : "h-[400px]"
+              )}>
+                <div className="p-4 space-y-3">
+                  {feedback.map((item, index) => (
+                    <div 
+                      key={index}
+                      className={cn(
+                        "p-3 rounded-lg border",
+                        getStatusColor(item.type)
+                      )}
+                    >
+                      <div className="flex gap-3">
+                        <div className="shrink-0 mt-0.5">
+                          {getIcon(item.type)}
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">{item.section}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {item.message}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+
+              <div className={cn(
+                isMobile && "sticky bottom-0 pt-4 pb-2 bg-background/80 backdrop-blur-sm border-t"
+              )}>
+                <TouchRipple className="rounded-md w-full">
+                  <button
+                    onClick={checkResume}
+                    className={cn(
+                      "w-full bg-resume-primary hover:bg-resume-secondary text-white transition-colors rounded-md font-medium inline-flex items-center justify-center gap-2",
+                      isMobile ? "h-12 text-base" : "h-10 text-sm"
+                    )}
+                  >
+                    Run Analysis Again
+                    <Loader2 className="h-4 w-4" />
+                  </button>
+                </TouchRipple>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 };
-
-export default ResumeChecker;

@@ -172,6 +172,91 @@
   .resume-preview {
     @apply p-4;
   }
+
+  .resume-form {
+    @apply p-4;
+  }
+
+  .form-section {
+    @apply space-y-4;
+  }
+
+  .input-group {
+    @apply space-y-2;
+  }
+
+  .form-row {
+    @apply flex-col space-y-4;
+  }
+
+  /* Improved touch targets */
+  button, 
+  .button,
+  input,
+  select,
+  textarea {
+    @apply min-h-[44px];
+  }
+
+  /* Better spacing for mobile */
+  .section-container {
+    @apply space-y-6 mb-8;
+  }
+
+  .resume-preview {
+    @apply p-4 mx-4 my-6;
+  }
+
+  /* Mobile typography */
+  h1 {
+    @apply text-2xl leading-tight;
+  }
+
+  h2 {
+    @apply text-xl leading-snug;
+  }
+
+  .name-title {
+    @apply text-2xl;
+  }
+
+  /* Mobile navigation improvements */
+  .navigation-items {
+    @apply space-y-2;
+  }
+
+  /* Mobile form field improvements */
+  .form-field {
+    @apply space-y-1.5;
+  }
+
+  .form-field label {
+    @apply text-sm font-medium;
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    @apply w-full px-3 py-2;
+  }
+
+  /* Mobile-friendly buttons */
+  .action-buttons {
+    @apply flex-col space-y-3;
+  }
+
+  .action-buttons > button {
+    @apply w-full;
+  }
+
+  /* Mobile step indicator */
+  .step-indicator {
+    @apply gap-3 py-4;
+  }
+
+  .step-indicator-dot {
+    @apply w-2.5 h-2.5;
+  }
 }
 
 /* Enhanced accessibility */
@@ -560,5 +645,38 @@
   
   .section-title {
     font-size: 1.1rem !important;
+  }
+}
+
+/* Mobile first animations */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .mobile-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+/* Touch-friendly hover states */
+@media (hover: none) {
+  .hover\:bg-accent:hover {
+    @apply active:bg-accent/80;
+  }
+
+  .hover\:text-primary:hover {
+    @apply active:text-primary/80;
+  }
+}
+
+/* Mobile form validation improvements */
+@media (max-width: 640px) {
+  .form-error {
+    @apply text-xs mt-1;
+  }
+
+  .invalid-feedback {
+    @apply text-xs mt-1 text-destructive;
   }
 }

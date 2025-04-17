@@ -1,258 +1,286 @@
 import React, { useState } from 'react';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Link2 } from 'lucide-react';
 import { useResumeContext } from '@/context/ResumeContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Project } from '@/context/ResumeContext';
-import { FileCode, Plus, Trash2, Link, Wand2 } from 'lucide-react';
-import { 
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card';
-import { v4 as uuidv4 } from 'uuid';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import { TouchRipple } from './ui/touch-ripple';
+import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
-import { Groq } from "groq-sdk";
 
-const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-if (!apiKey) {
-  console.error("GROQ_API_KEY is missing. Please set it in the .env file.");
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  technologies: string;
+  url?: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
 }
-const groq = new Groq({ 
-  apiKey, 
-  dangerouslyAllowBrowser: true 
-});
 
-const ProjectsForm = () => {
-  const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
-  const [projects, setProjects] = useState<Project[]>(
-    resumeData.projects || []
-  );
-  const [isGenerating, setIsGenerating] = useState<Record<string, boolean>>({});
+export const ProjectsForm = () => {
+  const { resumeData, updateResumeData } = useResumeContext();
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
-  const addProject = () => {
+  const handleAddProject = () => {
     const newProject: Project = {
-      id: uuidv4(),
-      name: '',
+      id: Date.now().toString(),
+      title: '',
       description: '',
       technologies: '',
-      url: '',
+      startDate: '',
+      endDate: '',
+      current: false
     };
-    setProjects([...projects, newProject]);
+
+    updateResumeData({
+      projects: [...(resumeData.projects || []), newProject]
+    });
+
+    // Scroll to the new project after a short delay to allow for DOM update
+    setTimeout(() => {
+      const element = document.getElementById(`project-${newProject.id}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   };
 
-  const removeProject = (id: string) => {
-    setProjects(projects.filter(project => project.id !== id));
-  };
-
-  const updateProject = (id: string, field: string, value: string) => {
-    setProjects(
-      projects.map(project => 
+  const handleUpdateProject = (id: string, field: keyof Project, value: string | boolean) => {
+    updateResumeData({
+      projects: resumeData.projects?.map(project =>
         project.id === id ? { ...project, [field]: value } : project
-      )
+      ) || []
+    });
+  };
+
+  const handleRemoveProject = (id: string) => {
+    updateResumeData({
+      projects: resumeData.projects?.filter(project => project.id !== id) || []
+    });
+    toast.success('Project removed');
+  };
+
+  const handleMoveProject = (id: string, direction: 'up' | 'down') => {
+    const projects = [...(resumeData.projects || [])];
+    const index = projects.findIndex(project => project.id === id);
+    if (direction === 'up' && index > 0) {
+      [projects[index], projects[index - 1]] = [projects[index - 1], projects[index]];
+      updateResumeData({ projects });
+    } else if (direction === 'down' && index < projects.length - 1) {
+      [projects[index], projects[index + 1]] = [projects[index + 1], projects[index]];
+      updateResumeData({ projects });
+    }
+  };
+
+  const validateForm = () => {
+    if (!resumeData.projects?.length) {
+      return false;
+    }
+
+    const isValid = resumeData.projects.every(project => 
+      project.title.trim() && 
+      project.description.trim() &&
+      project.technologies.trim() &&
+      project.startDate.trim() &&
+      (project.current || project.endDate.trim())
     );
-  };
 
-  const generateDescription = async (id: string) => {
-    const project = projects.find(p => p.id === id);
-    
-    if (!project || !project.name || !project.technologies) {
-      toast.error("Please fill in the project name and technologies first");
-      return;
+    if (!isValid) {
+      toast.error('Please fill in all required fields for each project');
+      return false;
     }
 
-    setIsGenerating(prev => ({ ...prev, [id]: true }));
-    
-    try {
-      const prompt = `Create a compelling project description for:
-Project: ${project.name}
-Technologies: ${project.technologies}
-
-Generate a detailed description that:
-1. Explains the project's purpose and impact
-2. Highlights technical challenges overcome
-3. Mentions key features and achievements
-4. Uses specific metrics where relevant (e.g. users served, performance improvements)
-5. Demonstrates both technical skills and soft skills
-
-Format as a concise paragraph focused on achievements and technical details.`;
-
-      const completion = await groq.chat.completions.create({
-        messages: [{ role: "user", content: prompt }],
-        model: "llama3-8b-8192",
-        temperature: 0.7,
-        max_tokens: 1024,
-      });
-
-      const description = completion.choices[0]?.message?.content || "Failed to generate description";
-      updateProject(id, 'description', description);
-      toast.success("Description generated!");
-    } catch (error) {
-      console.error('Error generating project description:', error);
-      toast.error("Failed to generate description. Please try again.");
-    } finally {
-      setIsGenerating(prev => ({ ...prev, [id]: false }));
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentStep(4);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateResumeData({ projects });
-    toast.success("Projects updated!");
-    setCurrentStep(6);
+    return true;
   };
 
   return (
-    <form onSubmit={handleSubmit} className="resume-form animate-fade-in">
-      <Card className="border-none shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-resume-primary to-resume-secondary text-white rounded-t-lg">
-          <div className="flex items-center gap-2">
-            <FileCode size={20} />
-            <CardTitle>Projects</CardTitle>
-          </div>
-          <CardDescription className="text-gray-100">
-            Add relevant projects to showcase your skills and accomplishments
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="pt-6">
-          {projects.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <FileCode className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-              <p>No projects added yet</p>
-              <p className="text-sm text-gray-400 mt-1">Projects are especially valuable for students and career changers</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {projects.map((project, index) => (
-                <Card key={project.id} className="border border-gray-200">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-lg font-medium">Project {index + 1}</CardTitle>
-                      <Button 
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-gray-500 hover:text-red-500"
-                        onClick={() => removeProject(project.id)}
-                      >
-                        <Trash2 size={18} />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor={`name-${project.id}`} className="block mb-2">Project Name</Label>
-                      <Input
-                        id={`name-${project.id}`}
-                        value={project.name}
-                        onChange={(e) => updateProject(project.id, 'name', e.target.value)}
-                        placeholder="e.g. E-commerce Platform"
-                        className="w-full"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <Label htmlFor={`description-${project.id}`} className="block">Description</Label>
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="sm"
-                          className="text-xs border-resume-primary text-resume-primary"
-                          onClick={() => generateDescription(project.id)}
-                          disabled={isGenerating[project.id] || !project.name || !project.technologies}
+    <FormWrapper
+      title="Projects"
+      description="Add your notable projects and achievements"
+      onNext={validateForm}
+      nextDisabled={!resumeData.projects?.length}
+    >
+      <div className="space-y-6">
+        <ScrollArea className={cn(
+          "rounded-lg border",
+          isMobile ? "h-[calc(100vh-280px)]" : "h-[600px]"
+        )}>
+          <div className="p-4 space-y-6">
+            {(resumeData.projects || []).map((project, index) => (
+              <Card
+                key={project.id}
+                id={`project-${project.id}`}
+                className={cn(
+                  "p-4 relative transition-shadow",
+                  draggingId === project.id && "shadow-lg",
+                  isMobile && "active:scale-[0.99]"
+                )}
+                draggable
+                onDragStart={() => setDraggingId(project.id)}
+                onDragEnd={() => setDraggingId(null)}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="h-5 w-5 text-muted-foreground cursor-move" />
+                    <h3 className="font-medium">Project {index + 1}</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {index > 0 && (
+                      <TouchRipple className="rounded-full">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleMoveProject(project.id, 'up')}
+                          className={cn(isMobile && "h-10 w-10")}
                         >
-                          {isGenerating[project.id] ? (
-                            <>Generating...</>
-                          ) : (
-                            <>
-                              <Wand2 size={14} className="mr-1" />
-                              Generate
-                            </>
-                          )}
+                          <MoveUp className="h-4 w-4" />
                         </Button>
-                      </div>
-                      <Textarea
-                        id={`description-${project.id}`}
-                        value={project.description}
-                        onChange={(e) => updateProject(project.id, 'description', e.target.value)}
-                        placeholder="Describe the project, its impact, and your role..."
-                        className="w-full min-h-[150px]"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor={`technologies-${project.id}`} className="block mb-2">Technologies Used</Label>
-                      <Input
-                        id={`technologies-${project.id}`}
-                        value={project.technologies || ''}
-                        onChange={(e) => updateProject(project.id, 'technologies', e.target.value)}
-                        placeholder="e.g. React, Node.js, MongoDB"
-                        className="w-full"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor={`url-${project.id}`} className="block mb-2">
-                        <div className="flex items-center gap-1">
-                          <Link size={14} />
-                          <span>Project URL</span>
-                          <span className="text-gray-500 text-xs ml-1">(optional)</span>
-                        </div>
-                      </Label>
+                      </TouchRipple>
+                    )}
+                    {index < (resumeData.projects?.length || 0) - 1 && (
+                      <TouchRipple className="rounded-full">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleMoveProject(project.id, 'down')}
+                          className={cn(isMobile && "h-10 w-10")}
+                        >
+                          <MoveDown className="h-4 w-4" />
+                        </Button>
+                      </TouchRipple>
+                    )}
+                    <TouchRipple className="rounded-full">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleRemoveProject(project.id)}
+                        className={cn(
+                          "text-destructive hover:text-destructive/90",
+                          isMobile && "h-10 w-10"
+                        )}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TouchRipple>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`title-${project.id}`}>Project Title *</Label>
+                    <Input
+                      id={`title-${project.id}`}
+                      value={project.title}
+                      onChange={(e) => handleUpdateProject(project.id, 'title', e.target.value)}
+                      className={cn(isMobile && "h-12")}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`url-${project.id}`}>Project URL</Label>
+                    <div className="relative">
+                      <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id={`url-${project.id}`}
+                        type="url"
                         value={project.url || ''}
-                        onChange={(e) => updateProject(project.id, 'url', e.target.value)}
-                        placeholder="e.g. https://github.com/yourusername/project"
-                        className="w-full"
+                        onChange={(e) => handleUpdateProject(project.id, 'url', e.target.value)}
+                        className={cn("pl-9", isMobile && "h-12")}
+                        placeholder="https://..."
                       />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-          
-          <Button 
-            type="button" 
-            onClick={addProject}
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor={`startDate-${project.id}`}>Start Date *</Label>
+                      <Input
+                        id={`startDate-${project.id}`}
+                        type="month"
+                        value={project.startDate}
+                        onChange={(e) => handleUpdateProject(project.id, 'startDate', e.target.value)}
+                        className={cn(isMobile && "h-12")}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`endDate-${project.id}`}>End Date *</Label>
+                      <div className="space-y-2">
+                        <Input
+                          id={`endDate-${project.id}`}
+                          type="month"
+                          value={project.endDate}
+                          onChange={(e) => handleUpdateProject(project.id, 'endDate', e.target.value)}
+                          disabled={project.current}
+                          className={cn(isMobile && "h-12")}
+                          required={!project.current}
+                        />
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={project.current}
+                            onChange={(e) => handleUpdateProject(project.id, 'current', e.target.checked)}
+                            className={cn(
+                              "rounded border-input",
+                              isMobile && "h-5 w-5"
+                            )}
+                          />
+                          <span className="text-sm">This is an ongoing project</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`technologies-${project.id}`}>Technologies Used *</Label>
+                    <Input
+                      id={`technologies-${project.id}`}
+                      value={project.technologies}
+                      onChange={(e) => handleUpdateProject(project.id, 'technologies', e.target.value)}
+                      className={cn(isMobile && "h-12")}
+                      placeholder="e.g., React, Node.js, TypeScript"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`description-${project.id}`}>Project Description *</Label>
+                    <Textarea
+                      id={`description-${project.id}`}
+                      value={project.description}
+                      onChange={(e) => handleUpdateProject(project.id, 'description', e.target.value)}
+                      className="min-h-[120px]"
+                      placeholder="Describe the project, your role, and key achievements..."
+                      required
+                    />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+
+        <TouchRipple className="rounded-md">
+          <Button
+            onClick={handleAddProject}
             variant="outline"
-            className="mt-4 border-dashed border-gray-300 text-gray-600 w-full py-6"
+            className={cn(
+              "w-full border-dashed",
+              isMobile && "h-12 text-base"
+            )}
           >
-            <Plus size={18} className="mr-2" /> Add Project
+            <Plus className="h-4 w-4 mr-2" />
+            Add Project
           </Button>
-        </CardContent>
-        
-        <CardFooter className="flex justify-between pt-4 border-t">
-          <Button 
-            type="button" 
-            onClick={handleBack}
-            variant="outline"
-            className="border-resume-primary text-resume-primary"
-          >
-            Back
-          </Button>
-          <Button 
-            type="submit" 
-            className="bg-resume-primary hover:bg-resume-secondary text-white"
-          >
-            Next
-          </Button>
-        </CardFooter>
-      </Card>
-    </form>
+        </TouchRipple>
+      </div>
+    </FormWrapper>
   );
 };
-
-export default ProjectsForm;

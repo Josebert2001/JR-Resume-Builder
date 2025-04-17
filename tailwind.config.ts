@@ -3,9 +3,10 @@ import type { Config } from "tailwindcss";
 export default {
 	darkMode: ["class"],
 	content: [
-			"./src/pages/**/*.{ts,tsx}",
-			"./src/components/**/*.{ts,tsx}",
-			"./src/**/*.{ts,tsx}",
+				"./pages/**/*.{ts,tsx}",
+				"./components/**/*.{ts,tsx}",
+				"./app/**/*.{ts,tsx}",
+				"./src/**/*.{ts,tsx}",
 	],
 	prefix: "",
 	theme: {
@@ -144,7 +145,11 @@ export default {
 				scaleOut: {
 					'0%': { transform: 'scale(1)', opacity: '1' },
 					'100%': { transform: 'scale(0.95)', opacity: '0' },
-				},
+					},
+				ripple: {
+					'0%': { transform: 'scale(0)', opacity: '0.6' },
+					'100%': { transform: 'scale(4)', opacity: '0' }
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -155,6 +160,15 @@ export default {
 				'slide-out': 'slideOut 0.2s ease-in',
 				'scale-in': 'scaleIn 0.2s ease-out',
 				'scale-out': 'scaleOut 0.2s ease-in',
+				'ripple': 'ripple 1s ease-out forwards'
+			},
+			utilities: {
+				'.touch-callout-none': {
+					'-webkit-touch-callout': 'none'
+				},
+				'.tap-highlight-color-transparent': {
+					'-webkit-tap-highlight-color': 'transparent'
+				}
 			}
 		}
 	},

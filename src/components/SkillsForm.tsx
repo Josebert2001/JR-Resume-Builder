@@ -1,260 +1,201 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { GripVertical, Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
 import { useResumeContext } from '@/context/ResumeContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Lightbulb, X, Plus, Wand2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import { TouchRipple } from './ui/touch-ripple';
+import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
-import { Groq } from "groq-sdk";
 
-const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-if (!apiKey) {
-  console.error("GROQ_API_KEY is missing. Please set it in the .env file.");
+interface Skill {
+  id: string;
+  name: string;
+  level: number;
 }
-const groq = new Groq({ 
-  apiKey, 
-  dangerouslyAllowBrowser: true 
-});
 
-const SkillsForm = () => {
-  const { resumeData, updateResumeData, setCurrentStep } = useResumeContext();
-  const [skillInput, setSkillInput] = useState('');
-  const [skills, setSkills] = useState<string[]>(resumeData.skills || []);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+export const SkillsForm = () => {
+  const { resumeData, updateResumeData } = useResumeContext();
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
-  const generateSkillSuggestions = async () => {
-    // Gather all available context from resume data
-    const context = {
-      education: resumeData.fieldOfStudy ? `Field of Study: ${resumeData.fieldOfStudy}` : '',
-      degree: resumeData.degree ? `Degree: ${resumeData.degree}` : '',
-      interests: resumeData.interests ? `Interests: ${resumeData.interests}` : '',
-      workExperience: resumeData.workExperience?.map(exp => 
-        `${exp.position} at ${exp.company}: ${exp.description}`
-      ).join('\n') || ''
+  const handleAddSkill = () => {
+    const newSkill: Skill = {
+      id: Date.now().toString(),
+      name: '',
+      level: 3
     };
 
-    // Check if we have enough context
-    if (!context.education && !context.degree && !context.workExperience) {
-      toast.error("Please fill in either education details or work experience first");
-      return;
-    }
+    updateResumeData({
+      skills: [...(resumeData.skills || []), newSkill]
+    });
 
-    setIsGenerating(true);
-    try {
-      const prompt = `Based on the following background:
-${context.education}
-${context.degree}
-${context.interests}
-Work Experience:
-${context.workExperience}
+    // Scroll to the new skill after a short delay to allow for DOM update
+    setTimeout(() => {
+      const element = document.getElementById(`skill-${newSkill.id}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
 
-Generate exactly 10 relevant professional skills that would be valuable for their career. Include both technical and soft skills based on their background.
-Return ONLY a JSON array of strings, nothing else. Example format: ["Skill 1", "Skill 2", "Skill 3"]`;
+  const handleUpdateSkill = (id: string, field: keyof Skill, value: string | number) => {
+    updateResumeData({
+      skills: resumeData.skills?.map(skill =>
+        skill.id === id ? { ...skill, [field]: value } : skill
+      ) || []
+    });
+  };
 
-      const completion = await groq.chat.completions.create({
-        messages: [
-          { 
-            role: "system", 
-            content: "You are a professional skills advisor. Always respond with properly formatted JSON arrays of strings only."
-          },
-          { 
-            role: "user", 
-            content: prompt 
-          }
-        ],
-        model: "llama3-8b-8192",
-        temperature: 0.7,
-        max_tokens: 1024,
-      });
+  const handleRemoveSkill = (id: string) => {
+    updateResumeData({
+      skills: resumeData.skills?.filter(skill => skill.id !== id) || []
+    });
+    toast.success('Skill removed');
+  };
 
-      const response = completion.choices[0]?.message?.content || '[]';
-      // Clean the response to ensure it only contains the JSON array
-      const cleanedResponse = response.trim().replace(/^```json\n|\n```$/g, '');
-      
-      try {
-        const suggestions = JSON.parse(cleanedResponse);
-        if (Array.isArray(suggestions)) {
-          setSuggestedSkills(suggestions);
-          toast.success("Generated skill suggestions!");
-        } else {
-          throw new Error('Response is not an array');
-        }
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', cleanedResponse);
-        toast.error("Failed to process suggestions");
-      }
-    } catch (error) {
-      console.error('Error generating skill suggestions:', error);
-      toast.error("Failed to generate suggestions");
-    } finally {
-      setIsGenerating(false);
+  const handleMoveSkill = (id: string, direction: 'up' | 'down') => {
+    const skills = [...(resumeData.skills || [])];
+    const index = skills.findIndex(skill => skill.id === id);
+    if (direction === 'up' && index > 0) {
+      [skills[index], skills[index - 1]] = [skills[index - 1], skills[index]];
+      updateResumeData({ skills });
+    } else if (direction === 'down' && index < skills.length - 1) {
+      [skills[index], skills[index + 1]] = [skills[index + 1], skills[index]];
+      updateResumeData({ skills });
     }
   };
 
-  const addSkill = () => {
-    if (skillInput.trim() && !skills.includes(skillInput.trim())) {
-      setSkills([...skills, skillInput.trim()]);
-      setSkillInput('');
+  const validateForm = () => {
+    if (!resumeData.skills?.length) {
+      return false;
     }
-  };
 
-  const removeSkill = (skillToRemove: string) => {
-    setSkills(skills.filter(skill => skill !== skillToRemove));
-  };
+    const isValid = resumeData.skills.every(skill => skill.name.trim());
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addSkill();
+    if (!isValid) {
+      toast.error('Please fill in all skill names');
+      return false;
     }
-  };
 
-  const addSuggestedSkill = (skill: string) => {
-    if (!skills.includes(skill)) {
-      setSkills([...skills, skill]);
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentStep(3);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateResumeData({ skills });
-    toast.success("Skills updated!");
-    setCurrentStep(6);  // Changed from 5 to 6 to advance to Preview & Download
+    return true;
   };
 
   return (
-    <form onSubmit={handleSubmit} className="resume-form animate-fade-in">
-      <Card className="border-none shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-resume-primary to-resume-secondary text-white rounded-t-lg">
-          <div className="flex items-center gap-2">
-            <Lightbulb size={20} />
-            <CardTitle>Skills</CardTitle>
-          </div>
-          <CardDescription className="text-gray-100">
-            Add your technical and professional skills
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="pt-6">
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <Label htmlFor="skill">Add Skills</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-xs border-resume-primary text-resume-primary"
-                onClick={generateSkillSuggestions}
-                disabled={isGenerating}
-              >
-                {isGenerating ? (
-                  <>Generating...</>
-                ) : (
-                  <>
-                    <Wand2 size={14} className="mr-1" />
-                    Suggest Skills
-                  </>
-                )}
-              </Button>
-            </div>
-            <div className="flex">
-              <Input
-                id="skill"
-                value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="e.g. JavaScript, Project Management, Communication"
-                className="rounded-r-none"
-              />
-              <Button 
-                type="button"
-                onClick={addSkill}
-                className="bg-resume-primary hover:bg-resume-secondary rounded-l-none"
-              >
-                <Plus size={16} />
-              </Button>
-            </div>
-            <p className="text-sm text-gray-500 mt-2">Press Enter to add a skill</p>
-          </div>
+    <FormWrapper
+      title="Skills"
+      description="Add your technical and professional skills"
+      onNext={validateForm}
+      nextDisabled={!resumeData.skills?.length}
+    >
+      <div className="space-y-6">
+        <div className={cn(
+          "space-y-4 rounded-lg border p-4",
+          isMobile ? "max-h-[calc(100vh-280px)] overflow-y-auto" : "max-h-[600px] overflow-y-auto"
+        )}>
+          {(resumeData.skills || []).map((skill, index) => (
+            <Card
+              key={skill.id}
+              id={`skill-${skill.id}`}
+              className={cn(
+                "p-4 relative transition-shadow",
+                draggingId === skill.id && "shadow-lg",
+                isMobile && "active:scale-[0.99]"
+              )}
+              draggable
+              onDragStart={() => setDraggingId(skill.id)}
+              onDragEnd={() => setDraggingId(null)}
+            >
+              <div className="flex items-center gap-4">
+                <GripVertical className="h-5 w-5 text-muted-foreground cursor-move shrink-0" />
+                
+                <div className="flex-1">
+                  <Input
+                    value={skill.name}
+                    onChange={(e) => handleUpdateSkill(skill.id, 'name', e.target.value)}
+                    placeholder="Enter a skill..."
+                    className={cn(isMobile && "h-12")}
+                    required
+                  />
+                </div>
 
-          <div className="mb-6">
-            <Label className="block mb-2">Your Skills</Label>
-            {skills.length === 0 ? (
-              <div className="text-center py-4 border border-dashed border-gray-300 rounded-md">
-                <p className="text-gray-500">No skills added yet</p>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {skills.map((skill, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1 px-3 py-1.5">
-                    {skill}
-                    <button 
-                      type="button" 
-                      onClick={() => removeSkill(skill)}
-                      className="ml-1 text-gray-500 hover:text-gray-700"
-                    >
-                      <X size={14} />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          {suggestedSkills.length > 0 && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">AI-Suggested Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                  {suggestedSkills.map((skill, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
-                      className={`cursor-pointer hover:bg-gray-100 ${skills.includes(skill) ? 'opacity-50' : ''}`}
-                      onClick={() => addSuggestedSkill(skill)}
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((level) => (
+                      <TouchRipple key={level} className="rounded-full">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateSkill(skill.id, 'level', level)}
+                          className={cn(
+                            "w-6 h-6 rounded-full border transition-colors",
+                            level <= skill.level ? "bg-resume-primary border-resume-primary" : "border-input",
+                            isMobile && "w-8 h-8"
+                          )}
+                          aria-label={`Skill level ${level}`}
+                        />
+                      </TouchRipple>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    {index > 0 && (
+                      <TouchRipple className="rounded-full">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleMoveSkill(skill.id, 'up')}
+                          className={cn(isMobile && "h-10 w-10")}
+                        >
+                          <MoveUp className="h-4 w-4" />
+                        </Button>
+                      </TouchRipple>
+                    )}
+                    {index < (resumeData.skills?.length || 0) - 1 && (
+                      <TouchRipple className="rounded-full">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleMoveSkill(skill.id, 'down')}
+                          className={cn(isMobile && "h-10 w-10")}
+                        >
+                          <MoveDown className="h-4 w-4" />
+                        </Button>
+                      </TouchRipple>
+                    )}
+                    <TouchRipple className="rounded-full">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleRemoveSkill(skill.id)}
+                        className={cn(
+                          "text-destructive hover:text-destructive/90",
+                          isMobile && "h-10 w-10"
+                        )}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TouchRipple>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-        
-        <CardFooter className="flex justify-between pt-4 border-t">
-          <Button 
-            type="button" 
-            onClick={handleBack}
+            </Card>
+          ))}
+        </div>
+
+        <TouchRipple className="rounded-md">
+          <Button
+            onClick={handleAddSkill}
             variant="outline"
-            className="border-resume-primary text-resume-primary"
+            className={cn(
+              "w-full border-dashed",
+              isMobile && "h-12 text-base"
+            )}
           >
-            Back
+            <Plus className="h-4 w-4 mr-2" />
+            Add Skill
           </Button>
-          <Button 
-            type="submit" 
-            className="bg-resume-primary hover:bg-resume-secondary text-white"
-          >
-            Next
-          </Button>
-        </CardFooter>
-      </Card>
-    </form>
+        </TouchRipple>
+      </div>
+    </FormWrapper>
   );
 };
-
-export default SkillsForm;

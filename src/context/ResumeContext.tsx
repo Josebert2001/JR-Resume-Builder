@@ -28,6 +28,22 @@ export type Project = {
   url?: string;
 };
 
+export type Education = {
+  id: string;
+  school: string;
+  degree: string;
+  fieldOfStudy: string;
+  graduationDate: string;
+  description: string;
+  gpa?: string;
+};
+
+export type Skill = {
+  id: string;
+  name: string;
+  level: number;
+};
+
 export type TemplateType = 
   | 'professional' 
   | 'modern' 
@@ -46,14 +62,8 @@ export type ResumeData = {
   email: string;
   phone: string;
   location?: string;
-  degree?: string;
-  fieldOfStudy?: string;
-  school?: string;
-  graduationYear?: string;
-  relevantCourses?: string[];
-  achievements?: string[];
-  summary?: string;
-  skills?: string[];
+  education: Education[];
+  skills?: Skill[];
   workExperience?: WorkExperience[];
   certifications?: Certification[];
   projects?: Project[];
@@ -75,6 +85,10 @@ type ResumeContextType = {
   isGenerating: boolean;
   setIsGenerating: (isGenerating: boolean) => void;
   setTemplate: (template: TemplateType) => void;
+  nextStep: () => void;
+  prevStep: () => void;
+  education: Education[];
+  updateEducation: (education: Education[]) => void;
 };
 
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
@@ -84,9 +98,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     name: '',
     email: '',
     phone: '',
-    fieldOfStudy: '',
-    school: '',
-    interests: '',
+    education: [],
     workExperience: [],
     certifications: [],
     projects: [],
@@ -95,7 +107,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
   });
   
   const [aiGenerated, setAiGenerated] = useState<GenerationResponse | null>(null);
-  const [currentStep, setCurrentStep] = useState(1); // Changed to start with template selection (step 1)
+  const [currentStep, setCurrentStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
@@ -116,6 +128,18 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     updateResumeData({ template });
   };
 
+  const nextStep = () => {
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  const prevStep = () => {
+    setCurrentStep((prev) => Math.max(1, prev - 1));
+  };
+
+  const updateEducation = (education: Education[]) => {
+    updateResumeData({ education });
+  };
+
   return (
     <ResumeContext.Provider
       value={{
@@ -128,6 +152,10 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
         isGenerating,
         setIsGenerating,
         setTemplate,
+        nextStep,
+        prevStep,
+        education: storedResumeData.education,
+        updateEducation,
       }}
     >
       {children}
