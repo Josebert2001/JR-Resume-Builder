@@ -21,7 +21,8 @@ export const TemplatePreview = ({ template }: TemplatePreviewProps) => {
     'profile': '/templates/profile.png',
     'targeted': '/templates/targeted.png',
     'mini': '/templates/mini.png',
-    'creative': '/templates/creative.png'
+    'creative': '/templates/creative.png',
+    'blind': '/templates/blind.png'
   };
 
   // Use a fallback placeholder if the image doesn't exist

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { GenerationResponse } from '@/services/aiService';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -56,7 +55,8 @@ export type TemplateType =
   | 'profile'
   | 'targeted'
   | 'mini'
-  | 'creative';
+  | 'creative'
+  | 'blind';  // Add blind template type
 
 export type PersonalInfo = {
   firstName: string;
