@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,6 +13,7 @@ import CoverLetterGuide from "./pages/CoverLetterGuide";
 import JobSearchTips from "./pages/JobSearchTips";
 import InterviewPreparation from "./pages/InterviewPreparation";
 import FontLoader from "./components/FontLoader";
+import { ResumeProvider } from "@/context/ResumeContext";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -34,6 +36,7 @@ const App = () => {
             <Sonner position="top-right" />
             <BrowserRouter>
               <Routes>
+                {/* Index page already has its own ResumeProvider in the component */}
                 <Route path="/" element={<Index />} />
                 <Route path="/templates" element={<ResumeTemplatesPage />} />
                 <Route path="/cover-letter-guide" element={<CoverLetterGuide />} />

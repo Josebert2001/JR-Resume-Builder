@@ -4,7 +4,7 @@ import { PersonalInfoForm } from '@/components/PersonalInfoForm';
 import { EducationForm } from '@/components/EducationForm';
 import { ResumePreview } from '@/components/ResumePreview';
 import { StepIndicator } from '@/components/StepIndicator';
-import { useResumeContext } from '@/context/ResumeContext';
+import { useResumeContext, ResumeProvider } from '@/context/ResumeContext';
 import { WorkExperienceForm } from '@/components/WorkExperienceForm';
 import { SkillsForm } from '@/components/SkillsForm';
 import { ResumeTemplates } from '@/components/ResumeTemplates';
@@ -23,6 +23,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ProjectsForm } from '@/components/ProjectsForm';
 
+// Wrap the content that uses useResumeContext in a component
 const ResumeBuilder = () => {
   const { currentStep, resumeData } = useResumeContext();
   
@@ -114,7 +115,10 @@ const Index = () => {
         </div>
       </header>
       
-      <ResumeBuilder />
+      {/* Ensure ResumeBuilder is always inside ResumeProvider */}
+      <ResumeProvider>
+        <ResumeBuilder />
+      </ResumeProvider>
       
       <Footer />
     </div>
