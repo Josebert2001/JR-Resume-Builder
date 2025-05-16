@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { TemplateType } from '@/context/ResumeContext';
 
 interface TemplatePreviewProps {
@@ -7,6 +7,8 @@ interface TemplatePreviewProps {
 }
 
 export const TemplatePreview = ({ template }: TemplatePreviewProps) => {
+  const [imageError, setImageError] = useState(false);
+  
   // Map templates to their preview images
   const templateImages: Record<TemplateType, string> = {
     'professional': '/templates/professional.png',
@@ -22,15 +24,20 @@ export const TemplatePreview = ({ template }: TemplatePreviewProps) => {
     'creative': '/templates/creative.png'
   };
 
+  // Use a fallback placeholder if the image doesn't exist
+  const imageSrc = imageError 
+    ? '/placeholder.svg' 
+    : templateImages[template] || '/placeholder.svg';
+
   return (
     <div className="relative w-full h-full overflow-hidden border rounded-md">
       <img 
-        src={templateImages[template]} 
+        src={imageSrc} 
         alt={`${template} template preview`} 
         className="object-cover w-full h-full"
-        onError={(e) => {
-          // Fallback if image doesn't exist
-          e.currentTarget.src = '/placeholder.svg';
+        onError={() => {
+          console.log(`Failed to load image for template: ${template}`);
+          setImageError(true);
         }}
       />
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">

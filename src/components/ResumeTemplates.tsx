@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useResumeContext, TemplateType } from '@/context/ResumeContext';
 import { Card } from './ui/card';
@@ -8,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { Button } from './ui/button';
+import { TemplatePreview } from './TemplatePreview';
 
 const templates = [
   {
@@ -126,20 +126,9 @@ export const ResumeTemplates = () => {
                 )}
                 onClick={() => setTemplate(t.id)}
               >
-                {/* Preview Image */}
+                {/* Use TemplatePreview component for consistent image handling */}
                 <div className="relative aspect-[3/4] border-b">
-                  <img
-                    src={t.preview}
-                    alt={`${t.name} template preview`}
-                    className="object-cover w-full h-full"
-                  />
-                  {template === t.id && (
-                    <div className="absolute inset-0 bg-resume-primary/10 flex items-center justify-center">
-                      <div className="bg-resume-primary text-white rounded-full p-2">
-                        <Check className="h-6 w-6" />
-                      </div>
-                    </div>
-                  )}
+                  <TemplatePreview template={t.id} />
                 </div>
 
                 {/* Template Info */}
