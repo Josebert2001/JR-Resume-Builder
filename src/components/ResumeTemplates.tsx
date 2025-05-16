@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useResumeContext } from '@/context/ResumeContext';
+import { useResumeContext, TemplateType } from '@/context/ResumeContext';
 import { Card } from './ui/card';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -11,25 +11,25 @@ import { Button } from './ui/button';
 
 const templates = [
   {
-    id: 'modern',
+    id: 'modern' as TemplateType,
     name: 'Modern',
     description: 'Clean and contemporary design with a focus on readability',
     preview: '/templates/modern.png'
   },
   {
-    id: 'professional',
+    id: 'professional' as TemplateType,
     name: 'Professional',
     description: 'Traditional layout perfect for corporate environments',
     preview: '/templates/professional.png'
   },
   {
-    id: 'creative',
+    id: 'creative' as TemplateType,
     name: 'Creative',
     description: 'Stand out with a unique and bold design',
     preview: '/templates/creative.png'
   },
   {
-    id: 'minimal',
+    id: 'minimal' as TemplateType,
     name: 'Minimal',
     description: 'Simple and elegant with focus on content',
     preview: '/templates/minimal.png'

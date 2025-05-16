@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { GenerationResponse } from '@/services/aiService';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -57,6 +58,16 @@ export type TemplateType =
   | 'mini'
   | 'creative';
 
+export type PersonalInfo = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  location?: string;
+  portfolio?: string;
+  summary?: string;
+};
+
 export type ResumeData = {
   name: string;
   email: string;
@@ -73,6 +84,7 @@ export type ResumeData = {
   githubUrl?: string;
   template?: TemplateType;
   interests?: string;
+  personalInfo?: PersonalInfo;
 };
 
 type ResumeContextType = {
@@ -85,10 +97,13 @@ type ResumeContextType = {
   isGenerating: boolean;
   setIsGenerating: (isGenerating: boolean) => void;
   setTemplate: (template: TemplateType) => void;
+  template: TemplateType;
   nextStep: () => void;
   prevStep: () => void;
   education: Education[];
   updateEducation: (education: Education[]) => void;
+  personalInfo: PersonalInfo;
+  updatePersonalInfo: (info: Partial<PersonalInfo>) => void;
 };
 
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
@@ -104,6 +119,15 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     projects: [],
     skills: [],
     template: 'professional',
+    personalInfo: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      location: '',
+      portfolio: '',
+      summary: ''
+    }
   });
   
   const [aiGenerated, setAiGenerated] = useState<GenerationResponse | null>(null);
@@ -140,6 +164,34 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     updateResumeData({ education });
   };
 
+  const updatePersonalInfo = (info: Partial<PersonalInfo>) => {
+    setStoredResumeData((prev: ResumeData) => ({
+      ...prev,
+      personalInfo: {
+        ...(prev.personalInfo || {
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          location: '',
+          portfolio: '',
+          summary: ''
+        }),
+        ...info
+      }
+    }));
+  };
+
+  const personalInfo = storedResumeData.personalInfo || {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    location: '',
+    portfolio: '',
+    summary: ''
+  };
+
   return (
     <ResumeContext.Provider
       value={{
@@ -152,10 +204,13 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
         isGenerating,
         setIsGenerating,
         setTemplate,
+        template: storedResumeData.template || 'professional',
         nextStep,
         prevStep,
         education: storedResumeData.education,
         updateEducation,
+        personalInfo,
+        updatePersonalInfo,
       }}
     >
       {children}

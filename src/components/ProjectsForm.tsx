@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,23 +7,12 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Link2 } from 'lucide-react';
-import { useResumeContext } from '@/context/ResumeContext';
+import { useResumeContext, Project } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  technologies: string;
-  url?: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-}
 
 export const ProjectsForm = () => {
   const { resumeData, updateResumeData } = useResumeContext();
@@ -32,12 +22,10 @@ export const ProjectsForm = () => {
   const handleAddProject = () => {
     const newProject: Project = {
       id: Date.now().toString(),
-      title: '',
+      name: '',
       description: '',
       technologies: '',
-      startDate: '',
-      endDate: '',
-      current: false
+      url: ''
     };
 
     updateResumeData({
@@ -51,7 +39,7 @@ export const ProjectsForm = () => {
     }, 100);
   };
 
-  const handleUpdateProject = (id: string, field: keyof Project, value: string | boolean) => {
+  const handleUpdateProject = (id: string, field: keyof Project, value: string) => {
     updateResumeData({
       projects: resumeData.projects?.map(project =>
         project.id === id ? { ...project, [field]: value } : project
@@ -84,11 +72,8 @@ export const ProjectsForm = () => {
     }
 
     const isValid = resumeData.projects.every(project => 
-      project.title.trim() && 
-      project.description.trim() &&
-      project.technologies.trim() &&
-      project.startDate.trim() &&
-      (project.current || project.endDate.trim())
+      project.name.trim() && 
+      project.description.trim()
     );
 
     if (!isValid) {
@@ -173,11 +158,11 @@ export const ProjectsForm = () => {
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor={`title-${project.id}`}>Project Title *</Label>
+                    <Label htmlFor={`name-${project.id}`}>Project Name *</Label>
                     <Input
-                      id={`title-${project.id}`}
-                      value={project.title}
-                      onChange={(e) => handleUpdateProject(project.id, 'title', e.target.value)}
+                      id={`name-${project.id}`}
+                      value={project.name}
+                      onChange={(e) => handleUpdateProject(project.id, 'name', e.target.value)}
                       className={cn(isMobile && "h-12")}
                       required
                     />
@@ -198,55 +183,14 @@ export const ProjectsForm = () => {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor={`startDate-${project.id}`}>Start Date *</Label>
-                      <Input
-                        id={`startDate-${project.id}`}
-                        type="month"
-                        value={project.startDate}
-                        onChange={(e) => handleUpdateProject(project.id, 'startDate', e.target.value)}
-                        className={cn(isMobile && "h-12")}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`endDate-${project.id}`}>End Date *</Label>
-                      <div className="space-y-2">
-                        <Input
-                          id={`endDate-${project.id}`}
-                          type="month"
-                          value={project.endDate}
-                          onChange={(e) => handleUpdateProject(project.id, 'endDate', e.target.value)}
-                          disabled={project.current}
-                          className={cn(isMobile && "h-12")}
-                          required={!project.current}
-                        />
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={project.current}
-                            onChange={(e) => handleUpdateProject(project.id, 'current', e.target.checked)}
-                            className={cn(
-                              "rounded border-input",
-                              isMobile && "h-5 w-5"
-                            )}
-                          />
-                          <span className="text-sm">This is an ongoing project</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="space-y-2">
                     <Label htmlFor={`technologies-${project.id}`}>Technologies Used *</Label>
                     <Input
                       id={`technologies-${project.id}`}
-                      value={project.technologies}
+                      value={project.technologies || ''}
                       onChange={(e) => handleUpdateProject(project.id, 'technologies', e.target.value)}
                       className={cn(isMobile && "h-12")}
                       placeholder="e.g., React, Node.js, TypeScript"
-                      required
                     />
                   </div>
 

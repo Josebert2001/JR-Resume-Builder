@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +7,7 @@ import { ResumeProvider, useResumeContext } from '@/context/ResumeContext';
 import type { TemplateType } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
+import { TemplatePreview } from '@/components/TemplatePreview';
 
 const TemplateCard = ({ 
   title, 

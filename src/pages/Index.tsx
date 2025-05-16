@@ -1,14 +1,15 @@
+
 import React from 'react';
-import PersonalInfoForm from '@/components/PersonalInfoForm';
-import EducationForm from '@/components/EducationForm';
-import ResumePreview from '@/components/ResumePreview';
-import StepIndicator from '@/components/StepIndicator';
+import { PersonalInfoForm } from '@/components/PersonalInfoForm';
+import { EducationForm } from '@/components/EducationForm';
+import { ResumePreview } from '@/components/ResumePreview';
+import { StepIndicator } from '@/components/StepIndicator';
 import { useResumeContext } from '@/context/ResumeContext';
-import WorkExperienceForm from '@/components/WorkExperienceForm';
-import SkillsForm from '@/components/SkillsForm';
-import ResumeTemplates from '@/components/ResumeTemplates';
+import { WorkExperienceForm } from '@/components/WorkExperienceForm';
+import { SkillsForm } from '@/components/SkillsForm';
+import { ResumeTemplates } from '@/components/ResumeTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ResumeChecker from '@/components/ResumeChecker';
+import { ResumeChecker } from '@/components/ResumeChecker';
 import { Link } from 'react-router-dom';
 import Footer from '@/components/Footer';
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { ProjectsForm } from '@/components/ProjectsForm';
 
 const ResumeBuilder = () => {
   const { currentStep } = useResumeContext();
@@ -27,7 +29,7 @@ const ResumeBuilder = () => {
   console.log("Current step:", currentStep);
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ border: '2px solid red' }}>
+    <div className="min-h-screen bg-gray-50">
       <h1 className="text-4xl font-bold text-center py-8">Resume Builder</h1>
       <StepIndicator />
       
@@ -45,9 +47,12 @@ const ResumeBuilder = () => {
       
       {/* Step 5: Skills */}
       {currentStep === 5 && <SkillsForm />}
+
+      {/* Step 6: Projects */}
+      {currentStep === 6 && <ProjectsForm />}
       
-      {/* Step 6: Projects and Final Preview */}
-      {currentStep === 6 && (
+      {/* Step 7: Final Preview */}
+      {currentStep === 7 && (
         <Tabs defaultValue="preview" className="max-w-4xl mx-auto">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="preview">Resume Preview</TabsTrigger>

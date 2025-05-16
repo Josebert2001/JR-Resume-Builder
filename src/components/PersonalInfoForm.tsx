@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -82,7 +83,7 @@ export const PersonalInfoForm = () => {
           <Input
             id="location"
             placeholder="City, Country"
-            value={personalInfo.location}
+            value={personalInfo.location || ''}
             onChange={(e) => updatePersonalInfo({ location: e.target.value })}
             className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
             required
@@ -97,7 +98,7 @@ export const PersonalInfoForm = () => {
             id="portfolio"
             type="url"
             placeholder="https://your-portfolio.com"
-            value={personalInfo.portfolio}
+            value={personalInfo.portfolio || ''}
             onChange={(e) => updatePersonalInfo({ portfolio: e.target.value })}
             className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
           />
@@ -110,7 +111,7 @@ export const PersonalInfoForm = () => {
           <Textarea
             id="summary"
             placeholder="Write a brief summary of your professional background and goals..."
-            value={personalInfo.summary}
+            value={personalInfo.summary || ''}
             onChange={(e) => updatePersonalInfo({ summary: e.target.value })}
             className="mt-1.5 w-full min-h-[120px] px-3 py-2 bg-background border border-input resize-none"
             required
