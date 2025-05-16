@@ -24,14 +24,17 @@ import { Separator } from "@/components/ui/separator";
 import { ProjectsForm } from '@/components/ProjectsForm';
 
 const ResumeBuilder = () => {
-  const { currentStep } = useResumeContext();
+  const { currentStep, resumeData } = useResumeContext();
+  
+  // Total number of steps in the resume building process
+  const totalSteps = 7;
   
   console.log("Current step:", currentStep);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <h1 className="text-4xl font-bold text-center py-8">Resume Builder</h1>
-      <StepIndicator />
+      <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
       
       {/* Step 1: Template Selection */}
       {currentStep === 1 && <ResumeTemplates />}
@@ -66,7 +69,7 @@ const ResumeBuilder = () => {
             <ResumeTemplates />
           </TabsContent>
           <TabsContent value="check">
-            <ResumeChecker />
+            <ResumeChecker resumeData={resumeData} />
           </TabsContent>
         </Tabs>
       )}
