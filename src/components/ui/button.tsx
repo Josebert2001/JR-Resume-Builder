@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -24,6 +25,7 @@ const buttonVariants = cva(
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        xl: "h-12 rounded-md px-10 text-base", // Add larger size for better touch targets
       },
     },
     defaultVariants: {
@@ -44,16 +46,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const isMobile = useIsMobile();
     const Comp = asChild ? Slot : "button";
     
+    // Auto-adjust size for better touch targets on mobile
+    const mobileAdjustedSize = isMobile && size === "default" ? "lg" : 
+                               isMobile && size === "sm" ? "default" : 
+                               isMobile && size === "icon" ? "icon" : size;
+    
     return (
       <Comp
         className={cn(
-          buttonVariants({ variant, size, className }),
+          buttonVariants({ variant, size: mobileAdjustedSize, className }),
           // Enhanced touch feedback for mobile
           isMobile && "active:scale-[0.98] active:opacity-90 touch-callout-none",
           // Improved tap target size for mobile
-          isMobile && size === "icon" && "h-11 w-11",
-          // Ensure sufficient touch target size
-          isMobile && size === "sm" && "h-10",
+          isMobile && size === "icon" && "h-12 w-12",
           // Add tap highlight color for mobile
           isMobile && "tap-highlight-color-transparent"
         )}
