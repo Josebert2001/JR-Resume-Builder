@@ -13,12 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { HelpCircle, MessageSquare } from 'lucide-react';
+import { HelpCircle, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { useIsMobile } from '@/hooks/use-mobile';
+import { motion } from 'framer-motion';
 
 export const PersonalInfoForm = () => {
   const { personalInfo, updatePersonalInfo, nextStep } = useResumeContext();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({
@@ -98,12 +101,35 @@ export const PersonalInfoForm = () => {
     return `${yearsExperience ? `${yearsExperience} years of experience as a ` : ''}${currentRole} with expertise in ${keySkills}. ${achievements ? `Notable achievements include ${achievements}. ` : ''}Looking to ${careerGoals}.`;
   };
 
+  const formVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        duration: 0.5,
+        staggerChildren: 0.1
+      } 
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-50">
-      <div className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+    <motion.form 
+      initial="hidden"
+      animate="visible"
+      variants={formVariants}
+      onSubmit={handleSubmit} 
+      className="space-y-6 animate-in fade-in-50 p-4 sm:p-0"
+    >
+      <div className="space-y-6">
+        <motion.div variants={itemVariants} className="grid gap-5 sm:grid-cols-2">
           <div className="form-field">
-            <Label htmlFor="firstName" className="text-sm font-medium">
+            <Label htmlFor="firstName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               First Name
             </Label>
             <Input
@@ -111,12 +137,12 @@ export const PersonalInfoForm = () => {
               placeholder="Enter your first name"
               value={personalInfo.firstName}
               onChange={(e) => updatePersonalInfo({ firstName: e.target.value })}
-              className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
+              className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
               required
             />
           </div>
           <div className="form-field">
-            <Label htmlFor="lastName" className="text-sm font-medium">
+            <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Last Name
             </Label>
             <Input
@@ -124,14 +150,14 @@ export const PersonalInfoForm = () => {
               placeholder="Enter your last name"
               value={personalInfo.lastName}
               onChange={(e) => updatePersonalInfo({ lastName: e.target.value })}
-              className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
+              className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
               required
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="form-field">
-          <Label htmlFor="email" className="text-sm font-medium">
+        <motion.div variants={itemVariants} className="form-field">
+          <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Email
           </Label>
           <Input
@@ -140,13 +166,13 @@ export const PersonalInfoForm = () => {
             placeholder="your.email@example.com"
             value={personalInfo.email}
             onChange={(e) => updatePersonalInfo({ email: e.target.value })}
-            className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
+            className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
             required
           />
-        </div>
+        </motion.div>
 
-        <div className="form-field">
-          <Label htmlFor="phone" className="text-sm font-medium">
+        <motion.div variants={itemVariants} className="form-field">
+          <Label htmlFor="phone" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Phone
           </Label>
           <Input
@@ -155,13 +181,13 @@ export const PersonalInfoForm = () => {
             placeholder="Your phone number"
             value={personalInfo.phone}
             onChange={(e) => updatePersonalInfo({ phone: e.target.value })}
-            className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
+            className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
             required
           />
-        </div>
+        </motion.div>
 
-        <div className="form-field">
-          <Label htmlFor="location" className="text-sm font-medium">
+        <motion.div variants={itemVariants} className="form-field">
+          <Label htmlFor="location" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Location
           </Label>
           <Input
@@ -169,13 +195,13 @@ export const PersonalInfoForm = () => {
             placeholder="City, Country"
             value={personalInfo.location || ''}
             onChange={(e) => updatePersonalInfo({ location: e.target.value })}
-            className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
+            className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
             required
           />
-        </div>
+        </motion.div>
 
-        <div className="form-field">
-          <Label htmlFor="portfolio" className="text-sm font-medium">
+        <motion.div variants={itemVariants} className="form-field">
+          <Label htmlFor="portfolio" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Portfolio URL
           </Label>
           <Input
@@ -184,13 +210,13 @@ export const PersonalInfoForm = () => {
             placeholder="https://your-portfolio.com"
             value={personalInfo.portfolio || ''}
             onChange={(e) => updatePersonalInfo({ portfolio: e.target.value })}
-            className="mt-1.5 w-full px-3 py-2 bg-background border border-input"
+            className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
           />
-        </div>
+        </motion.div>
 
-        <div className="form-field">
+        <motion.div variants={itemVariants} className="form-field">
           <div className="flex items-center justify-between">
-            <Label htmlFor="summary" className="text-sm font-medium">
+            <Label htmlFor="summary" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Professional Summary
             </Label>
             <Button 
@@ -198,9 +224,9 @@ export const PersonalInfoForm = () => {
               variant="outline" 
               size="sm" 
               onClick={() => setIsAIDialogOpen(true)}
-              className="text-xs flex items-center gap-1.5 text-resume-primary hover:text-resume-secondary"
+              className="text-xs flex items-center gap-1.5 text-resume-primary hover:text-white hover:bg-resume-primary transition-colors duration-300"
             >
-              <MessageSquare size={14} />
+              <Sparkles size={14} className="animate-pulse" />
               AI Help
             </Button>
           </div>
@@ -209,69 +235,82 @@ export const PersonalInfoForm = () => {
             placeholder="Write a brief summary of your professional background and goals..."
             value={personalInfo.summary || ''}
             onChange={(e) => updatePersonalInfo({ summary: e.target.value })}
-            className="mt-1.5 w-full min-h-[120px] px-3 py-2 bg-background border border-input resize-none"
+            className="mt-1.5 w-full min-h-[120px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20 resize-none"
             required
           />
-        </div>
+        </motion.div>
       </div>
 
-      <div className="flex justify-end pt-4">
+      <motion.div 
+        variants={itemVariants}
+        className="flex justify-end pt-6"
+      >
         <Button 
           type="submit"
-          className="w-full sm:w-auto bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white font-medium py-2 px-6 rounded-lg transition-all duration-200"
+          className="w-full sm:w-auto bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
         >
           Next Step
+          <ArrowRight size={16} className="ml-2" />
         </Button>
-      </div>
+      </motion.div>
 
       <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-800 border-0 shadow-xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <MessageSquare size={18} className="text-resume-primary" />
+            <DialogTitle className="flex items-center gap-2 text-resume-primary dark:text-blue-400">
+              <MessageSquare size={18} className="text-resume-primary dark:text-blue-400" />
               Resume AI Assistant
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600 dark:text-gray-300">
               Let's create a professional summary that highlights your strengths.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="py-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="py-4"
+          >
             <div className="mb-4">
-              <p className="text-sm font-medium mb-2">
+              <p className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
                 {questions[currentQuestion]}
               </p>
               <Textarea 
                 value={currentAnswer} 
                 onChange={(e) => setCurrentAnswer(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[100px] bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-resume-primary focus:ring-resume-primary/20"
                 placeholder="Type your answer here..."
               />
             </div>
 
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground flex items-center">
+              <span className="inline-block w-6 h-1.5 bg-resume-primary rounded-full mr-2"></span>
               Question {currentQuestion + 1} of {questions.length}
             </div>
-          </div>
+          </motion.div>
 
           <DialogFooter>
             <Button 
               variant="outline" 
               onClick={() => setIsAIDialogOpen(false)}
+              className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleNextQuestion}
               disabled={isGenerating}
-              className="bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white"
+              className="bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white transition-all duration-300"
             >
-              {currentQuestion < questions.length - 1 ? 'Next Question' : 'Generate Summary'}
-              {isGenerating && <span className="ml-2 animate-spin">↻</span>}
+              {currentQuestion < questions.length - 1 ? (
+                <>Next Question <ArrowRight size={16} className="ml-2" /></>
+              ) : (
+                <>Generate Summary {isGenerating && <span className="ml-2 animate-spin">↻</span>}</>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </form>
+    </motion.form>
   );
 };

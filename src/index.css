@@ -155,6 +155,54 @@
   animation: float 3s ease-in-out infinite;
 }
 
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Improved form field styling */
+.form-field input,
+.form-field select,
+.form-field textarea {
+  @apply transition-colors duration-200;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  @apply ring-2 ring-resume-primary/20 border-resume-primary;
+}
+
+/* Button hover effects */
+.btn-hover-effect {
+  @apply relative overflow-hidden;
+}
+
+.btn-hover-effect:after {
+  @apply content-[''] absolute top-0 h-full w-0 left-0 bg-white/20 transition-all duration-300 ease-out;
+}
+
+.btn-hover-effect:hover:after {
+  @apply w-full;
+}
+
+/* Enhanced card styles */
+.resume-card {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300;
+}
+
 /* Improved mobile responsiveness */
 @media (max-width: 640px) {
   .container {
@@ -257,6 +305,31 @@
   .step-indicator-dot {
     @apply w-2.5 h-2.5;
   }
+  /* Mobile hero section improvement */
+  .hero-section {
+    @apply px-4 py-10 text-center;
+  }
+
+  .hero-heading {
+    @apply text-2xl mb-4;
+  }
+
+  /* Mobile-friendly input focus states */
+  input:focus, 
+  select:focus, 
+  textarea:focus {
+    @apply outline-none;
+  }
+  
+  /* Mobile-friendly form layout */
+  .form-section {
+    @apply space-y-4;
+  }
+
+  /* Better button touch targets */
+  button {
+    @apply min-h-[46px] active:scale-95 transition-transform;
+  }
 }
 
 /* Enhanced accessibility */
@@ -277,11 +350,11 @@
 }
 
 .step-indicator-dot {
-  @apply w-3 h-3 rounded-full mx-2;
+  @apply w-3 h-3 rounded-full mx-2 transition-all duration-300;
 }
 
 .step-indicator-dot.active {
-  @apply bg-resume-primary;
+  @apply bg-resume-primary scale-110 shadow-md shadow-resume-primary/30;
 }
 
 .step-indicator-dot.completed {
@@ -289,7 +362,7 @@
 }
 
 .step-indicator-dot.incomplete {
-  @apply bg-gray-300;
+  @apply bg-gray-300 dark:bg-gray-600;
 }
 
 @media print {
@@ -679,4 +752,60 @@
   .invalid-feedback {
     @apply text-xs mt-1 text-destructive;
   }
+}
+
+/* Responsive card grid */
+.card-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* Input transitions */
+.input-transition {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Shadow effects */
+.shadow-soft {
+  @apply shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 transition-shadow duration-300;
+}
+
+/* Responsive typography */
+@media (min-width: 768px) {
+  .text-responsive {
+    @apply text-base;
+  }
+}
+
+@media (max-width: 767px) {
+  .text-responsive {
+    @apply text-sm;
+  }
+}
+
+/* Button animations */
+.btn-animated {
+  @apply relative overflow-hidden transition-all duration-300;
+}
+
+.btn-animated::after {
+  @apply content-[''] absolute inset-0 bg-white/20 scale-x-0 origin-left transition-transform duration-300;
+}
+
+.btn-animated:hover::after {
+  @apply scale-x-100;
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+/* Focus within form groups */
+.form-group:focus-within label {
+  @apply text-resume-primary transition-colors duration-200;
+}
+
+/* Enhanced tooltips */
+.enhanced-tooltip {
+  @apply invisible absolute z-10 w-max max-w-xs p-2 rounded bg-gray-900 text-white text-xs opacity-0 transition-all duration-300 group-hover:visible group-hover:opacity-100;
 }
