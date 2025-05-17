@@ -36,31 +36,15 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-
-    --resume-primary: 221 83% 53%;
-    --resume-secondary: 217 91% 60%;
-    --resume-accent: 214 94% 67%;
-    --resume-success: 162 94% 30%;
-    --resume-warning: 43 96% 42%;
-    --resume-error: 0 84% 60%;
-    --resume-light: 214 100% 98%;
-    --resume-dark: 217 33% 17%;
-    --resume-muted: 215 25% 27%;
+    --resume-primary: #1e40af;
+    --resume-secondary: #3b82f6;
+    --resume-accent: #60a5fa;
+    --resume-success: #059669;
+    --resume-warning: #d97706;
+    --resume-error: #dc2626;
+    --resume-light: #f8fafc;
+    --resume-dark: #1e293b;
+    --resume-muted: #64748b;
   }
 
   .dark {
@@ -91,14 +75,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   /* Improved focus styles for better accessibility */
@@ -125,684 +101,189 @@
     @apply tracking-tight font-medium;
   }
 
-  /* Reduced motion preferences */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-}
-
-.resume-form {
-  @apply max-w-3xl mx-auto px-4 sm:px-6 md:p-6;
-}
-
-.resume-preview {
-  @apply bg-white shadow-lg p-4 sm:p-8 max-w-3xl mx-auto rounded-lg my-4 sm:my-0;
-}
-
-/* Enhanced animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0,
-    rgba(255, 255, 255, 0.2) 20%,
-    rgba(255, 255, 255, 0.5) 60%,
-    rgba(255, 255, 255, 0)
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite linear;
-}
-
-/* Improved form field styling */
-.form-field input,
-.form-field select,
-.form-field textarea {
-  @apply transition-colors duration-200;
-}
-
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus {
-  @apply ring-2 ring-resume-primary/20 border-resume-primary;
-}
-
-/* Button hover effects */
-.btn-hover-effect {
-  @apply relative overflow-hidden;
-}
-
-.btn-hover-effect:after {
-  @apply content-[''] absolute top-0 h-full w-0 left-0 bg-white/20 transition-all duration-300 ease-out;
-}
-
-.btn-hover-effect:hover:after {
-  @apply w-full;
-}
-
-/* Enhanced card styles */
-.resume-card {
-  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300;
-}
-
-/* Improved mobile responsiveness */
-@media (max-width: 640px) {
-  .container {
-    @apply px-4;
-  }
-  
-  h1 {
-    @apply text-2xl;
-  }
-  
-  h2 {
-    @apply text-xl;
-  }
-  
-  .resume-preview {
-    @apply p-4 mx-4;
+  /* Enhanced animations */
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
   }
 
-  .resume-form {
-    @apply p-4;
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
   }
 
-  .form-section {
-    @apply space-y-4;
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
   }
 
-  .input-group {
-    @apply space-y-2;
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0.5) 60%,
+      rgba(255, 255, 255, 0)
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
   }
 
-  .form-row {
-    @apply flex-col space-y-4;
-  }
-
-  /* Improved touch targets */
-  button, 
-  .button,
-  input,
-  select,
-  textarea {
-    @apply min-h-[44px];
-  }
-
-  /* Better spacing for mobile */
-  .section-container {
-    @apply space-y-6 mb-8;
-  }
-
-  /* Mobile typography */
-  h1 {
-    @apply text-2xl leading-tight;
-  }
-
-  h2 {
-    @apply text-xl leading-snug;
-  }
-
-  .name-title {
-    @apply text-2xl;
-  }
-
-  /* Mobile navigation improvements */
-  .navigation-items {
-    @apply space-y-2;
-  }
-
-  /* Mobile form field improvements */
-  .form-field {
-    @apply space-y-1.5;
-  }
-
-  .form-field label {
-    @apply text-sm font-medium;
-  }
-
+  /* Improved form field styling */
   .form-field input,
   .form-field select,
   .form-field textarea {
-    @apply w-full px-3 py-2;
+    @apply transition-colors duration-200;
   }
 
-  /* Mobile-friendly buttons */
-  .action-buttons {
-    @apply flex-col space-y-3;
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    @apply ring-2 ring-resume-primary/20 border-resume-primary;
   }
 
-  .action-buttons > button {
+  /* Button hover effects */
+  .btn-hover-effect {
+    @apply relative overflow-hidden;
+  }
+
+  .btn-hover-effect:after {
+    @apply content-[''] absolute top-0 h-full w-0 left-0 bg-white/20 transition-all duration-300 ease-out;
+  }
+
+  .btn-hover-effect:hover:after {
     @apply w-full;
   }
 
-  /* Mobile step indicator */
-  .step-indicator {
-    @apply gap-2 py-4 px-4;
+  /* Enhanced card styles */
+  .resume-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300;
   }
 
-  .step-indicator-dot {
-    @apply w-2 h-2;
-  }
-  
-  /* Mobile hero section improvement */
-  .hero-section {
-    @apply px-4 py-6 text-center;
-  }
+  /* Improved mobile responsiveness */
+  @media (max-width: 640px) {
+    .container {
+      @apply px-4;
+    }
+    
+    h1 {
+      @apply text-2xl;
+    }
+    
+    h2 {
+      @apply text-xl;
+    }
+    
+    .resume-preview {
+      @apply p-4 mx-4;
+    }
 
-  .hero-heading {
-    @apply text-2xl mb-4;
-  }
+    .resume-form {
+      @apply p-4;
+    }
 
-  /* Mobile-friendly input focus states */
-  input:focus, 
-  select:focus, 
-  textarea:focus {
-    @apply outline-none;
-  }
-  
-  /* Better button touch targets */
-  button {
-    @apply min-h-[44px] active:scale-95 transition-transform;
-  }
-  
-  /* Mobile dialogues */
-  .dialog-content {
-    @apply p-4 mx-4;
-  }
-}
+    .form-section {
+      @apply space-y-4;
+    }
 
-/* Enhanced accessibility */
-.sr-only {
-  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
-}
+    .input-group {
+      @apply space-y-2;
+    }
 
-.skip-to-content {
-  @apply absolute left-4 -top-full z-50 bg-white px-4 py-2 transition-all focus:top-4;
-}
+    .form-row {
+      @apply flex-col space-y-4;
+    }
 
-.input-group {
-  @apply mb-6;
-}
+    /* Improved touch targets */
+    button, 
+    .button,
+    input,
+    select,
+    textarea {
+      @apply min-h-[44px];
+    }
 
-.step-indicator {
-  @apply flex justify-center my-8;
-}
+    /* Better spacing for mobile */
+    .section-container {
+      @apply space-y-6 mb-8;
+    }
 
-.step-indicator-dot {
-  @apply w-3 h-3 rounded-full mx-2 transition-all duration-300;
-}
+    /* Mobile typography */
+    .text-responsive {
+      @apply text-sm;
+    }
 
-.step-indicator-dot.active {
-  @apply bg-resume-primary scale-110 shadow-md shadow-resume-primary/30;
-}
+    /* Mobile navigation improvements */
+    .navigation-items {
+      @apply space-y-2;
+    }
 
-.step-indicator-dot.completed {
-  @apply bg-resume-accent;
-}
+    /* Mobile form field improvements */
+    .form-field {
+      @apply space-y-1.5;
+    }
 
-.step-indicator-dot.incomplete {
-  @apply bg-gray-300 dark:bg-gray-600;
-}
+    .form-field label {
+      @apply text-sm font-medium;
+    }
 
-@media print {
-  @page {
-    size: A4;
-    margin: 15mm;
-  }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      @apply w-full px-3 py-2;
+    }
 
-  /* Hide UI elements when printing */
-  button, 
-  .job-search,
-  nav,
-  footer {
-    display: none !important;
-  }
+    /* Mobile-friendly buttons */
+    .action-buttons {
+      @apply flex-col space-y-3;
+    }
 
-  /* PDF Layout Improvements */
-  .resume-preview {
-    margin: 0 !important;
-    padding: 2rem !important;
-    border: none !important;
-    box-shadow: none !important;
-    max-width: none !important;
-    width: 100% !important;
-  }
+    .action-buttons > button {
+      @apply w-full;
+    }
 
-  /* Typography for PDF */
-  h1 {
-    font-size: 24pt !important;
-    margin-bottom: 1rem !important;
+    /* Mobile step indicator */
+    .step-indicator {
+      @apply gap-2 py-4 px-4;
+    }
+
+    .step-indicator-dot {
+      @apply w-2 h-2;
+    }
   }
 
-  h2 {
-    font-size: 16pt !important;
-    margin-bottom: 0.75rem !important;
-    break-after: avoid !important;
+  /* Enhanced accessibility */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
   }
 
-  h3 {
-    font-size: 13pt !important;
-    margin-bottom: 0.5rem !important;
-    break-after: avoid !important;
+  .skip-to-content {
+    @apply absolute left-4 -top-full z-50 bg-white px-4 py-2 transition-all focus:top-4;
   }
 
-  p, li {
-    font-size: 11pt !important;
-    line-height: 1.4 !important;
-    orphans: 3;
-    widows: 3;
+  /* Print styles */
+  @media print {
+    @page {
+      size: A4;
+      margin: 15mm;
+    }
+
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+
+    .resume-preview {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm;
+      margin: 0;
+      box-shadow: none;
+      border: none;
+    }
   }
-
-  /* Section Spacing */
-  .mb-8 {
-    margin-bottom: 1.5rem !important;
-  }
-
-  .mb-4 {
-    margin-bottom: 0.75rem !important;
-  }
-
-  /* Avoid breaking sections across pages */
-  .mb-8, .space-y-6 > div {
-    break-inside: avoid;
-  }
-
-  /* Grid layout fixes for PDF */
-  .grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* Icons and colors */
-  .text-resume-primary {
-    color: rgb(30, 64, 175) !important;
-  }
-
-  .text-resume-secondary {
-    color: rgb(59, 130, 246) !important;
-  }
-
-  .border-resume-primary {
-    border-color: rgb(30, 64, 175) !important;
-  }
-
-  /* Preserve icon colors */
-  svg {
-    color: rgb(59, 130, 246) !important;
-  }
-
-  /* Make links visible but not too prominent */
-  a {
-    text-decoration: none !important;
-    color: rgb(30, 64, 175) !important;
-  }
-
-  /* Ensure proper list formatting */
-  .space-y-4 > * + * {
-    margin-top: 1rem !important;
-  }
-
-  .space-y-6 > * + * {
-    margin-top: 1.5rem !important;
-  }
-
-  /* Border styling */
-  .border-b {
-    border-bottom-width: 1px !important;
-    border-bottom-style: solid !important;
-    border-bottom-color: rgb(59, 130, 246) !important;
-  }
-
-  /* Ensure bullet points and icons print correctly */
-  .h-2.w-2.rounded-full {
-    background-color: rgb(59, 130, 246) !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Optimize image quality */
-  img {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
-
-/* Resume Template Styles */
-/* Professional Template */
-.professional-template {
-  --spacing: 1.5rem;
-  --primary-color: #2c3e50;
-  --secondary-color: #34495e;
-}
-
-.professional-template .name-title {
-  font-size: 2rem;
-  color: var(--primary-color);
-  letter-spacing: -0.5px;
-  margin-bottom: 0.5rem;
-}
-
-.professional-template .section-title {
-  color: var(--primary-color);
-  font-size: 1.25rem;
-  font-weight: 600;
-  border-bottom: 2px solid var(--primary-color);
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-/* Modern Template */
-.modern-template {
-  --spacing: 1.75rem;
-  --primary-color: #1a73e8;
-  --secondary-color: #174ea6;
-}
-
-.modern-template .name-title {
-  font-size: 2.25rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  -webkit-background-clip: text;
-  color: transparent;
-  margin-bottom: 0.75rem;
-}
-
-.modern-template .section-title {
-  color: var(--primary-color);
-  font-size: 1.35rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.modern-template .section-title::before {
-  content: '';
-  display: block;
-  width: 0.25rem;
-  height: 1.5rem;
-  background: var(--primary-color);
-  border-radius: 2px;
-}
-
-.modern-template .education-entry {
-  margin-bottom: 1.5rem;
-}
-
-.modern-template .education-degree {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: 0.25rem;
-}
-
-.modern-template .education-school {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--secondary-color);
-  margin-bottom: 0.25rem;
-}
-
-.modern-template .education-details {
-  font-size: 0.9rem;
-  color: #4a5568;
-  line-height: 1.5;
-}
-
-.modern-template .education-courses {
-  font-size: 0.9rem;
-  color: #4a5568;
-  font-style: italic;
-  margin-top: 0.25rem;
-}
-
-/* Minimal Template */
-.minimal-template {
-  --spacing: 1.25rem;
-  --primary-color: #2d3436;
-  --secondary-color: #636e72;
-}
-
-.minimal-template .name-title {
-  font-size: 1.75rem;
-  color: var(--primary-color);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.minimal-template .section-title {
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 0.875rem;
-  color: var(--secondary-color);
-  margin-bottom: 1rem;
-}
-
-/* Chronological Template */
-.chronological-template {
-  --spacing: 1.5rem;
-  --primary-color: #2c3e50;
-  --secondary-color: #7f8c8d;
-}
-
-.chronological-template .section-title {
-  color: var(--primary-color);
-  font-size: 1.25rem;
-  border-bottom: 1px solid var(--secondary-color);
-  padding-bottom: 0.25rem;
-  margin-bottom: 1rem;
-}
-
-/* Functional Template */
-.functional-template {
-  --spacing: 1.5rem;
-  --primary-color: #16a085;
-  --secondary-color: #1abc9c;
-}
-
-.functional-template .section-title {
-  color: var(--primary-color);
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  padding-left: 1rem;
-  border-left: 4px solid var(--primary-color);
-}
-
-/* Combination Template */
-.combination-template {
-  --spacing: 1.5rem;
-  --primary-color: #2980b9;
-  --secondary-color: #3498db;
-}
-
-.combination-template .section-title {
-  color: var(--primary-color);
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(to right, var(--secondary-color) 0%, transparent 100%);
-  border-radius: 4px;
-}
-
-/* Infographic Template */
-.infographic-template {
-  --spacing: 1.75rem;
-  --primary-color: #e74c3c;
-  --secondary-color: #c0392b;
-}
-
-.infographic-template .name-title {
-  font-size: 2rem;
-  color: var(--primary-color);
-  margin-bottom: 1rem;
-}
-
-.infographic-template .section-title {
-  display: inline-block;
-  color: white;
-  background: var(--primary-color);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-/* Targeted Template */
-.targeted-template {
-  --spacing: 1.5rem;
-  --primary-color: #6c5ce7;
-  --secondary-color: #5d52d1;
-}
-
-.targeted-template .name-title {
-  font-size: 2rem;
-  color: var(--primary-color);
-  margin-bottom: 0.5rem;
-}
-
-.targeted-template .section-title {
-  color: var(--primary-color);
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  border-bottom: 2px dashed var(--secondary-color);
-  padding-bottom: 0.25rem;
-}
-
-/* Common styles for all templates */
-.section-container {
-  margin-bottom: var(--spacing, 1.5rem);
-}
-
-.section-content {
-  color: #4a5568;
-  line-height: 1.6;
-}
-
-/* Print styles */
-@media print {
-  .section-container {
-    break-inside: avoid;
-  }
-  
-  .page-break {
-    break-before: page;
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .name-title {
-    font-size: 1.5rem !important;
-  }
-  
-  .section-title {
-    font-size: 1.1rem !important;
-  }
-}
-
-/* Mobile first animations */
-@media (prefers-reduced-motion: no-preference) {
-  .mobile-slide-in {
-    animation: slideIn 0.3s ease-out;
-  }
-
-  .mobile-fade-in {
-    animation: fadeIn 0.2s ease-out;
-  }
-}
-
-/* Touch-friendly hover states */
-@media (hover: none) {
-  .hover\:bg-accent:hover {
-    @apply active:bg-accent/80;
-  }
-
-  .hover\:text-primary:hover {
-    @apply active:text-primary/80;
-  }
-}
-
-/* Mobile form validation improvements */
-@media (max-width: 640px) {
-  .form-error {
-    @apply text-xs mt-1;
-  }
-
-  .invalid-feedback {
-    @apply text-xs mt-1 text-destructive;
-  }
-}
-
-/* Responsive card grid */
-.card-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
-}
-
-/* Input transitions */
-.input-transition {
-  @apply transition-all duration-200 ease-in-out;
-}
-
-/* Shadow effects */
-.shadow-soft {
-  @apply shadow-md shadow-black/5 hover:shadow-lg hover:shadow-black/10 transition-shadow duration-300;
-}
-
-/* Responsive typography */
-@media (min-width: 768px) {
-  .text-responsive {
-    @apply text-base;
-  }
-}
-
-@media (max-width: 767px) {
-  .text-responsive {
-    @apply text-sm;
-  }
-}
-
-/* Button animations */
-.btn-animated {
-  @apply relative overflow-hidden transition-all duration-300;
-}
-
-.btn-animated::after {
-  @apply content-[''] absolute inset-0 bg-white/20 scale-x-0 origin-left transition-transform duration-300;
-}
-
-.btn-animated:hover::after {
-  @apply scale-x-100;
-}
-
-/* Loading states */
-.loading-skeleton {
-  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
-}
-
-/* Focus within form groups */
-.form-group:focus-within label {
-  @apply text-resume-primary transition-colors duration-200;
-}
-
-/* Enhanced tooltips */
-.enhanced-tooltip {
-  @apply invisible absolute z-10 w-max max-w-xs p-2 rounded bg-gray-900 text-white text-xs opacity-0 transition-all duration-300 group-hover:visible group-hover:opacity-100;
 }

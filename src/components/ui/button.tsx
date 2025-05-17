@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -19,13 +18,14 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        gradient: "bg-gradient-to-r from-resume-primary to-resume-secondary text-white hover:opacity-90",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
-        xl: "h-12 rounded-md px-10 text-base", // Add larger size for better touch targets
+        xl: "h-12 rounded-md px-10 text-base",
       },
     },
     defaultVariants: {
@@ -48,8 +48,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     // Auto-adjust size for better touch targets on mobile
     const mobileAdjustedSize = isMobile && size === "default" ? "lg" : 
-                               isMobile && size === "sm" ? "default" : 
-                               isMobile && size === "icon" ? "icon" : size;
+                              isMobile && size === "sm" ? "default" : 
+                              isMobile && size === "icon" ? "icon" : size;
     
     return (
       <Comp
@@ -60,7 +60,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           // Improved tap target size for mobile
           isMobile && size === "icon" && "h-12 w-12",
           // Add tap highlight color for mobile
-          isMobile && "tap-highlight-color-transparent"
+          isMobile && "tap-highlight-color-transparent",
+          // Add hover animation for desktop
+          !isMobile && "hover:scale-[1.02] transition-transform duration-200"
         )}
         ref={ref}
         // Enhanced mobile accessibility
