@@ -8,103 +8,35 @@ import type { TemplateType } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
 import { TemplatePreview } from '@/components/TemplatePreview';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Book, Info } from 'lucide-react';
+import { Info, Book } from 'lucide-react';
 
-// Template categories and descriptions
-const templateCategories = {
-  standard: {
-    title: "Standard Resume Formats",
-    description: "Widely accepted templates suitable for most industries and positions",
-    templates: [
-      { 
-        id: "chronological" as TemplateType, 
-        title: "Chronological", 
-        description: "Industry standard format that emphasizes your career path and work history in reverse order",
-        bestFor: "Professionals with steady career progression"
-      },
-      { 
-        id: "functional" as TemplateType, 
-        title: "Functional", 
-        description: "Highlights your skills and abilities rather than your work timeline",
-        bestFor: "Career changers or those with employment gaps"
-      },
-      { 
-        id: "combination" as TemplateType, 
-        title: "Combination", 
-        description: "Blends chronological and functional approaches for a comprehensive view",
-        bestFor: "Experienced professionals with diverse skillsets"
-      }
-    ]
+// Simplified templates
+const templates = [
+  { 
+    id: "professional" as TemplateType, 
+    title: "Professional", 
+    description: "Clean, traditional design perfect for corporate environments",
+    bestFor: "Business, finance, and traditional industries"
   },
-  design: {
-    title: "Design-Oriented Templates",
-    description: "Visually distinctive templates that make your resume stand out",
-    templates: [
-      { 
-        id: "modern" as TemplateType, 
-        title: "Modern", 
-        description: "Contemporary layout with creative touches and clean design",
-        bestFor: "Tech, design, and forward-thinking industries"
-      },
-      { 
-        id: "professional" as TemplateType, 
-        title: "Professional", 
-        description: "Clean, traditional design perfect for corporate environments",
-        bestFor: "Business, finance, and traditional industries"
-      },
-      { 
-        id: "minimal" as TemplateType, 
-        title: "Minimal", 
-        description: "Simple and elegant design that focuses on content clarity",
-        bestFor: "Any industry where simplicity is valued"
-      },
-      { 
-        id: "creative" as TemplateType, 
-        title: "Creative", 
-        description: "Bold, distinctive design that showcases personality",
-        bestFor: "Creative fields like design, marketing, or media"
-      }
-    ]
+  { 
+    id: "modern" as TemplateType, 
+    title: "Modern", 
+    description: "Contemporary layout with creative touches and clean design",
+    bestFor: "Tech, design, and forward-thinking industries"
   },
-  specialized: {
-    title: "Specialized Resume Formats",
-    description: "Templates designed for specific purposes or job search strategies",
-    templates: [
-      { 
-        id: "targeted" as TemplateType, 
-        title: "Targeted", 
-        description: "Customized format designed for specific jobs or companies",
-        bestFor: "Tailoring your resume to a particular role"
-      },
-      { 
-        id: "infographic" as TemplateType, 
-        title: "Infographic", 
-        description: "Visual representation of your qualifications and experience",
-        bestFor: "Creative positions where visualization skills matter"
-      },
-      { 
-        id: "profile" as TemplateType, 
-        title: "Profile", 
-        description: "Highlights your professional persona and personal brand",
-        bestFor: "Consultants, entrepreneurs, and thought leaders"
-      },
-      { 
-        id: "blind" as TemplateType, 
-        title: "Blind", 
-        description: "Format that minimizes personal identifiers to reduce bias",
-        bestFor: "Promoting equitable hiring practices"
-      },
-      { 
-        id: "mini" as TemplateType, 
-        title: "Mini Resume", 
-        description: "Compact format that fits essential information on a single page",
-        bestFor: "Networking events or brief introductions"
-      }
-    ]
+  { 
+    id: "creative" as TemplateType, 
+    title: "Creative", 
+    description: "Bold, distinctive design that showcases personality",
+    bestFor: "Creative fields like design, marketing, or media"
+  },
+  { 
+    id: "minimal" as TemplateType, 
+    title: "Minimal", 
+    description: "Simple and elegant design that focuses on content clarity",
+    bestFor: "Any industry where simplicity is valued"
   }
-};
+];
 
 const TemplateCard = ({ 
   title, 
@@ -169,38 +101,35 @@ const ResumeFormats = () => {
         <h3 className="text-xl font-semibold text-resume-primary">Understanding Resume Formats</h3>
       </div>
       <p className="mb-4 text-sm text-resume-muted">
-        Choosing the right resume format can significantly impact your job application success. Here's a quick guide to the most common formats:
+        Choosing the right resume format can significantly impact your job application success. Here's a quick guide to our available formats:
       </p>
       
       <div className="space-y-4 mb-4">
         <div>
-          <h4 className="font-medium mb-1">Chronological Resume</h4>
+          <h4 className="font-medium mb-1">Professional</h4>
           <p className="text-sm">
-            Lists work experience in reverse chronological order (most recent first). This is the current preferred standard 
-            and works best if you're showing career progression in the same field.
+            Clean, traditional design perfect for corporate environments. Emphasizes structure and clarity with a focus on work experience.
           </p>
         </div>
         
         <div>
-          <h4 className="font-medium mb-1">Functional Resume</h4>
+          <h4 className="font-medium mb-1">Modern</h4>
           <p className="text-sm">
-            Emphasizes skills and abilities rather than employment timeline. Good for career changers or addressing employment gaps.
+            Contemporary layout that balances creativity with professionalism. Ideal for tech, design, and forward-thinking industries.
           </p>
         </div>
         
         <div>
-          <h4 className="font-medium mb-1">Combination Resume</h4>
+          <h4 className="font-medium mb-1">Creative</h4>
           <p className="text-sm">
-            Blends chronological and functional approaches, opening with relevant skills followed by work history.
-            Ideal for highlighting specialized expertise while maintaining a clear career path.
+            Bold, distinctive design that showcases personality. Perfect for creative fields like design, marketing, or media.
           </p>
         </div>
         
         <div>
-          <h4 className="font-medium mb-1">ATS Considerations</h4>
+          <h4 className="font-medium mb-1">Minimal</h4>
           <p className="text-sm">
-            With 85% of employers using Applicant Tracking Systems (ATS), ensure your resume is machine-readable
-            by using standard fonts, avoiding graphics in key areas, and including relevant keywords for your industry.
+            Simple and elegant design that focuses on content clarity. Works well in any industry where simplicity and clarity are valued.
           </p>
         </div>
       </div>
@@ -209,8 +138,6 @@ const ResumeFormats = () => {
 };
 
 const TemplatesContent = () => {
-  const [activeTab, setActiveTab] = React.useState("standard");
-  
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm py-4 border-b border-gray-200" role="banner">
@@ -258,70 +185,22 @@ const TemplatesContent = () => {
           {/* Educational section about resume formats */}
           <ResumeFormats />
           
-          {/* Template navigation tabs */}
+          {/* Templates grid */}
           <div className="mb-8">
-            <Tabs 
-              defaultValue="standard" 
-              className="w-full"
-              onValueChange={value => setActiveTab(value)}
-            >
-              <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="standard">Standard Formats</TabsTrigger>
-                <TabsTrigger value="design">Design Templates</TabsTrigger>
-                <TabsTrigger value="specialized">Specialized</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="standard">
-                <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">{templateCategories.standard.title}</h3>
-                <p className="text-resume-muted mb-6">{templateCategories.standard.description}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {templateCategories.standard.templates.map(template => (
-                    <TemplateCard 
-                      key={template.id}
-                      title={template.title} 
-                      description={template.description} 
-                      bestFor={template.bestFor}
-                      template={template.id} 
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="design">
-                <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">{templateCategories.design.title}</h3>
-                <p className="text-resume-muted mb-6">{templateCategories.design.description}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {templateCategories.design.templates.map(template => (
-                    <TemplateCard 
-                      key={template.id}
-                      title={template.title} 
-                      description={template.description}
-                      bestFor={template.bestFor}
-                      template={template.id} 
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="specialized">
-                <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">{templateCategories.specialized.title}</h3>
-                <p className="text-resume-muted mb-6">{templateCategories.specialized.description}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {templateCategories.specialized.templates.map(template => (
-                    <TemplateCard 
-                      key={template.id}
-                      title={template.title} 
-                      description={template.description}
-                      bestFor={template.bestFor}
-                      template={template.id} 
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
+            <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6 text-resume-secondary">Our Resume Templates</h3>
+            <p className="text-resume-muted mb-6">Choose from our curated selection of professional templates designed to help you stand out.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+              {templates.map(template => (
+                <TemplateCard 
+                  key={template.id}
+                  title={template.title} 
+                  description={template.description} 
+                  bestFor={template.bestFor}
+                  template={template.id} 
+                />
+              ))}
+            </div>
           </div>
-          
-          <Separator className="my-8" />
           
           <div className="bg-white p-6 rounded-lg shadow-sm border">
             <h3 className="text-lg md:text-xl font-semibold mb-4 text-resume-primary">Need Help Choosing?</h3>

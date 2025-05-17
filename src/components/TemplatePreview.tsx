@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { TemplateType } from '@/context/ResumeContext';
 
@@ -9,11 +8,14 @@ interface TemplatePreviewProps {
 export const TemplatePreview = ({ template }: TemplatePreviewProps) => {
   const [imageError, setImageError] = useState(false);
   
-  // Map templates to their preview images
+  // Map templates to their preview images - simplified to only the 4 we're using
   const templateImages: Record<TemplateType, string> = {
     'professional': '/templates/professional.png',
     'modern': '/templates/modern.png',
     'minimal': '/templates/minimal.png',
+    'creative': '/templates/creative.png',
+    // Keep references to other templates to avoid TypeScript errors,
+    // but they won't be used in the UI
     'chronological': '/templates/chronological.png',
     'functional': '/templates/functional.png',
     'combination': '/templates/combination.png',
@@ -21,7 +23,6 @@ export const TemplatePreview = ({ template }: TemplatePreviewProps) => {
     'profile': '/templates/profile.png',
     'targeted': '/templates/targeted.png',
     'mini': '/templates/mini.png',
-    'creative': '/templates/creative.png',
     'blind': '/templates/blind.png'
   };
 
