@@ -137,11 +137,11 @@
 }
 
 .resume-form {
-  @apply max-w-3xl mx-auto p-6;
+  @apply max-w-3xl mx-auto px-4 sm:px-6 md:p-6;
 }
 
 .resume-preview {
-  @apply bg-white shadow-lg p-8 max-w-3xl mx-auto rounded-lg;
+  @apply bg-white shadow-lg p-4 sm:p-8 max-w-3xl mx-auto rounded-lg my-4 sm:my-0;
 }
 
 /* Enhanced animations */
@@ -218,7 +218,7 @@
   }
   
   .resume-preview {
-    @apply p-4;
+    @apply p-4 mx-4;
   }
 
   .resume-form {
@@ -249,10 +249,6 @@
   /* Better spacing for mobile */
   .section-container {
     @apply space-y-6 mb-8;
-  }
-
-  .resume-preview {
-    @apply p-4 mx-4 my-6;
   }
 
   /* Mobile typography */
@@ -299,15 +295,16 @@
 
   /* Mobile step indicator */
   .step-indicator {
-    @apply gap-3 py-4;
+    @apply gap-2 py-4 px-4;
   }
 
   .step-indicator-dot {
-    @apply w-2.5 h-2.5;
+    @apply w-2 h-2;
   }
+  
   /* Mobile hero section improvement */
   .hero-section {
-    @apply px-4 py-10 text-center;
+    @apply px-4 py-6 text-center;
   }
 
   .hero-heading {
@@ -321,14 +318,14 @@
     @apply outline-none;
   }
   
-  /* Mobile-friendly form layout */
-  .form-section {
-    @apply space-y-4;
-  }
-
   /* Better button touch targets */
   button {
-    @apply min-h-[46px] active:scale-95 transition-transform;
+    @apply min-h-[44px] active:scale-95 transition-transform;
+  }
+  
+  /* Mobile dialogues */
+  .dialog-content {
+    @apply p-4 mx-4;
   }
 }
 

@@ -124,7 +124,7 @@ export const PersonalInfoForm = () => {
       animate="visible"
       variants={formVariants}
       onSubmit={handleSubmit} 
-      className="space-y-6 animate-in fade-in-50 p-4 sm:p-0"
+      className="space-y-6 animate-in fade-in-50 px-4 sm:px-6 md:px-0 max-w-3xl mx-auto"
     >
       <div className="space-y-6">
         <motion.div variants={itemVariants} className="grid gap-5 sm:grid-cols-2">
@@ -254,8 +254,9 @@ export const PersonalInfoForm = () => {
         </Button>
       </motion.div>
 
+      {/* AI Dialog for professional summary generation */}
       <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-800 border-0 shadow-xl">
+        <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-800 border-0 shadow-xl mx-4 sm:mx-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-resume-primary dark:text-blue-400">
               <MessageSquare size={18} className="text-resume-primary dark:text-blue-400" />
@@ -289,18 +290,18 @@ export const PersonalInfoForm = () => {
             </div>
           </motion.div>
 
-          <DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-0 mt-2">
             <Button 
               variant="outline" 
               onClick={() => setIsAIDialogOpen(false)}
-              className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700 w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleNextQuestion}
               disabled={isGenerating}
-              className="bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white transition-all duration-300"
+              className="bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white transition-all duration-300 w-full sm:w-auto"
             >
               {currentQuestion < questions.length - 1 ? (
                 <>Next Question <ArrowRight size={16} className="ml-2" /></>

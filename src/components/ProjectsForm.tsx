@@ -91,10 +91,10 @@ export const ProjectsForm = () => {
       onNext={validateForm}
       nextDisabled={!resumeData.projects?.length}
     >
-      <div className="space-y-6">
+      <div className="space-y-6 px-4 sm:px-2 md:px-0">
         <ScrollArea className={cn(
           "rounded-lg border",
-          isMobile ? "h-[calc(100vh-280px)]" : "h-[600px]"
+          isMobile ? "h-[calc(100vh-300px)]" : "h-[600px]"
         )}>
           <div className="p-4 space-y-6">
             {(resumeData.projects || []).map((project, index) => (
@@ -112,17 +112,17 @@ export const ProjectsForm = () => {
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <GripVertical className="h-5 w-5 text-muted-foreground cursor-move" />
+                    <GripVertical className="h-5 w-5 text-muted-foreground cursor-move hidden sm:block" />
                     <h3 className="font-medium">Project {index + 1}</h3>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     {index > 0 && (
                       <TouchRipple className="rounded-full">
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => handleMoveProject(project.id, 'up')}
-                          className={cn(isMobile && "h-10 w-10")}
+                          className={cn(isMobile && "h-8 w-8")}
                         >
                           <MoveUp className="h-4 w-4" />
                         </Button>
@@ -134,7 +134,7 @@ export const ProjectsForm = () => {
                           size="icon"
                           variant="ghost"
                           onClick={() => handleMoveProject(project.id, 'down')}
-                          className={cn(isMobile && "h-10 w-10")}
+                          className={cn(isMobile && "h-8 w-8")}
                         >
                           <MoveDown className="h-4 w-4" />
                         </Button>
@@ -147,7 +147,7 @@ export const ProjectsForm = () => {
                         onClick={() => handleRemoveProject(project.id)}
                         className={cn(
                           "text-destructive hover:text-destructive/90",
-                          isMobile && "h-10 w-10"
+                          isMobile && "h-8 w-8"
                         )}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -200,7 +200,7 @@ export const ProjectsForm = () => {
                       id={`description-${project.id}`}
                       value={project.description}
                       onChange={(e) => handleUpdateProject(project.id, 'description', e.target.value)}
-                      className="min-h-[120px]"
+                      className="min-h-[100px]"
                       placeholder="Describe the project, your role, and key achievements..."
                       required
                     />
