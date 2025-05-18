@@ -33,7 +33,7 @@ const ResumeBuilder = () => {
   console.log("Current step:", currentStep);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50 overflow-y-auto">
       <h1 className="text-4xl font-bold text-center py-8">Resume Builder</h1>
       <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
       
@@ -80,7 +80,7 @@ const ResumeBuilder = () => {
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="bg-gray-50 dark:bg-gray-900 overflow-y-auto">
       <header className="bg-white dark:bg-gray-800 shadow-sm py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
