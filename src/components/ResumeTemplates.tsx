@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useResumeContext, TemplateType } from '@/context/ResumeContext';
 import { Card } from './ui/card';
@@ -100,7 +99,7 @@ export const ResumeTemplates = () => {
                 )}
                 onClick={() => setTemplate(t.id)}
               >
-                {/* Use TemplatePreview component for consistent image handling */}
+                {/* Use TemplatePreview component for consistent preview */}
                 <div className="relative aspect-[3/4] border-b">
                   <TemplatePreview template={t.id} />
                   
