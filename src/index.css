@@ -85,15 +85,24 @@
   /* Smooth scrolling for the whole page */
   html {
     scroll-behavior: smooth;
-    @apply antialiased;
+    @apply antialiased overflow-x-hidden;
+    height: 100%;
+    width: 100%;
   }
 
   body {
-    @apply bg-background text-foreground min-h-screen;
+    @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100%;
+    width: 100%;
+    position: relative;
+    touch-action: manipulation;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -207,18 +216,19 @@
       @apply flex-col space-y-4;
     }
 
-    /* Improved touch targets */
+    /* Improved touch targets for better mobile experience */
     button, 
     .button,
-    input,
-    select,
-    textarea {
-      @apply min-h-[44px];
+    input[type="button"],
+    input[type="submit"] {
+      @apply min-h-[44px] touch-callout-none;
+      touch-action: manipulation;
     }
 
-    /* Better spacing for mobile */
-    .section-container {
-      @apply space-y-6 mb-8;
+    /* Ensure content is scrollable on mobile */
+    .content-container {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Mobile typography */
@@ -297,6 +307,23 @@
       margin: 0;
       box-shadow: none;
       border: none;
+    }
+  }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 768px) {
+    .mobile-scrollable {
+      -webkit-overflow-scrolling: touch;
+      overflow-y: auto;
+      height: auto;
+    }
+    
+    .touch-scroll {
+      touch-action: pan-y;
+    }
+
+    .prevent-overflow {
+      overflow-x: hidden;
     }
   }
 }

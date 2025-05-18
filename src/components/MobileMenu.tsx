@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -17,7 +18,7 @@ export const MobileMenu = () => {
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0">
+      <SheetContent side="left" className="w-[80%] sm:w-[70%] md:w-[60%] p-0">
         <SheetHeader className="p-6 border-b">
           <SheetTitle className="text-xl font-semibold bg-gradient-to-r from-resume-primary to-resume-secondary text-transparent bg-clip-text">JR Resume Builder</SheetTitle>
         </SheetHeader>
