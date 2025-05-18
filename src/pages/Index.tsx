@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { ProjectsForm } from '@/components/ProjectsForm';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Wrap the content that uses useResumeContext in a component
 const ResumeBuilder = () => {
@@ -34,7 +33,7 @@ const ResumeBuilder = () => {
   console.log("Current step:", currentStep);
 
   return (
-    <div className="flex-1 bg-gray-50 mobile-scrollable">
+    <div className="min-h-screen bg-gray-50">
       <h1 className="text-4xl font-bold text-center py-8">Resume Builder</h1>
       <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
       
@@ -58,19 +57,19 @@ const ResumeBuilder = () => {
       
       {/* Step 7: Final Preview */}
       {currentStep === 7 && (
-        <Tabs defaultValue="preview" className="max-w-4xl mx-auto px-4">
+        <Tabs defaultValue="preview" className="max-w-4xl mx-auto">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="preview">Resume Preview</TabsTrigger>
             <TabsTrigger value="templates">Change Template</TabsTrigger>
             <TabsTrigger value="check">Resume Check</TabsTrigger>
           </TabsList>
-          <TabsContent value="preview" className="mobile-scrollable">
+          <TabsContent value="preview">
             <ResumePreview />
           </TabsContent>
-          <TabsContent value="templates" className="mobile-scrollable">
+          <TabsContent value="templates">
             <ResumeTemplates />
           </TabsContent>
-          <TabsContent value="check" className="mobile-scrollable">
+          <TabsContent value="check">
             <ResumeChecker resumeData={resumeData} />
           </TabsContent>
         </Tabs>
@@ -81,7 +80,7 @@ const ResumeBuilder = () => {
 
 const Index = () => {
   return (
-    <div className="flex flex-col min-h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow-sm py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -116,13 +115,10 @@ const Index = () => {
         </div>
       </header>
       
-      {/* Main content area with proper scrolling */}
-      <main className="flex-1 mobile-scrollable">
-        {/* Ensure ResumeBuilder is always inside ResumeProvider */}
-        <ResumeProvider>
-          <ResumeBuilder />
-        </ResumeProvider>
-      </main>
+      {/* Ensure ResumeBuilder is always inside ResumeProvider */}
+      <ResumeProvider>
+        <ResumeBuilder />
+      </ResumeProvider>
       
       <Footer />
     </div>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -32,19 +31,21 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <FontLoader />
-            <div className="min-h-screen bg-background flex flex-col overflow-hidden">
-              <Toaster />
-              <Sonner position="top-right" />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/templates" element={<ResumeTemplatesPage />} />
-                  <Route path="/cover-letter-guide" element={<CoverLetterGuide />} />
-                  <Route path="/job-search-tips" element={<JobSearchTips />} />
-                  <Route path="/interview-preparation" element={<InterviewPreparation />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
+            <div className="min-h-screen bg-background">
+              <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+                <Toaster />
+                <Sonner position="top-right" />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/templates" element={<ResumeTemplatesPage />} />
+                    <Route path="/cover-letter-guide" element={<CoverLetterGuide />} />
+                    <Route path="/job-search-tips" element={<JobSearchTips />} />
+                    <Route path="/interview-preparation" element={<InterviewPreparation />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </div>
             </div>
           </TooltipProvider>
         </QueryClientProvider>
