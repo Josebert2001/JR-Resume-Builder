@@ -5,7 +5,7 @@ import { Facebook, Instagram, Twitter } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-800 py-8 px-6 md:px-20 text-gray-700 dark:text-gray-300">
+    <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-800 py-8 px-6 md:px-20 text-gray-700 dark:text-gray-300 mt-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         
         {/* Logo & Tagline */}
