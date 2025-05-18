@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -32,7 +31,7 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <FontLoader />
-            <div className="bg-background overflow-x-hidden">
+            <div className="min-h-screen bg-background">
               <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                 <Toaster />
                 <Sonner position="top-right" />

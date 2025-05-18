@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { useSwipeNavigation } from '@/hooks/use-swipe-navigation';
@@ -68,7 +67,7 @@ export const FormWrapper = ({
 
   return (
     <div 
-      className="flex flex-col animate-in fade-in-50 overflow-y-visible"
+      className="min-h-[calc(100vh-4rem)] flex flex-col animate-in fade-in-50"
       {...touchHandlers}
       onMouseEnter={handleSwipeHint}
     >
@@ -79,13 +78,13 @@ export const FormWrapper = ({
         </p>
       </div>
 
-      <div className="flex-grow overflow-y-visible">
+      <div className="flex-grow">
         {children}
       </div>
 
       <div className={cn(
         "mt-6",
-        isMobile && "pt-4 pb-6 bg-background/80 backdrop-blur-sm border-t"
+        isMobile && "sticky bottom-0 pt-4 pb-6 bg-background/80 backdrop-blur-sm border-t"
       )}>
         <div className={cn(
           "flex gap-2",
