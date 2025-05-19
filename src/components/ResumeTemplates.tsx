@@ -4,7 +4,6 @@ import { Card } from './ui/card';
 import { Check, Info } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { TemplatePreview } from './TemplatePreview';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
@@ -43,7 +42,7 @@ const templates = [
 ];
 
 export const ResumeTemplates = () => {
-  const { template, setTemplate } = useResumeContext();
+  const { template, setTemplate, nextStep } = useResumeContext();
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = useState(0);
   
@@ -62,11 +61,17 @@ export const ResumeTemplates = () => {
     }
   };
 
+  const handleContinue = () => {
+    if (template) {
+      nextStep();
+    }
+  };
+
   return (
     <FormWrapper
       title="Choose a Template"
       description="Select a template that best represents your professional style"
-      nextDisabled={!template}
+      nextDisabled={true}
       showBackButton={false}
     >
       <div className="mb-6">
@@ -99,11 +104,9 @@ export const ResumeTemplates = () => {
               )}
               onClick={() => setTemplate(t.id)}
             >
-              {/* Use TemplatePreview component for consistent preview */}
               <div className="relative aspect-[3/4] border-b">
                 <TemplatePreview template={t.id} />
                 
-                {/* ATS Compatible Badge */}
                 <div className="absolute top-2 right-2 z-10">
                   <TooltipProvider>
                     <Tooltip>
@@ -127,7 +130,6 @@ export const ResumeTemplates = () => {
                   </TooltipProvider>
                 </div>
                 
-                {/* Selected indicator */}
                 {template === t.id && (
                   <div className="absolute inset-0 bg-resume-primary/10 flex items-center justify-center">
                     <div className="bg-resume-primary text-white rounded-full p-2">
@@ -137,7 +139,6 @@ export const ResumeTemplates = () => {
                 )}
               </div>
 
-              {/* Template Info */}
               <div className="p-4">
                 <h3 className="font-medium text-lg mb-1">{t.name}</h3>
                 <p className="text-sm text-muted-foreground">{t.description}</p>
@@ -146,13 +147,24 @@ export const ResumeTemplates = () => {
           ))}
         </div>
 
-        {/* Next Templates Button */}
-        <div className="mt-6 flex justify-center">
+        {/* Navigation Buttons */}
+        <div className="mt-6 flex flex-col gap-4 items-center">
+          {templates.length > templatesPerView && (
+            <Button
+              onClick={handleNextTemplates}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              Browse More Templates
+            </Button>
+          )}
+          
           <Button
-            onClick={handleNextTemplates}
-            className="bg-resume-primary hover:bg-resume-secondary text-white px-8 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+            onClick={handleContinue}
+            disabled={!template}
+            className="w-full sm:w-auto bg-resume-primary hover:bg-resume-secondary text-white"
           >
-            Next Templates
+            Continue with Selected Template
           </Button>
         </div>
         
@@ -174,7 +186,6 @@ export const ResumeTemplates = () => {
         )}
       </div>
 
-      {/* Format information section */}
       <div className="mt-8 p-4 bg-gray-50 rounded-lg border">
         <h3 className="font-medium mb-2">About Resume Templates</h3>
         <p className="text-sm text-muted-foreground">
