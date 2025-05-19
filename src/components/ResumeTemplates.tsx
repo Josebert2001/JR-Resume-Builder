@@ -8,6 +8,7 @@ import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { TemplatePreview } from './TemplatePreview';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Button } from './ui/button';
 
 // Simplified templates - only 4 main templates
 const templates = [
@@ -53,6 +54,14 @@ export const ResumeTemplates = () => {
     activeIndex + templatesPerView
   );
 
+  const handleNextTemplates = () => {
+    if (activeIndex < templates.length - templatesPerView) {
+      setActiveIndex(prev => prev + 1);
+    } else {
+      setActiveIndex(0); // Loop back to start
+    }
+  };
+
   return (
     <FormWrapper
       title="Choose a Template"
@@ -70,82 +79,82 @@ export const ResumeTemplates = () => {
       {isMobile && (
         <div className="flex justify-center items-center mb-4">
           <span className="text-sm text-muted-foreground">
-            Swipe to browse templates ({activeIndex + 1}/{templates.length})
+            Template {activeIndex + 1} of {templates.length}
           </span>
         </div>
       )}
       
       <div className="relative">
-        <TouchRipple
-          className="rounded-lg overflow-hidden"
-          onSwipeLeft={activeIndex < templates.length - templatesPerView ? 
-            () => setActiveIndex(prev => Math.min(prev + 1, templates.length - templatesPerView)) : 
-            undefined}
-          onSwipeRight={activeIndex > 0 ? 
-            () => setActiveIndex(prev => Math.max(prev - 1, 0)) : 
-            undefined}
-        >
-          <div className={cn(
-            "grid grid-cols-1 sm:grid-cols-2 gap-6 transition-all duration-300",
-            isMobile && "px-4"
-          )}>
-            {visibleTemplates.map((t) => (
-              <Card
-                key={t.id}
-                className={cn(
-                  "relative overflow-hidden transition-all duration-200 cursor-pointer h-full",
-                  template === t.id && "ring-2 ring-resume-primary",
-                  isMobile ? "active:scale-[0.98]" : "hover:shadow-lg",
-                )}
-                onClick={() => setTemplate(t.id)}
-              >
-                {/* Use TemplatePreview component for consistent preview */}
-                <div className="relative aspect-[3/4] border-b">
-                  <TemplatePreview template={t.id} />
-                  
-                  {/* ATS Compatible Badge */}
-                  <div className="absolute top-2 right-2 z-10">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className={cn(
-                            "px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1",
-                            t.atsCompatible 
-                              ? "bg-green-100 text-green-800" 
-                              : "bg-yellow-100 text-yellow-800"
-                          )}>
-                            <Info className="h-3 w-3" />
-                            {t.atsCompatible ? "ATS Friendly" : "Design Focused"}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {t.atsCompatible 
-                            ? "This template is optimized for Applicant Tracking Systems" 
-                            : "This creative template may not be ideal for all ATS systems"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  
-                  {/* Selected indicator */}
-                  {template === t.id && (
-                    <div className="absolute inset-0 bg-resume-primary/10 flex items-center justify-center">
-                      <div className="bg-resume-primary text-white rounded-full p-2">
-                        <Check className="h-6 w-6" />
-                      </div>
+        <div className={cn(
+          "grid grid-cols-1 sm:grid-cols-2 gap-6 transition-all duration-300",
+          isMobile && "px-4"
+        )}>
+          {visibleTemplates.map((t) => (
+            <Card
+              key={t.id}
+              className={cn(
+                "relative overflow-hidden transition-all duration-200 cursor-pointer h-full",
+                template === t.id && "ring-2 ring-resume-primary",
+                isMobile ? "active:scale-[0.98]" : "hover:shadow-lg",
+              )}
+              onClick={() => setTemplate(t.id)}
+            >
+              {/* Use TemplatePreview component for consistent preview */}
+              <div className="relative aspect-[3/4] border-b">
+                <TemplatePreview template={t.id} />
+                
+                {/* ATS Compatible Badge */}
+                <div className="absolute top-2 right-2 z-10">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className={cn(
+                          "px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1",
+                          t.atsCompatible 
+                            ? "bg-green-100 text-green-800" 
+                            : "bg-yellow-100 text-yellow-800"
+                        )}>
+                          <Info className="h-3 w-3" />
+                          {t.atsCompatible ? "ATS Friendly" : "Design Focused"}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t.atsCompatible 
+                          ? "This template is optimized for Applicant Tracking Systems" 
+                          : "This creative template may not be ideal for all ATS systems"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                
+                {/* Selected indicator */}
+                {template === t.id && (
+                  <div className="absolute inset-0 bg-resume-primary/10 flex items-center justify-center">
+                    <div className="bg-resume-primary text-white rounded-full p-2">
+                      <Check className="h-6 w-6" />
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Template Info */}
-                <div className="p-4">
-                  <h3 className="font-medium text-lg mb-1">{t.name}</h3>
-                  <p className="text-sm text-muted-foreground">{t.description}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </TouchRipple>
+              {/* Template Info */}
+              <div className="p-4">
+                <h3 className="font-medium text-lg mb-1">{t.name}</h3>
+                <p className="text-sm text-muted-foreground">{t.description}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* Next Templates Button */}
+        <div className="mt-6 flex justify-center">
+          <Button
+            onClick={handleNextTemplates}
+            className="bg-resume-primary hover:bg-resume-secondary text-white px-8 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+          >
+            Next Templates
+          </Button>
+        </div>
         
         {/* Template pagination indicators for mobile */}
         {isMobile && (
