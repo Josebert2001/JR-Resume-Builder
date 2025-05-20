@@ -5,12 +5,16 @@ import { useSwipeNavigation } from '@/hooks/use-swipe-navigation';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { SkipForward } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FormWrapperProps {
   children: React.ReactNode;
   onNext?: () => boolean | void;
   onBack?: () => void;
+  onSkip?: () => void;
   showBackButton?: boolean;
+  showSkip?: boolean;
   nextDisabled?: boolean;
   title: string;
   description: string;
@@ -20,7 +24,9 @@ export const FormWrapper = ({
   children,
   onNext,
   onBack,
+  onSkip,
   showBackButton = true,
+  showSkip = false,
   nextDisabled = false,
   title,
   description
@@ -44,6 +50,14 @@ export const FormWrapper = ({
       onBack();
     }
     setCurrentStep(currentStep - 1);
+  };
+
+  const handleSkip = () => {
+    if (onSkip) {
+      onSkip();
+    } else {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const { touchHandlers } = useSwipeNavigation({
@@ -89,35 +103,52 @@ export const FormWrapper = ({
       )}>
         <div className={cn(
           "flex gap-2",
-          isMobile ? "flex-col" : "justify-between"
+          isMobile ? "flex-col" : "items-center"
         )}>
-          {showBackButton && (
-            <button
+          <div className={cn(
+            "flex gap-2",
+            isMobile ? "flex-col w-full" : "flex-1"
+          )}>
+            {showBackButton && (
+              <Button
+                type="button"
+                onClick={handleBack}
+                variant="outline"
+                className={cn(
+                  isMobile && "order-2 h-12 w-full"
+                )}
+              >
+                Previous Step
+              </Button>
+            )}
+            <Button
               type="button"
-              onClick={handleBack}
+              onClick={handleNext}
+              disabled={nextDisabled}
+              variant="gradient"
               className={cn(
-                "px-4 h-10 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-colors",
-                "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                isMobile && "order-2 h-12"
+                isMobile && "order-1 h-12 w-full",
+                !showBackButton && !showSkip && "w-full"
               )}
             >
-              Previous Step
-            </button>
+              Next Step
+            </Button>
+          </div>
+
+          {showSkip && (
+            <Button
+              type="button"
+              onClick={handleSkip}
+              variant="ghost"
+              className={cn(
+                "flex items-center gap-1",
+                isMobile && "order-3 h-12"
+              )}
+            >
+              <span>Skip this section</span>
+              <SkipForward className="h-4 w-4" />
+            </Button>
           )}
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={nextDisabled}
-            className={cn(
-              "px-4 h-10 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-colors",
-              "bg-resume-primary text-white hover:bg-resume-secondary",
-              "disabled:opacity-50 disabled:pointer-events-none",
-              isMobile && "order-1 h-12",
-              !showBackButton && "w-full"
-            )}
-          >
-            Next Step
-          </button>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Link2 } from 'lucide-react';
+import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Link2, SkipForward } from 'lucide-react';
 import { useResumeContext, Project } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,7 @@ import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
 
 export const ProjectsForm = () => {
-  const { resumeData, updateResumeData } = useResumeContext();
+  const { resumeData, updateResumeData, nextStep } = useResumeContext();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
@@ -66,6 +66,11 @@ export const ProjectsForm = () => {
     }
   };
 
+  const handleSkip = () => {
+    toast.info('Projects section skipped');
+    nextStep();
+  };
+
   const validateForm = () => {
     if (!resumeData.projects?.length) {
       return false;
@@ -90,6 +95,8 @@ export const ProjectsForm = () => {
       description="Add your notable projects and achievements"
       onNext={validateForm}
       nextDisabled={!resumeData.projects?.length}
+      showSkip={true}
+      onSkip={handleSkip}
     >
       <div className="space-y-6 px-4 sm:px-2 md:px-0">
         <ScrollArea className={cn(
