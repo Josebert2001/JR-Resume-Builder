@@ -1,32 +1,16 @@
-
 import { Groq } from "groq-sdk";
 
-const apiKey = import.meta.env.VITE_GROQ_API_KEY || '';
-
 const groq = new Groq({
-  apiKey,
+  apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
   dangerouslyAllowBrowser: true
 });
-
-const isValidApiKey = () => {
-  return apiKey && apiKey.length > 0 && !apiKey.startsWith('sk_');
-};
-
-const checkApiKey = () => {
-  if (!isValidApiKey()) {
-    throw new Error('Missing or invalid Groq API key. Please set a valid VITE_GROQ_API_KEY in your environment variables.');
-  }
-};
 
 export const generateEducationDescription = async (
   degree: string,
   fieldOfStudy: string,
   school: string
 ): Promise<string> => {
-  try {
-    checkApiKey();
-    
-    const prompt = `Generate a concise, professional description for an education entry with:
+  const prompt = `Generate a concise, professional description for an education entry with:
 Degree: ${degree}
 Field of Study: ${fieldOfStudy}
 School: ${school}
@@ -39,6 +23,7 @@ Focus on:
 
 Keep it to 2-3 sentences maximum.`;
 
+  try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "llama3-8b-8192",
@@ -49,10 +34,7 @@ Keep it to 2-3 sentences maximum.`;
     return completion.choices[0]?.message?.content || '';
   } catch (error) {
     console.error('Error generating education description:', error);
-    if (error instanceof Error && error.message.includes('API key')) {
-      throw new Error('API key issue: Please check your Groq API key configuration.');
-    }
-    throw error;
+    return '';
   }
 };
 
@@ -61,10 +43,7 @@ export const generateWorkDescription = async (
   company: string,
   industry?: string
 ): Promise<string> => {
-  try {
-    checkApiKey();
-    
-    const prompt = `Generate a professional work experience description for:
+  const prompt = `Generate a professional work experience description for:
 Position: ${position}
 Company: ${company}
 ${industry ? `Industry: ${industry}` : ''}
@@ -78,6 +57,7 @@ Include:
 
 Format each point starting with "• " and separate with newlines.`;
 
+  try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "llama3-8b-8192",
@@ -88,10 +68,7 @@ Format each point starting with "• " and separate with newlines.`;
     return completion.choices[0]?.message?.content || '';
   } catch (error) {
     console.error('Error generating work description:', error);
-    if (error instanceof Error && error.message.includes('API key')) {
-      throw new Error('API key issue: Please check your Groq API key configuration.');
-    }
-    throw error;
+    return '';
   }
 };
 
@@ -99,10 +76,7 @@ export const suggestSkills = async (
   position: string,
   experience: string[]
 ): Promise<string[]> => {
-  try {
-    checkApiKey();
-    
-    const prompt = `Suggest relevant professional skills for:
+  const prompt = `Suggest relevant professional skills for:
 Position: ${position}
 Experience: ${experience.join(', ')}
 
@@ -115,6 +89,7 @@ Include:
 
 Return only a JSON array of skills, nothing else.`;
 
+  try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "llama3-8b-8192",
@@ -126,9 +101,6 @@ Return only a JSON array of skills, nothing else.`;
     return JSON.parse(content);
   } catch (error) {
     console.error('Error suggesting skills:', error);
-    if (error instanceof Error && error.message.includes('API key')) {
-      throw new Error('API key issue: Please check your Groq API key configuration.');
-    }
     return [];
   }
 };
@@ -142,10 +114,7 @@ export const analyzeResume = async (
   missedKeywords: string[];
   suggestions: string[];
 }> => {
-  try {
-    checkApiKey();
-    
-    const prompt = `Analyze this resume against the following job description:
+  const prompt = `Analyze this resume against the following job description:
 
 RESUME:
 ${resumeText}
@@ -169,6 +138,7 @@ Return the analysis as a JSON object with the following format:
 
 Be thorough but concise. The score should reflect the overall match quality.`;
 
+  try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "llama3-8b-8192",
@@ -198,14 +168,6 @@ Be thorough but concise. The score should reflect the overall match quality.`;
     }
   } catch (error) {
     console.error('Error analyzing resume:', error);
-    if (error instanceof Error && error.message.includes('API key')) {
-      return {
-        score: 0,
-        matchedKeywords: [],
-        missedKeywords: [],
-        suggestions: ['API key configuration issue: Please check your Groq API key.']
-      };
-    }
     return {
       score: 0,
       matchedKeywords: [],

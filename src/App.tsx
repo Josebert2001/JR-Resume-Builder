@@ -15,15 +15,6 @@ import InterviewPreparation from "./pages/InterviewPreparation";
 import FontLoader from "./components/FontLoader";
 import { ResumeProvider } from "@/context/ResumeContext";
 
-// Check for API key and show warning in development
-const isDevEnvironment = import.meta.env.DEV;
-const hasGroqApiKey = import.meta.env.VITE_GROQ_API_KEY;
-
-if (isDevEnvironment && !hasGroqApiKey) {
-  console.warn('⚠️ VITE_GROQ_API_KEY environment variable is not set. AI features will not work properly.');
-  console.info('💡 To enable AI features, please set a valid Groq API key in your .env file.');
-}
-
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {

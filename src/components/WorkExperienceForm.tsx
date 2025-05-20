@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -5,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Sparkles, Loader2 } from 'lucide-react';
 import { useResumeContext, WorkExperience } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -18,7 +19,6 @@ export const WorkExperienceForm = () => {
   const { resumeData, updateResumeData } = useResumeContext();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
-  const [apiKeyError, setApiKeyError] = useState<boolean>(false);
   const isMobile = useIsMobile();
 
   const handleAddExperience = () => {
@@ -78,8 +78,6 @@ export const WorkExperienceForm = () => {
     }
 
     setGeneratingId(id);
-    setApiKeyError(false);
-    
     try {
       const description = await generateWorkDescription(
         exp.position,
@@ -94,15 +92,7 @@ export const WorkExperienceForm = () => {
       }
     } catch (error) {
       console.error('Error generating work description:', error);
-      
-      if (error instanceof Error && error.message.includes('API key')) {
-        setApiKeyError(true);
-        toast.error('API key missing or invalid. Please check your configuration.', {
-          duration: 5000,
-        });
-      } else {
-        toast.error('Failed to generate description. Please try again.');
-      }
+      toast.error('Failed to generate description. Please try again.');
     } finally {
       setGeneratingId(null);
     }
@@ -135,21 +125,6 @@ export const WorkExperienceForm = () => {
       onNext={validateForm}
       nextDisabled={!resumeData.workExperience?.length}
     >
-      {apiKeyError && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <AlertCircle className="h-5 w-5 text-yellow-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                <strong>API Key Required:</strong> To use AI features, please set the VITE_GROQ_API_KEY environment variable with a valid Groq API key.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <div className="space-y-6">
         <ScrollArea className={cn(
           "rounded-lg border",
