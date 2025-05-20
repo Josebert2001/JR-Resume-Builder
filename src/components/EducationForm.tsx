@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ArrowLeft, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ export const EducationForm = () => {
   const { education, updateEducation, nextStep, prevStep } = useResumeContext();
   const isMobile = useIsMobile();
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [apiKeyError, setApiKeyError] = useState<boolean>(false);
 
   const handleAddEducation = () => {
     updateEducation([
@@ -56,6 +57,8 @@ export const EducationForm = () => {
     }
 
     setGeneratingId(id);
+    setApiKeyError(false);
+    
     try {
       const description = await generateEducationDescription(
         edu.degree,
@@ -71,7 +74,15 @@ export const EducationForm = () => {
       }
     } catch (error) {
       console.error('Error generating education description:', error);
-      toast.error('Failed to generate description. Please try again.');
+      
+      if (error instanceof Error && error.message.includes('API key')) {
+        setApiKeyError(true);
+        toast.error('API key missing or invalid. Please check your configuration.', {
+          duration: 5000,
+        });
+      } else {
+        toast.error('Failed to generate description. Please try again.');
+      }
     } finally {
       setGeneratingId(null);
     }
@@ -79,6 +90,21 @@ export const EducationForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-50">
+      {apiKeyError && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-5 w-5 text-yellow-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <strong>API Key Required:</strong> To use AI features, please set the VITE_GROQ_API_KEY environment variable with a valid Groq API key.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6">
         {education.map((edu, index) => (
           <div 
