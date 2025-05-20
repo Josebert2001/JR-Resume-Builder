@@ -104,3 +104,75 @@ Return only a JSON array of skills, nothing else.`;
     return [];
   }
 };
+
+export const analyzeResume = async (
+  resumeText: string,
+  jobDescription: string
+): Promise<{
+  score: number;
+  matchedKeywords: string[];
+  missedKeywords: string[];
+  suggestions: string[];
+}> => {
+  const prompt = `Analyze this resume against the following job description:
+
+RESUME:
+${resumeText}
+
+JOB DESCRIPTION:
+${jobDescription}
+
+Provide a detailed analysis with the following components:
+1. A match score as a percentage (0-100%) representing how well the resume matches the job requirements.
+2. A list of keywords from the job description that are present in the resume.
+3. A list of important keywords from the job description that are missing from the resume.
+4. Specific suggestions for improving the resume to better match this job description.
+
+Return the analysis as a JSON object with the following format:
+{
+  "score": number,
+  "matchedKeywords": string[],
+  "missedKeywords": string[],
+  "suggestions": string[]
+}
+
+Be thorough but concise. The score should reflect the overall match quality.`;
+
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama3-8b-8192",
+      temperature: 0.7,
+      max_tokens: 1000,
+      response_format: { type: "json_object" }
+    });
+
+    const content = completion.choices[0]?.message?.content || '{"score": 0, "matchedKeywords": [], "missedKeywords": [], "suggestions": []}';
+    
+    try {
+      const result = JSON.parse(content);
+      return {
+        score: result.score || 0,
+        matchedKeywords: result.matchedKeywords || [],
+        missedKeywords: result.missedKeywords || [],
+        suggestions: result.suggestions || []
+      };
+    } catch (parseError) {
+      console.error('Error parsing AI response:', parseError);
+      return {
+        score: 0,
+        matchedKeywords: [],
+        missedKeywords: [],
+        suggestions: ['Failed to parse AI analysis.']
+      };
+    }
+  } catch (error) {
+    console.error('Error analyzing resume:', error);
+    return {
+      score: 0,
+      matchedKeywords: [],
+      missedKeywords: [],
+      suggestions: ['Failed to complete AI analysis.']
+    };
+  }
+};
