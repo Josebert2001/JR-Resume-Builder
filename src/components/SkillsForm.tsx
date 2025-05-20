@@ -2,13 +2,23 @@ import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GripVertical, Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
+import { GripVertical, Plus, Trash2, MoveUp, MoveDown, Sparkles, Loader2, CheckCircle2 } from 'lucide-react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
+import { suggestSkills } from '@/services/resumeAI';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Skill {
   id: string;
@@ -19,6 +29,10 @@ interface Skill {
 export const SkillsForm = () => {
   const { resumeData, updateResumeData } = useResumeContext();
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<Record<string, boolean>>({});
+  const [suggestDialogOpen, setSuggestDialogOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const handleAddSkill = () => {
@@ -81,6 +95,93 @@ export const SkillsForm = () => {
     return true;
   };
 
+  const handleSuggestSkills = async () => {
+    // Check if we have at least one work experience
+    if (!resumeData.workExperience?.length) {
+      toast.error('Please add at least one work experience to get skill suggestions');
+      return;
+    }
+
+    setIsSuggesting(true);
+    
+    try {
+      // Get the most recent position
+      const recentPosition = resumeData.workExperience[0].position;
+      
+      // Get all experience descriptions
+      const experienceDescriptions = resumeData.workExperience.map(exp => 
+        `${exp.position} at ${exp.company}: ${exp.description || ''}`
+      );
+      
+      // Existing skills to avoid duplicates
+      const existingSkills = new Set(resumeData.skills?.map(s => s.name.toLowerCase()));
+      
+      // Get AI suggested skills
+      const suggestions = await suggestSkills(recentPosition, experienceDescriptions);
+      
+      // Filter out skills that already exist
+      const filteredSuggestions = suggestions.filter(
+        skill => !existingSkills.has(skill.toLowerCase())
+      );
+      
+      if (filteredSuggestions.length === 0) {
+        toast.info('No new skills to suggest. Try adding more details to your work experience.');
+        return;
+      }
+      
+      // Set the suggested skills and open the dialog
+      setSuggestedSkills(filteredSuggestions);
+      
+      // Initialize selected skills object to all true
+      const initialSelected: Record<string, boolean> = {};
+      filteredSuggestions.forEach(skill => {
+        initialSelected[skill] = true;
+      });
+      setSelectedSkills(initialSelected);
+      
+      // Open the dialog
+      setSuggestDialogOpen(true);
+      
+    } catch (error) {
+      console.error('Error suggesting skills:', error);
+      toast.error('Failed to suggest skills. Please try again.');
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
+
+  const handleToggleSkill = (skill: string) => {
+    setSelectedSkills({
+      ...selectedSkills,
+      [skill]: !selectedSkills[skill]
+    });
+  };
+
+  const handleAddSelectedSkills = () => {
+    // Get the selected skills
+    const skillsToAdd = suggestedSkills.filter(skill => selectedSkills[skill]);
+    
+    if (skillsToAdd.length === 0) {
+      setSuggestDialogOpen(false);
+      return;
+    }
+    
+    // Add the selected skills to the resume
+    const newSkills = skillsToAdd.map(name => ({
+      id: `ai-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name,
+      level: 3 // Default level
+    }));
+    
+    updateResumeData({
+      skills: [...(resumeData.skills || []), ...newSkills]
+    });
+    
+    // Close the dialog and show success message
+    setSuggestDialogOpen(false);
+    toast.success(`Added ${skillsToAdd.length} new skills to your resume`);
+  };
+
   return (
     <FormWrapper
       title="Skills"
@@ -89,6 +190,28 @@ export const SkillsForm = () => {
       nextDisabled={!resumeData.skills?.length}
     >
       <div className="space-y-6">
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSuggestSkills}
+            disabled={isSuggesting || !(resumeData.workExperience?.length)}
+            className="mb-4"
+          >
+            {isSuggesting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Suggesting...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Suggest Skills with AI
+              </>
+            )}
+          </Button>
+        </div>
+
         <div className={cn(
           "space-y-4 rounded-lg border p-4",
           isMobile ? "max-h-[calc(100vh-280px)] overflow-y-auto" : "max-h-[600px] overflow-y-auto"
@@ -196,6 +319,47 @@ export const SkillsForm = () => {
           </Button>
         </TouchRipple>
       </div>
+
+      <Dialog open={suggestDialogOpen} onOpenChange={setSuggestDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Suggested Skills</DialogTitle>
+            <DialogDescription>
+              These skills are suggested based on your work experience. Select the ones you want to add to your resume.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+              {suggestedSkills.map((skill) => (
+                <div key={skill} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`skill-${skill}`} 
+                    checked={selectedSkills[skill]}
+                    onCheckedChange={() => handleToggleSkill(skill)}
+                  />
+                  <label
+                    htmlFor={`skill-${skill}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {skill}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSuggestDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddSelectedSkills}>
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Add Selected Skills
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </FormWrapper>
   );
 };

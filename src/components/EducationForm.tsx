@@ -1,16 +1,20 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { generateEducationDescription } from '@/services/resumeAI';
+import { toast } from 'sonner';
 
 export const EducationForm = () => {
   const { education, updateEducation, nextStep, prevStep } = useResumeContext();
   const isMobile = useIsMobile();
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
 
   const handleAddEducation = () => {
     updateEducation([
@@ -42,6 +46,35 @@ export const EducationForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     nextStep();
+  };
+
+  const handleGenerateDescription = async (id: string) => {
+    const edu = education.find(e => e.id === id);
+    if (!edu || !edu.school || !edu.degree || !edu.fieldOfStudy) {
+      toast.error('Please fill in school, degree, and field of study first');
+      return;
+    }
+
+    setGeneratingId(id);
+    try {
+      const description = await generateEducationDescription(
+        edu.degree,
+        edu.fieldOfStudy,
+        edu.school
+      );
+      
+      if (description) {
+        handleEducationChange(id, 'description', description);
+        toast.success('Education description generated!');
+      } else {
+        toast.error('Failed to generate description. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error generating education description:', error);
+      toast.error('Failed to generate description. Please try again.');
+    } finally {
+      setGeneratingId(null);
+    }
   };
 
   return (
@@ -132,11 +165,33 @@ export const EducationForm = () => {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="form-field sm:col-span-2">
-                  <Label htmlFor={`description-${edu.id}`}>
-                    Description
-                  </Label>
+              <div className="grid gap-4">
+                <div className="form-field">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor={`description-${edu.id}`}>
+                      Description
+                    </Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleGenerateDescription(edu.id)}
+                      disabled={generatingId === edu.id || !edu.school || !edu.degree || !edu.fieldOfStudy}
+                      className="text-xs h-7 px-2"
+                    >
+                      {generatingId === edu.id ? (
+                        <>
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-1 h-3 w-3" />
+                          Generate with AI
+                        </>
+                      )}
+                    </Button>
+                  </div>
                   <Textarea
                     id={`description-${edu.id}`}
                     value={edu.description}

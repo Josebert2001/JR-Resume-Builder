@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -5,17 +6,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown } from 'lucide-react';
+import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Sparkles, Loader2 } from 'lucide-react';
 import { useResumeContext, WorkExperience } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
+import { generateWorkDescription } from '@/services/resumeAI';
 
 export const WorkExperienceForm = () => {
   const { resumeData, updateResumeData } = useResumeContext();
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const handleAddExperience = () => {
@@ -64,6 +67,34 @@ export const WorkExperienceForm = () => {
     } else if (direction === 'down' && index < experiences.length - 1) {
       [experiences[index], experiences[index + 1]] = [experiences[index + 1], experiences[index]];
       updateResumeData({ workExperience: experiences });
+    }
+  };
+
+  const handleGenerateDescription = async (id: string) => {
+    const exp = resumeData.workExperience?.find(e => e.id === id);
+    if (!exp || !exp.position || !exp.company) {
+      toast.error('Please fill in position and company first');
+      return;
+    }
+
+    setGeneratingId(id);
+    try {
+      const description = await generateWorkDescription(
+        exp.position,
+        exp.company
+      );
+      
+      if (description) {
+        handleUpdateExperience(id, 'description', description);
+        toast.success('Job description generated!');
+      } else {
+        toast.error('Failed to generate description. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error generating work description:', error);
+      toast.error('Failed to generate description. Please try again.');
+    } finally {
+      setGeneratingId(null);
     }
   };
 
@@ -219,7 +250,29 @@ export const WorkExperienceForm = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`description-${experience.id}`}>Description *</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`description-${experience.id}`}>Description *</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleGenerateDescription(experience.id)}
+                        disabled={generatingId === experience.id || !experience.position || !experience.company}
+                        className="text-xs h-7 px-2"
+                      >
+                        {generatingId === experience.id ? (
+                          <>
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-1 h-3 w-3" />
+                            Generate with AI
+                          </>
+                        )}
+                      </Button>
+                    </div>
                     <Textarea
                       id={`description-${experience.id}`}
                       value={experience.description}
