@@ -8,7 +8,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { TouchRipple } from './ui/touch-ripple';
 import { ZoomIn, ZoomOut, Maximize2, Download, Eye } from 'lucide-react';
 import { FormattedResume } from './FormattedResume';
-import { toPDF } from 'react-to-pdf';
+import { usePDF } from 'react-to-pdf';
 import { toast } from 'sonner';
 
 export const ResumePreview = () => {
@@ -21,6 +21,16 @@ export const ResumePreview = () => {
   const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
   const [isDownloading, setIsDownloading] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Replace toPDF with usePDF hook
+  const { toPDF, targetRef } = usePDF({
+    filename: 'resume.pdf',
+    page: {
+      format: 'letter',
+      orientation: 'portrait',
+      margin: 0
+    }
+  });
 
   const handleZoom = (direction: 'in' | 'out') => {
     setScale(prev => {
@@ -89,14 +99,8 @@ export const ResumePreview = () => {
       const lastName = resumeData.personalInfo?.lastName || '';
       const filename = `${firstName}_${lastName}_Resume`.replace(/\s+/g, '_');
       
-      await toPDF(resumeRef.current, {
-        filename: `${filename}.pdf`,
-        page: {
-          format: 'letter',
-          orientation: 'portrait',
-          margin: 0
-        }
-      });
+      // Use the toPDF function from the usePDF hook
+      await toPDF();
       
       toast.success('Resume successfully downloaded!');
     } catch (error) {
@@ -182,7 +186,7 @@ export const ResumePreview = () => {
             transition: isPanning ? 'none' : 'transform 0.2s ease-out'
           }}
         >
-          <Card className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={resumeRef}>
+          <Card className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={targetRef || resumeRef}>
             <FormattedResume template={template} resumeData={resumeData} />
           </Card>
         </div>
