@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -5,15 +6,20 @@ import { useResumeContext } from '@/context/ResumeContext';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { TouchRipple } from './ui/touch-ripple';
-import { ZoomIn, ZoomOut, Maximize2, Download } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Download, Eye } from 'lucide-react';
+import { FormattedResume } from './FormattedResume';
+import { toPDF } from 'react-to-pdf';
+import { toast } from 'sonner';
 
 export const ResumePreview = () => {
-  const { resumeData } = useResumeContext();
+  const { resumeData, template } = useResumeContext();
   const previewRef = useRef<HTMLDivElement>(null);
+  const resumeRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
+  const [isDownloading, setIsDownloading] = useState(false);
   const isMobile = useIsMobile();
 
   const handleZoom = (direction: 'in' | 'out') => {
@@ -74,6 +80,33 @@ export const ResumePreview = () => {
     setIsPanning(false);
   };
 
+  const handleDownload = async () => {
+    if (!resumeRef.current) return;
+
+    try {
+      setIsDownloading(true);
+      const firstName = resumeData.personalInfo?.firstName || '';
+      const lastName = resumeData.personalInfo?.lastName || '';
+      const filename = `${firstName}_${lastName}_Resume`.replace(/\s+/g, '_');
+      
+      await toPDF(resumeRef.current, {
+        filename: `${filename}.pdf`,
+        page: {
+          format: 'letter',
+          orientation: 'portrait',
+          margin: 0
+        }
+      });
+      
+      toast.success('Resume successfully downloaded!');
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      toast.error('Failed to download resume. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   // Reset scroll position when scale changes
   useEffect(() => {
     setScrollPosition({ x: 0, y: 0 });
@@ -121,13 +154,15 @@ export const ResumePreview = () => {
           <Button
             variant="secondary"
             size="icon"
-            onClick={() => {
-              // Download functionality will be implemented later
-              console.log('Download resume');
-            }}
+            onClick={handleDownload}
+            disabled={isDownloading}
             className={cn(isMobile && "h-12 w-12")}
           >
-            <Download className="h-4 w-4" />
+            {isDownloading ? (
+              <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
           </Button>
         </TouchRipple>
       </div>
@@ -147,13 +182,8 @@ export const ResumePreview = () => {
             transition: isPanning ? 'none' : 'transform 0.2s ease-out'
           }}
         >
-          <Card className="w-[816px] h-[1056px] shadow-lg">
-            <div className="p-8">
-              {/* Resume content will be rendered here */}
-              <pre className="whitespace-pre-wrap">
-                {JSON.stringify(resumeData, null, 2)}
-              </pre>
-            </div>
+          <Card className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={resumeRef}>
+            <FormattedResume template={template} resumeData={resumeData} />
           </Card>
         </div>
       </div>
