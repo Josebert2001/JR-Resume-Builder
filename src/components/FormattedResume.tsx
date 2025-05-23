@@ -39,16 +39,25 @@ export const FormattedResume: React.FC<FormattedResumeProps> = ({ template, resu
     githubUrl: resumeData.githubUrl || '',
   };
 
-  switch (template) {
-    case 'professional':
-      return <ProfessionalTemplate data={formattedData} />;
-    case 'modern':
-      return <ModernTemplate data={formattedData} />;
-    case 'minimal':
-      return <MinimalTemplate data={formattedData} />;
-    case 'creative':
-      return <CreativeTemplate data={formattedData} />;
-    default:
-      return <ProfessionalTemplate data={formattedData} />;
-  }
+  // This function renders the appropriate template based on the selected template type
+  const renderTemplate = () => {
+    switch (template) {
+      case 'professional':
+        return <ProfessionalTemplate data={formattedData} />;
+      case 'modern':
+        return <ModernTemplate data={formattedData} />;
+      case 'minimal':
+        return <MinimalTemplate data={formattedData} />;
+      case 'creative':
+        return <CreativeTemplate data={formattedData} />;
+      default:
+        return <ProfessionalTemplate data={formattedData} />;
+    }
+  };
+
+  return (
+    <div className="w-full h-full print:w-[210mm] print:h-[297mm] print:p-0">
+      {renderTemplate()}
+    </div>
+  );
 };

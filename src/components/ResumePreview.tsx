@@ -6,7 +6,7 @@ import { useResumeContext } from '@/context/ResumeContext';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { TouchRipple } from './ui/touch-ripple';
-import { ZoomIn, ZoomOut, Maximize2, Download, Eye } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Download, Settings, Eye } from 'lucide-react';
 import { FormattedResume } from './FormattedResume';
 import { usePDF } from 'react-to-pdf';
 import { toast } from 'sonner';
@@ -20,17 +20,39 @@ export const ResumePreview = () => {
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showPdfOptions, setShowPdfOptions] = useState(false);
   const isMobile = useIsMobile();
   
-  // Replace toPDF with usePDF hook
-  const { toPDF, targetRef } = usePDF({
-    filename: 'resume.pdf',
-    page: {
-      format: 'letter',
-      orientation: 'portrait',
-      margin: 0
-    }
+  // PDF options state
+  const [pdfOptions, setPdfOptions] = useState({
+    format: 'letter',
+    orientation: 'portrait',
+    margin: 0,
+    filename: 'resume.pdf'
   });
+  
+  // usePDF hook with dynamic options
+  const { toPDF, targetRef } = usePDF({
+    filename: pdfOptions.filename,
+    page: {
+      format: pdfOptions.format as any,
+      orientation: pdfOptions.orientation as 'portrait' | 'landscape',
+      margin: pdfOptions.margin
+    },
+    method: 'save'
+  });
+
+  // Update filename when user data changes
+  useEffect(() => {
+    const firstName = resumeData.personalInfo?.firstName || '';
+    const lastName = resumeData.personalInfo?.lastName || '';
+    if (firstName || lastName) {
+      setPdfOptions(prev => ({
+        ...prev,
+        filename: `${firstName}_${lastName}_Resume`.replace(/\s+/g, '_') + '.pdf'
+      }));
+    }
+  }, [resumeData.personalInfo?.firstName, resumeData.personalInfo?.lastName]);
 
   const handleZoom = (direction: 'in' | 'out') => {
     setScale(prev => {
@@ -91,30 +113,50 @@ export const ResumePreview = () => {
   };
 
   const handleDownload = async () => {
-    if (!resumeRef.current) return;
+    if (!targetRef.current) return;
 
     try {
       setIsDownloading(true);
-      const firstName = resumeData.personalInfo?.firstName || '';
-      const lastName = resumeData.personalInfo?.lastName || '';
-      const filename = `${firstName}_${lastName}_Resume`.replace(/\s+/g, '_');
       
       // Use the toPDF function from the usePDF hook
       await toPDF();
       
-      toast.success('Resume successfully downloaded!');
+      toast.success('Resume successfully downloaded!', {
+        description: `Your resume has been saved as ${pdfOptions.filename}`
+      });
     } catch (error) {
       console.error('Error downloading resume:', error);
-      toast.error('Failed to download resume. Please try again.');
+      toast.error('Failed to download resume', {
+        description: 'Please try again or use a different browser'
+      });
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  // Toggle PDF options panel
+  const togglePdfOptions = () => {
+    setShowPdfOptions(prev => !prev);
+  };
+
+  // Update PDF option
+  const updatePdfOption = (key: string, value: any) => {
+    setPdfOptions(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   // Reset scroll position when scale changes
   useEffect(() => {
     setScrollPosition({ x: 0, y: 0 });
   }, [scale]);
+
+  // Auto-fit to screen on initial render
+  useEffect(() => {
+    handleFitToScreen();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative h-full">
@@ -126,6 +168,7 @@ export const ResumePreview = () => {
             onClick={() => handleZoom('out')}
             disabled={scale <= 0.5}
             className={cn(isMobile && "h-12 w-12")}
+            aria-label="Zoom out"
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
@@ -138,6 +181,7 @@ export const ResumePreview = () => {
             onClick={() => handleZoom('in')}
             disabled={scale >= 2}
             className={cn(isMobile && "h-12 w-12")}
+            aria-label="Zoom in"
           >
             <ZoomIn className="h-4 w-4" />
           </Button>
@@ -149,8 +193,21 @@ export const ResumePreview = () => {
             size="icon"
             onClick={handleFitToScreen}
             className={cn(isMobile && "h-12 w-12")}
+            aria-label="Fit to screen"
           >
             <Maximize2 className="h-4 w-4" />
+          </Button>
+        </TouchRipple>
+
+        <TouchRipple className="rounded-full">
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={togglePdfOptions}
+            className={cn(isMobile && "h-12 w-12")}
+            aria-label="PDF options"
+          >
+            <Settings className="h-4 w-4" />
           </Button>
         </TouchRipple>
 
@@ -161,6 +218,7 @@ export const ResumePreview = () => {
             onClick={handleDownload}
             disabled={isDownloading}
             className={cn(isMobile && "h-12 w-12")}
+            aria-label="Download resume"
           >
             {isDownloading ? (
               <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
@@ -170,6 +228,65 @@ export const ResumePreview = () => {
           </Button>
         </TouchRipple>
       </div>
+
+      {showPdfOptions && (
+        <div className="absolute top-16 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg z-10 w-72 border border-border">
+          <h3 className="text-sm font-medium mb-2">PDF Options</h3>
+          
+          <div className="space-y-3">
+            <div>
+              <label htmlFor="pdf-format" className="block text-sm mb-1">Paper Format</label>
+              <select
+                id="pdf-format"
+                className="w-full p-2 text-sm rounded border border-input bg-transparent"
+                value={pdfOptions.format}
+                onChange={(e) => updatePdfOption('format', e.target.value)}
+              >
+                <option value="letter">US Letter</option>
+                <option value="a4">A4</option>
+                <option value="legal">Legal</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="pdf-orientation" className="block text-sm mb-1">Orientation</label>
+              <select
+                id="pdf-orientation"
+                className="w-full p-2 text-sm rounded border border-input bg-transparent"
+                value={pdfOptions.orientation}
+                onChange={(e) => updatePdfOption('orientation', e.target.value)}
+              >
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="pdf-margin" className="block text-sm mb-1">Margin (mm)</label>
+              <input
+                id="pdf-margin"
+                type="number"
+                min="0"
+                max="50"
+                className="w-full p-2 text-sm rounded border border-input bg-transparent"
+                value={pdfOptions.margin}
+                onChange={(e) => updatePdfOption('margin', parseInt(e.target.value, 10))}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="pdf-filename" className="block text-sm mb-1">Filename</label>
+              <input
+                id="pdf-filename"
+                type="text"
+                className="w-full p-2 text-sm rounded border border-input bg-transparent"
+                value={pdfOptions.filename}
+                onChange={(e) => updatePdfOption('filename', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div 
         ref={previewRef}
