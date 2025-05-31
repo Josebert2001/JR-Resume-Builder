@@ -1,9 +1,7 @@
 
 import React from 'react';
 import { useResumeContext } from '@/context/ResumeContext';
-import { useSwipeNavigation } from '@/hooks/use-swipe-navigation';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,32 +58,8 @@ export const FormWrapper = ({
     }
   };
 
-  const { touchHandlers } = useSwipeNavigation({
-    onSwipeLeft: handleNext,
-    onSwipeRight: showBackButton ? handleBack : undefined,
-    threshold: 75
-  });
-
-  const handleSwipeHint = () => {
-    if (isMobile) {
-      toast.info(
-        showBackButton 
-          ? 'Swipe left to continue, right to go back' 
-          : 'Swipe left to continue',
-        {
-          position: 'bottom-center',
-          duration: 2000
-        }
-      );
-    }
-  };
-
   return (
-    <div 
-      className="flex flex-col animate-in fade-in-50 mobile-scrollable prevent-overflow"
-      {...touchHandlers}
-      onMouseEnter={handleSwipeHint}
-    >
+    <div className="flex flex-col animate-in fade-in-50 mobile-scrollable prevent-overflow">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-2">{title}</h2>
         <p className="text-muted-foreground">

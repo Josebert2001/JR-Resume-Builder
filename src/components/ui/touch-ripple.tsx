@@ -2,33 +2,20 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useSwipeNavigation } from '@/hooks/use-swipe-navigation';
 
 interface TouchRippleProps {
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
-  onSwipeLeft?: () => void;
-  onSwipeRight?: () => void;
 }
 
 export const TouchRipple = ({ 
   children, 
   className,
-  disabled = false,
-  onSwipeLeft,
-  onSwipeRight
+  disabled = false
 }: TouchRippleProps) => {
   const [ripples, setRipples] = useState<Array<{ x: number; y: number; id: number }>>([]);
   const isMobile = useIsMobile();
-  
-  // Add swipe navigation support
-  const { touchHandlers } = useSwipeNavigation({
-    onSwipeLeft,
-    onSwipeRight,
-    threshold: 50,
-    disableVertical: true
-  });
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (disabled || !isMobile) return;
@@ -54,7 +41,6 @@ export const TouchRipple = ({
         className
       )}
       onTouchStart={handleTouchStart}
-      {...touchHandlers}
     >
       {children}
       {ripples.map(({ x, y, id }) => (
