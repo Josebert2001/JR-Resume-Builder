@@ -1,7 +1,7 @@
 
 import { BaseMemory } from "@langchain/core/memory";
 import { InputValues, MemoryVariables, OutputValues } from "@langchain/core/memory";
-import { BaseChatMessageHistory } from "@langchain/core/chat_history";
+import { ChatMessageHistory } from "langchain/memory";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 
 export interface ConversationMemoryParams {
@@ -13,7 +13,7 @@ export interface ConversationMemoryParams {
 }
 
 export class ConversationMemory extends BaseMemory {
-  chatHistory: BaseChatMessageHistory;
+  chatHistory: ChatMessageHistory;
   returnMessages: boolean;
   inputKey: string;
   outputKey: string;
@@ -22,7 +22,7 @@ export class ConversationMemory extends BaseMemory {
 
   constructor(params: ConversationMemoryParams = {}) {
     super();
-    this.chatHistory = new BaseChatMessageHistory();
+    this.chatHistory = new ChatMessageHistory();
     this.returnMessages = params.returnMessages ?? false;
     this.inputKey = params.inputKey ?? "input";
     this.outputKey = params.outputKey ?? "output";
@@ -51,7 +51,7 @@ export class ConversationMemory extends BaseMemory {
     const output = outputValues[this.outputKey];
 
     await this.chatHistory.addUserMessage(input);
-    await this.chatHistory.addAIMessage(output);
+    await this.chatHistory.addMessage(new AIMessage(output));
     
     // Trim memory if it exceeds token limit
     if (this.maxTokenLimit) {
@@ -94,7 +94,7 @@ export class ConversationMemory extends BaseMemory {
       if (message instanceof HumanMessage) {
         await this.chatHistory.addUserMessage(message.content as string);
       } else if (message instanceof AIMessage) {
-        await this.chatHistory.addAIMessage(message.content as string);
+        await this.chatHistory.addMessage(new AIMessage(message.content as string));
       }
     }
   }
