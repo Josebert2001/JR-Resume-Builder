@@ -1,8 +1,9 @@
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
-import { FontLoader } from "./components/FontLoader";
+import FontLoader from "./components/FontLoader";
 import Index from "./pages/Index";
 import ResumeTemplatesPage from "./pages/ResumeTemplatesPage";
 import InterviewPreparation from "./pages/InterviewPreparation";
