@@ -1,4 +1,10 @@
 import { Groq } from "groq-sdk";
+import {
+  generateResumeContent as lcGenerateResumeContent,
+  generateJobResponsibilities as lcGenerateJobResponsibilities,
+  analyzeResume as lcAnalyzeResume,
+  suggestSkills as lcSuggestSkills
+} from './langchain/langchainService';
 
 const groq = new Groq({
   apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
@@ -56,11 +62,18 @@ export type ProfessionalInterestsResponse = {
 };
 
 export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
-  if (!data.course || !data.school || !data.interests) {
-    throw new Error('Missing required fields for resume content generation');
-  }
+  try {
+    // Try LangChain first
+    return await lcGenerateResumeContent(data);
+  } catch (error) {
+    console.warn('LangChain generation failed, falling back to direct Groq:', error);
+    
+    // Fallback to original implementation
+    if (!data.course || !data.school || !data.interests) {
+      throw new Error('Missing required fields for resume content generation');
+    }
 
-  const prompt = `Create a professional resume summary and relevant skills list for:
+    const prompt = `Create a professional resume summary and relevant skills list for:
 Name: ${data.name}
 Education: ${data.course} from ${data.school}
 Interests: ${data.interests}
@@ -78,81 +91,95 @@ Return ONLY a JSON object with the following structure, nothing else:
   "skills": ["skill1", "skill2", ...]
 }`;
 
-  try {
-    const completion = await groq.chat.completions.create({
-      messages: [
-        { 
-          role: "system", 
-          content: "You are a professional resume writer. Return ONLY properly formatted JSON with a summary and skills array. Do not include any other text or explanations."
-        },
-        { 
-          role: "user", 
-          content: prompt 
-        }
-      ],
-      model: "llama3-8b-8192",
-      temperature: 0.7,
-      max_tokens: 1024,
-    });
-
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No content received from AI service');
-    }
-
-    let response;
     try {
-      // Clean the response - remove any text before and after the JSON object
-      const jsonStart = content.indexOf('{');
-      const jsonEnd = content.lastIndexOf('}') + 1;
-      if (jsonStart === -1 || jsonEnd === -1) {
-        throw new Error('No JSON object found in response');
-      }
-      const jsonContent = content.slice(jsonStart, jsonEnd);
-      
-      response = JSON.parse(jsonContent);
-      
-      // Validate response structure
-      if (!response.summary || !Array.isArray(response.skills)) {
-        throw new Error('Invalid response structure');
+      const completion = await groq.chat.completions.create({
+        messages: [
+          { 
+            role: "system", 
+            content: "You are a professional resume writer. Return ONLY properly formatted JSON with a summary and skills array. Do not include any other text or explanations."
+          },
+          { 
+            role: "user", 
+            content: prompt 
+          }
+        ],
+        model: "llama3-8b-8192",
+        temperature: 0.7,
+        max_tokens: 1024,
+      });
+
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No content received from AI service');
       }
 
-      return {
-        summary: response.summary,
-        skills: response.skills
-      };
-    } catch (parseError) {
-      console.error('Error parsing AI response:', parseError, 'Raw content:', content);
-      throw new Error('Failed to parse AI response');
+      let response;
+      try {
+        const jsonStart = content.indexOf('{');
+        const jsonEnd = content.lastIndexOf('}') + 1;
+        if (jsonStart === -1 || jsonEnd === -1) {
+          throw new Error('No JSON object found in response');
+        }
+        const jsonContent = content.slice(jsonStart, jsonEnd);
+        
+        response = JSON.parse(jsonContent);
+        
+        if (!response.summary || !Array.isArray(response.skills)) {
+          throw new Error('Invalid response structure');
+        }
+
+        return {
+          summary: response.summary,
+          skills: response.skills
+        };
+      } catch (parseError) {
+        console.error('Error parsing AI response:', parseError, 'Raw content:', content);
+        throw new Error('Failed to parse AI response');
+      }
+    } catch (error) {
+      console.error('Error generating resume content:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate resume content');
     }
-  } catch (error) {
-    console.error('Error generating resume content:', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to generate resume content');
   }
 };
 
 export const generateJobResponsibilities = async (data: ResponsibilityGenerationRequest): Promise<string> => {
-  const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}.
-  Focus on specific, measurable achievements and key responsibilities.
-  Format each bullet point starting with "• " and separate with newlines.`;
-
   try {
-    const completion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "llama3-8b-8192",
-      temperature: 0.7,
-      max_tokens: 1024,
-    });
-
-    return completion.choices[0]?.message?.content || "Failed to generate responsibilities";
+    // Try LangChain first
+    return await lcGenerateJobResponsibilities(data);
   } catch (error) {
-    console.error('Error generating job responsibilities:', error);
-    throw new Error('Failed to generate job responsibilities');
+    console.warn('LangChain generation failed, falling back to direct Groq:', error);
+    
+    // Fallback to original implementation
+    const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}.
+    Focus on specific, measurable achievements and key responsibilities.
+    Format each bullet point starting with "• " and separate with newlines.`;
+
+    try {
+      const completion = await groq.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "llama3-8b-8192",
+        temperature: 0.7,
+        max_tokens: 1024,
+      });
+
+      return completion.choices[0]?.message?.content || "Failed to generate responsibilities";
+    } catch (error) {
+      console.error('Error generating job responsibilities:', error);
+      throw new Error('Failed to generate job responsibilities');
+    }
   }
 };
 
 export const analyzeResume = async (resumeContent: string, jobDescription: string): Promise<ResumeAnalysisResponse> => {
-  const prompt = `Analyze this resume against a job description and provide feedback in JSON format.
+  try {
+    // Try LangChain first
+    return await lcAnalyzeResume(resumeContent, jobDescription);
+  } catch (error) {
+    console.warn('LangChain analysis failed, falling back to direct Groq:', error);
+    
+    // Fallback to original implementation
+    const prompt = `Analyze this resume against a job description and provide feedback in JSON format.
 
 Resume Content:
 ${resumeContent}
@@ -174,38 +201,39 @@ Format:
   "suggestions": string[]
 }`;
 
-  try {
-    const completion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "llama3-8b-8192",
-      temperature: 0.7,
-      max_tokens: 1024,
-    });
-
-    let response;
-    const content = completion.choices[0]?.message?.content;
-    
     try {
-      if (typeof content === 'string' && content.trim().startsWith('{')) {
-        response = JSON.parse(content);
-      } else {
-        console.error('Invalid response format from API');
+      const completion = await groq.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "llama3-8b-8192",
+        temperature: 0.7,
+        max_tokens: 1024,
+      });
+
+      let response;
+      const content = completion.choices[0]?.message?.content;
+      
+      try {
+        if (typeof content === 'string' && content.trim().startsWith('{')) {
+          response = JSON.parse(content);
+        } else {
+          console.error('Invalid response format from API');
+          response = {};
+        }
+      } catch (parseError) {
+        console.error('Error parsing API response:', parseError);
         response = {};
       }
-    } catch (parseError) {
-      console.error('Error parsing API response:', parseError);
-      response = {};
-    }
 
-    return {
-      score: response?.score || 0,
-      matchedKeywords: Array.isArray(response?.matchedKeywords) ? response.matchedKeywords : [],
-      missedKeywords: Array.isArray(response?.missedKeywords) ? response.missedKeywords : [],
-      suggestions: Array.isArray(response?.suggestions) ? response.suggestions : []
-    };
-  } catch (error) {
-    console.error('Error analyzing resume:', error);
-    throw new Error('Failed to analyze resume');
+      return {
+        score: response?.score || 0,
+        matchedKeywords: Array.isArray(response?.matchedKeywords) ? response.matchedKeywords : [],
+        missedKeywords: Array.isArray(response?.missedKeywords) ? response.missedKeywords : [],
+        suggestions: Array.isArray(response?.suggestions) ? response.suggestions : []
+      };
+    } catch (error) {
+      console.error('Error analyzing resume:', error);
+      throw new Error('Failed to analyze resume');
+    }
   }
 };
 
