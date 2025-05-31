@@ -1,4 +1,3 @@
-
 import {
   resumeContentChain,
   workDescriptionChain,
@@ -6,6 +5,15 @@ import {
   resumeAnalysisChain,
   skillsSuggestionChain
 } from "./chains/resumeChains";
+import {
+  resumeConversationChain,
+  skillsConversationChain,
+  careerConversationChain
+} from "./chains/conversationChains";
+import {
+  comprehensiveResumeAnalysisChain,
+  industryOptimizationChain
+} from "./chains/advancedResumeChains";
 
 export type GenerationRequest = {
   name: string;
@@ -34,6 +42,42 @@ export type ResumeAnalysisResponse = {
   suggestions: string[];
 };
 
+export type ComprehensiveAnalysisResponse = {
+  analysis: {
+    strengths: string[];
+    weaknesses: string[];
+    missingElements: string[];
+    industryAlignment: string;
+    overallScore: number;
+  };
+  improvements: {
+    priorityActions: string[];
+    contentSuggestions: {
+      summary: string;
+      skills: string[];
+      experiences: string[];
+    };
+    formattingTips: string[];
+    keywordOptimization: string[];
+  };
+  atsOptimization: {
+    atsScore: number;
+    formatIssues: string[];
+    keywordMatches: string[];
+    missingKeywords: string[];
+    optimizedSections: {
+      skills: string[];
+      experience: string[];
+    };
+    recommendations: string[];
+  };
+};
+
+export type ConversationResponse = {
+  response: string;
+  context: string;
+};
+
 export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
   if (!data.course || !data.school || !data.interests) {
     throw new Error('Missing required fields for resume content generation');
@@ -47,7 +91,6 @@ export const generateResumeContent = async (data: GenerationRequest): Promise<Ge
       interests: data.interests
     });
 
-    // Validate response structure
     if (!result.summary || !Array.isArray(result.skills)) {
       throw new Error('Invalid response structure from AI');
     }
@@ -130,4 +173,164 @@ export const suggestSkills = async (
     console.error('Error suggesting skills with LangChain:', error);
     return [];
   }
+};
+
+export const getResumeConversationResponse = async (input: string): Promise<ConversationResponse> => {
+  try {
+    const result = await resumeConversationChain.invoke({
+      input: input
+    });
+
+    return {
+      response: result.response || result.text || 'No response generated',
+      context: 'resume_assistance'
+    };
+  } catch (error) {
+    console.error('Error in resume conversation:', error);
+    throw new Error('Failed to process resume conversation');
+  }
+};
+
+export const getSkillsConversationResponse = async (input: string): Promise<ConversationResponse> => {
+  try {
+    const result = await skillsConversationChain.invoke({
+      input: input
+    });
+
+    return {
+      response: result.response || result.text || 'No response generated',
+      context: 'skills_development'
+    };
+  } catch (error) {
+    console.error('Error in skills conversation:', error);
+    throw new Error('Failed to process skills conversation');
+  }
+};
+
+export const getCareerConversationResponse = async (input: string): Promise<ConversationResponse> => {
+  try {
+    const result = await careerConversationChain.invoke({
+      input: input
+    });
+
+    return {
+      response: result.response || result.text || 'No response generated',
+      context: 'career_guidance'
+    };
+  } catch (error) {
+    console.error('Error in career conversation:', error);
+    throw new Error('Failed to process career conversation');
+  }
+};
+
+export const getComprehensiveResumeAnalysis = async (
+  resumeContent: string,
+  targetRole: string,
+  industry: string,
+  jobDescription: string
+): Promise<ComprehensiveAnalysisResponse> => {
+  try {
+    const result = await comprehensiveResumeAnalysisChain.invoke({
+      resumeContent,
+      targetRole,
+      industry,
+      jobDescription
+    });
+
+    return {
+      analysis: result.analysis || {
+        strengths: [],
+        weaknesses: [],
+        missingElements: [],
+        industryAlignment: 'low',
+        overallScore: 0
+      },
+      improvements: result.improvements || {
+        priorityActions: [],
+        contentSuggestions: { summary: '', skills: [], experiences: [] },
+        formattingTips: [],
+        keywordOptimization: []
+      },
+      atsOptimization: result.atsOptimization || {
+        atsScore: 0,
+        formatIssues: [],
+        keywordMatches: [],
+        missingKeywords: [],
+        optimizedSections: { skills: [], experience: [] },
+        recommendations: []
+      }
+    };
+  } catch (error) {
+    console.error('Error in comprehensive resume analysis:', error);
+    throw new Error('Failed to perform comprehensive analysis');
+  }
+};
+
+export const getIndustryOptimization = async (
+  resumeContent: string,
+  targetRole: string,
+  industry: string
+): Promise<{
+  industryKeywords: string[];
+  preferredFormat: string;
+  essentialSkills: string[];
+  industryTrends: string[];
+  optimizedContent: {
+    summary: string;
+    skills: string[];
+    experience: string[];
+  };
+  additionalSections: string[];
+}> => {
+  try {
+    const result = await industryOptimizationChain.invoke({
+      resumeContent,
+      targetRole,
+      industry
+    });
+
+    return result || {
+      industryKeywords: [],
+      preferredFormat: '',
+      essentialSkills: [],
+      industryTrends: [],
+      optimizedContent: { summary: '', skills: [], experience: [] },
+      additionalSections: []
+    };
+  } catch (error) {
+    console.error('Error in industry optimization:', error);
+    throw new Error('Failed to perform industry optimization');
+  }
+};
+
+export const clearResumeConversationMemory = async (): Promise<void> => {
+  try {
+    await resumeConversationChain.memory?.clear();
+  } catch (error) {
+    console.error('Error clearing resume conversation memory:', error);
+  }
+};
+
+export const clearSkillsConversationMemory = async (): Promise<void> => {
+  try {
+    await skillsConversationChain.memory?.clear();
+  } catch (error) {
+    console.error('Error clearing skills conversation memory:', error);
+  }
+};
+
+export const clearCareerConversationMemory = async (): Promise<void> => {
+  try {
+    await careerConversationChain.memory?.clear();
+  } catch (error) {
+    console.error('Error clearing career conversation memory:', error);
+  }
+};
+
+export const clearAllConversationMemory = async (): Promise<void> => {
+  await Promise.all([
+    clearResumeConversationMemory(),
+    clearSkillsConversationMemory(),
+    clearCareerConversationMemory()
+  ]);
 };
