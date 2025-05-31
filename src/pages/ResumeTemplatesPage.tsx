@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ResumeProvider, useResumeContext } from '@/context/ResumeContext';
+import { useResumeContext } from '@/context/ResumeContext';
 import type { TemplateType } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
@@ -137,7 +137,7 @@ const ResumeFormats = () => {
   );
 };
 
-const TemplatesContent = () => {
+const ResumeTemplatesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm py-4 border-b border-gray-200" role="banner">
@@ -221,14 +221,6 @@ const TemplatesContent = () => {
 
       <Footer />
     </div>
-  );
-};
-
-const ResumeTemplatesPage = () => {
-  return (
-    <ResumeProvider>
-      <TemplatesContent />
-    </ResumeProvider>
   );
 };
 

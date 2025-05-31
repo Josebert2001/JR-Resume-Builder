@@ -13,7 +13,6 @@ import CoverLetterGuide from "./pages/CoverLetterGuide";
 import JobSearchTips from "./pages/JobSearchTips";
 import InterviewPreparation from "./pages/InterviewPreparation";
 import FontLoader from "./components/FontLoader";
-import { ResumeProvider } from "@/context/ResumeContext";
 
 // Create a client
 const queryClient = new QueryClient({
