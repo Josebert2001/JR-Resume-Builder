@@ -1,7 +1,7 @@
 
 import { BaseMemory } from "@langchain/core/memory";
 import { InputValues, MemoryVariables, OutputValues } from "@langchain/core/memory";
-import { ChatMessageHistory } from "@langchain/core/chat_history";
+import { BaseChatMessageHistory } from "@langchain/core/chat_history";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 
 export interface ConversationMemoryParams {
@@ -13,7 +13,7 @@ export interface ConversationMemoryParams {
 }
 
 export class ConversationMemory extends BaseMemory {
-  chatHistory: ChatMessageHistory;
+  chatHistory: BaseChatMessageHistory;
   returnMessages: boolean;
   inputKey: string;
   outputKey: string;
@@ -22,7 +22,7 @@ export class ConversationMemory extends BaseMemory {
 
   constructor(params: ConversationMemoryParams = {}) {
     super();
-    this.chatHistory = new ChatMessageHistory();
+    this.chatHistory = new BaseChatMessageHistory();
     this.returnMessages = params.returnMessages ?? false;
     this.inputKey = params.inputKey ?? "input";
     this.outputKey = params.outputKey ?? "output";

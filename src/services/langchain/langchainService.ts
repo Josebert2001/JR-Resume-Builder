@@ -289,13 +289,20 @@ export const getIndustryOptimization = async (
       industry
     });
 
-    return result || {
-      industryKeywords: [],
-      preferredFormat: '',
-      essentialSkills: [],
-      industryTrends: [],
-      optimizedContent: { summary: '', skills: [], experience: [] },
-      additionalSections: []
+    // Type assertion to handle ChainValues return type
+    const typedResult = result as any;
+
+    return {
+      industryKeywords: Array.isArray(typedResult?.industryKeywords) ? typedResult.industryKeywords : [],
+      preferredFormat: typedResult?.preferredFormat || '',
+      essentialSkills: Array.isArray(typedResult?.essentialSkills) ? typedResult.essentialSkills : [],
+      industryTrends: Array.isArray(typedResult?.industryTrends) ? typedResult.industryTrends : [],
+      optimizedContent: {
+        summary: typedResult?.optimizedContent?.summary || '',
+        skills: Array.isArray(typedResult?.optimizedContent?.skills) ? typedResult.optimizedContent.skills : [],
+        experience: Array.isArray(typedResult?.optimizedContent?.experience) ? typedResult.optimizedContent.experience : []
+      },
+      additionalSections: Array.isArray(typedResult?.additionalSections) ? typedResult.additionalSections : []
     };
   } catch (error) {
     console.error('Error in industry optimization:', error);
@@ -305,7 +312,9 @@ export const getIndustryOptimization = async (
 
 export const clearResumeConversationMemory = async (): Promise<void> => {
   try {
-    await resumeConversationChain.memory?.clear();
+    if (resumeConversationChain.memory && 'clear' in resumeConversationChain.memory) {
+      await (resumeConversationChain.memory as any).clear();
+    }
   } catch (error) {
     console.error('Error clearing resume conversation memory:', error);
   }
@@ -313,7 +322,9 @@ export const clearResumeConversationMemory = async (): Promise<void> => {
 
 export const clearSkillsConversationMemory = async (): Promise<void> => {
   try {
-    await skillsConversationChain.memory?.clear();
+    if (skillsConversationChain.memory && 'clear' in skillsConversationChain.memory) {
+      await (skillsConversationChain.memory as any).clear();
+    }
   } catch (error) {
     console.error('Error clearing skills conversation memory:', error);
   }
@@ -321,7 +332,9 @@ export const clearSkillsConversationMemory = async (): Promise<void> => {
 
 export const clearCareerConversationMemory = async (): Promise<void> => {
   try {
-    await careerConversationChain.memory?.clear();
+    if (careerConversationChain.memory && 'clear' in careerConversationChain.memory) {
+      await (careerConversationChain.memory as any).clear();
+    }
   } catch (error) {
     console.error('Error clearing career conversation memory:', error);
   }
