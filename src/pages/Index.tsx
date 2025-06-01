@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PersonalInfoForm } from '@/components/PersonalInfoForm';
 import { EducationForm } from '@/components/EducationForm';
@@ -98,7 +97,7 @@ const ResumeBuilder = () => {
 
 const Index = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('resume');
+  const [activeTab, setActiveTab] = useState('home'); // Changed default to 'home'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -136,96 +135,112 @@ const Index = () => {
         </div>
       </header>
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Build Your Perfect Resume
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Create a professional resume in minutes with our AI-powered builder
-          </p>
-          
-          {/* Navigation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => setActiveTab('resume')}
-            >
-              <CardHeader className="text-center">
-                <FileText className="h-12 w-12 mx-auto text-blue-600 mb-2" />
-                <CardTitle>Resume Builder</CardTitle>
-                <CardDescription>Create and customize your resume</CardDescription>
-              </CardHeader>
-            </Card>
+      {/* Conditionally render main content or ResumeBuilder based on activeTab */}
+      {activeTab === 'home' && (
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              Build Your Perfect Resume
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Create a professional resume in minutes with our AI-powered builder
+            </p>
             
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => navigate('/ai-assistance')}
-            >
-              <CardHeader className="text-center">
-                <Bot className="h-12 w-12 mx-auto text-purple-600 mb-2" />
-                <CardTitle>AI Assistant</CardTitle>
-                <CardDescription>Get personalized career guidance</CardDescription>
-              </CardHeader>
-            </Card>
-            
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => setActiveTab('job-search')}
-            >
-              <CardHeader className="text-center">
-                <Search className="h-12 w-12 mx-auto text-green-600 mb-2" />
-                <CardTitle>Job Search</CardTitle>
-                <CardDescription>Find relevant job opportunities</CardDescription>
-              </CardHeader>
-            </Card>
-            
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => setActiveTab('templates')}
-            >
-              <CardHeader className="text-center">
-                <Palette className="h-12 w-12 mx-auto text-orange-600 mb-2" />
-                <CardTitle>Templates</CardTitle>
-                <CardDescription>Choose from professional designs</CardDescription>
-              </CardHeader>
-            </Card>
+            {/* Navigation Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+                onClick={() => setActiveTab('resume')}
+              >
+                <CardHeader className="text-center">
+                  <FileText className="h-12 w-12 mx-auto text-blue-600 mb-2" />
+                  <CardTitle>Resume Builder</CardTitle>
+                  <CardDescription>Create and customize your resume</CardDescription>
+                </CardHeader>
+              </Card>
+              
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+                onClick={() => navigate('/ai-assistance')}
+              >
+                <CardHeader className="text-center">
+                  <Bot className="h-12 w-12 mx-auto text-purple-600 mb-2" />
+                  <CardTitle>AI Assistant</CardTitle>
+                  <CardDescription>Get personalized career guidance</CardDescription>
+                </CardHeader>
+              </Card>
+              
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+                onClick={() => setActiveTab('job-search')}
+              >
+                <CardHeader className="text-center">
+                  <Search className="h-12 w-12 mx-auto text-green-600 mb-2" />
+                  <CardTitle>Job Search</CardTitle>
+                  <CardDescription>Find relevant job opportunities</CardDescription>
+                </CardHeader>
+              </Card>
+              
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+                onClick={() => setActiveTab('templates')}
+              >
+                <CardHeader className="text-center">
+                  <Palette className="h-12 w-12 mx-auto text-orange-600 mb-2" />
+                  <CardTitle>Templates</CardTitle>
+                  <CardDescription>Choose from professional designs</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
           </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="flex justify-center mb-8">
-          <div className="flex flex-wrap gap-4">
-            <Button 
-              onClick={() => navigate('/ai-assistance')}
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Chat with AI Assistant
-            </Button>
-            <Button 
-              onClick={() => navigate('/templates')}
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <Palette className="h-4 w-4" />
-              Browse Templates
-            </Button>
-            <Button 
-              onClick={() => navigate('/interview-prep')}
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <TrendingUp className="h-4 w-4" />
-              Interview Prep
-            </Button>
+          {/* Quick Actions */}
+          <div className="flex justify-center mb-8">
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                onClick={() => navigate('/ai-assistance')}
+                className="flex items-center gap-2"
+                variant="outline"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Chat with AI Assistant
+              </Button>
+              <Button 
+                onClick={() => navigate('/templates')}
+                className="flex items-center gap-2"
+                variant="outline"
+              >
+                <Palette className="h-4 w-4" />
+                Browse Templates
+              </Button>
+              <Button 
+                onClick={() => navigate('/interview-prep')}
+                className="flex items-center gap-2"
+                variant="outline"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Interview Prep
+              </Button>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      )}
       
-      {/* ResumeBuilder is already inside ResumeProvider from main.tsx */}
-      <ResumeBuilder />
+      {/* Show ResumeBuilder when activeTab is 'resume' */}
+      {activeTab === 'resume' && <ResumeBuilder />}
+      
+      {/* Show other content based on activeTab */}
+      {activeTab === 'job-search' && (
+        <div className="container mx-auto px-4 py-8">
+          <JobSearch />
+        </div>
+      )}
+      
+      {activeTab === 'templates' && (
+        <div className="container mx-auto px-4 py-8">
+          <ResumeTemplates />
+        </div>
+      )}
       
       <Footer />
     </div>
