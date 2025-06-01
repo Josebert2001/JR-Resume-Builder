@@ -47,20 +47,45 @@ export class ConversationMemory extends BaseMemory {
   }
 
   async saveContext(inputValues: InputValues, outputValues: OutputValues): Promise<void> {
-    const input = inputValues[this.inputKey];
-    const output = outputValues[this.outputKey];
+    try {
+      const input = inputValues[this.inputKey];
+      const output = outputValues[this.outputKey];
 
-    await this.chatHistory.addUserMessage(input);
-    await this.chatHistory.addMessage(new AIMessage(output));
-    
-    // Trim memory if it exceeds token limit
-    if (this.maxTokenLimit) {
-      await this.trimMemory();
+      // Ensure we have valid input and output
+      if (!input || !output) {
+        console.warn('Missing input or output for conversation memory');
+        return;
+      }
+
+      // Create messages with proper structure
+      const humanMessage = new HumanMessage({
+        content: String(input),
+        additional_kwargs: {}
+      });
+
+      const aiMessage = new AIMessage({
+        content: String(output),
+        additional_kwargs: {}
+      });
+
+      await this.chatHistory.addMessage(humanMessage);
+      await this.chatHistory.addMessage(aiMessage);
+      
+      // Trim memory if it exceeds token limit
+      if (this.maxTokenLimit) {
+        await this.trimMemory();
+      }
+    } catch (error) {
+      console.error('Error saving conversation context:', error);
     }
   }
 
   async clear(): Promise<void> {
-    await this.chatHistory.clear();
+    try {
+      await this.chatHistory.clear();
+    } catch (error) {
+      console.error('Error clearing conversation memory:', error);
+    }
   }
 
   private getBufferString(messages: BaseMessage[]): string {
@@ -79,23 +104,23 @@ export class ConversationMemory extends BaseMemory {
   private async trimMemory(): Promise<void> {
     if (!this.maxTokenLimit) return;
     
-    const messages = await this.chatHistory.getMessages();
-    let totalTokens = this.estimateTokens(messages);
-    
-    // Remove oldest messages if we exceed the limit
-    while (totalTokens > this.maxTokenLimit && messages.length > 2) {
-      messages.shift(); // Remove oldest message
-      totalTokens = this.estimateTokens(messages);
-    }
-    
-    // Update chat history with trimmed messages
-    await this.chatHistory.clear();
-    for (const message of messages) {
-      if (message instanceof HumanMessage) {
-        await this.chatHistory.addUserMessage(message.content as string);
-      } else if (message instanceof AIMessage) {
-        await this.chatHistory.addMessage(new AIMessage(message.content as string));
+    try {
+      const messages = await this.chatHistory.getMessages();
+      let totalTokens = this.estimateTokens(messages);
+      
+      // Remove oldest messages if we exceed the limit
+      while (totalTokens > this.maxTokenLimit && messages.length > 2) {
+        messages.shift(); // Remove oldest message
+        totalTokens = this.estimateTokens(messages);
       }
+      
+      // Update chat history with trimmed messages
+      await this.chatHistory.clear();
+      for (const message of messages) {
+        await this.chatHistory.addMessage(message);
+      }
+    } catch (error) {
+      console.error('Error trimming conversation memory:', error);
     }
   }
 

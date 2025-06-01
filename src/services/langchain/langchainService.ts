@@ -177,48 +177,108 @@ export const suggestSkills = async (
 
 export const getResumeConversationResponse = async (input: string): Promise<ConversationResponse> => {
   try {
+    console.log('Processing resume conversation input:', input);
+    
     const result = await resumeConversationChain.invoke({
       input: input
     });
 
+    console.log('Resume conversation result:', result);
+
+    // Handle different possible response formats
+    let response = '';
+    if (typeof result === 'string') {
+      response = result;
+    } else if (result && typeof result === 'object') {
+      response = result.response || result.text || result.output || 'No response generated';
+    } else {
+      response = 'No response generated';
+    }
+
     return {
-      response: result.response || result.text || 'No response generated',
+      response: response,
       context: 'resume_assistance'
     };
   } catch (error) {
     console.error('Error in resume conversation:', error);
+    
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('additional_kwargs')) {
+        throw new Error('AI conversation memory error. Please try clearing the conversation and starting again.');
+      } else if (error.message.includes('API')) {
+        throw new Error('AI service unavailable. Please check your API configuration.');
+      }
+    }
+    
     throw new Error('Failed to process resume conversation');
   }
 };
 
 export const getSkillsConversationResponse = async (input: string): Promise<ConversationResponse> => {
   try {
+    console.log('Processing skills conversation input:', input);
+    
     const result = await skillsConversationChain.invoke({
       input: input
     });
 
+    console.log('Skills conversation result:', result);
+
+    let response = '';
+    if (typeof result === 'string') {
+      response = result;
+    } else if (result && typeof result === 'object') {
+      response = result.response || result.text || result.output || 'No response generated';
+    } else {
+      response = 'No response generated';
+    }
+
     return {
-      response: result.response || result.text || 'No response generated',
+      response: response,
       context: 'skills_development'
     };
   } catch (error) {
     console.error('Error in skills conversation:', error);
+    
+    if (error instanceof Error && error.message.includes('additional_kwargs')) {
+      throw new Error('AI conversation memory error. Please try clearing the conversation and starting again.');
+    }
+    
     throw new Error('Failed to process skills conversation');
   }
 };
 
 export const getCareerConversationResponse = async (input: string): Promise<ConversationResponse> => {
   try {
+    console.log('Processing career conversation input:', input);
+    
     const result = await careerConversationChain.invoke({
       input: input
     });
 
+    console.log('Career conversation result:', result);
+
+    let response = '';
+    if (typeof result === 'string') {
+      response = result;
+    } else if (result && typeof result === 'object') {
+      response = result.response || result.text || result.output || 'No response generated';
+    } else {
+      response = 'No response generated';
+    }
+
     return {
-      response: result.response || result.text || 'No response generated',
+      response: response,
       context: 'career_guidance'
     };
   } catch (error) {
     console.error('Error in career conversation:', error);
+    
+    if (error instanceof Error && error.message.includes('additional_kwargs')) {
+      throw new Error('AI conversation memory error. Please try clearing the conversation and starting again.');
+    }
+    
     throw new Error('Failed to process career conversation');
   }
 };
@@ -312,9 +372,8 @@ export const getIndustryOptimization = async (
 
 export const clearResumeConversationMemory = async (): Promise<void> => {
   try {
-    if (resumeConversationChain.memory && 'clear' in resumeConversationChain.memory) {
-      await (resumeConversationChain.memory as any).clear();
-    }
+    await resumeConversationMemory.clear();
+    console.log('Resume conversation memory cleared');
   } catch (error) {
     console.error('Error clearing resume conversation memory:', error);
   }
@@ -322,9 +381,8 @@ export const clearResumeConversationMemory = async (): Promise<void> => {
 
 export const clearSkillsConversationMemory = async (): Promise<void> => {
   try {
-    if (skillsConversationChain.memory && 'clear' in skillsConversationChain.memory) {
-      await (skillsConversationChain.memory as any).clear();
-    }
+    await skillsConversationMemory.clear();
+    console.log('Skills conversation memory cleared');
   } catch (error) {
     console.error('Error clearing skills conversation memory:', error);
   }
@@ -332,9 +390,8 @@ export const clearSkillsConversationMemory = async (): Promise<void> => {
 
 export const clearCareerConversationMemory = async (): Promise<void> => {
   try {
-    if (careerConversationChain.memory && 'clear' in careerConversationChain.memory) {
-      await (careerConversationChain.memory as any).clear();
-    }
+    await careerConversationMemory.clear();
+    console.log('Career conversation memory cleared');
   } catch (error) {
     console.error('Error clearing career conversation memory:', error);
   }
