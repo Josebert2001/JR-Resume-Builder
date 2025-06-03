@@ -17,6 +17,14 @@ import {
   comprehensiveResumeAnalysisChain,
   industryOptimizationChain
 } from "./chains/advancedResumeChains";
+import { 
+  safeJsonParse, 
+  validateJsonStructure, 
+  resumeContentSchema, 
+  resumeAnalysisSchema,
+  cleanAiResponse 
+} from "./utils/responseParser";
+import { performHealthCheck, HealthCheckResult } from "./utils/healthCheck";
 
 export type GenerationRequest = {
   name: string;
@@ -81,60 +89,9 @@ export type ConversationResponse = {
   context: string;
 };
 
-// Health check function for debugging
-export const checkLangchainHealth = async (): Promise<{
-  isHealthy: boolean;
-  errors: string[];
-  details: Record<string, any>;
-}> => {
-  const errors: string[] = [];
-  const details: Record<string, any> = {};
-
-  try {
-    // Check API key availability
-    const apiKey = localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY;
-    details.hasApiKey = !!apiKey;
-    
-    if (!apiKey) {
-      errors.push('No Groq API key configured');
-    }
-
-    // Test basic chain functionality
-    try {
-      const testResult = await resumeContentChain.invoke({
-        name: "Test User",
-        course: "Computer Science",
-        school: "Test University",
-        interests: "Software Development"
-      });
-      details.chainTest = 'success';
-    } catch (error) {
-      errors.push(`Chain test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      details.chainTest = 'failed';
-    }
-
-    // Check memory functionality
-    try {
-      await resumeConversationMemory.loadMemoryVariables({});
-      details.memoryTest = 'success';
-    } catch (error) {
-      errors.push(`Memory test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      details.memoryTest = 'failed';
-    }
-
-    return {
-      isHealthy: errors.length === 0,
-      errors,
-      details
-    };
-  } catch (error) {
-    console.error('Health check failed:', error);
-    return {
-      isHealthy: false,
-      errors: [`Health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`],
-      details: { healthCheckError: true }
-    };
-  }
+// Health check function using new dedicated service
+export const checkLangchainHealth = async (): Promise<HealthCheckResult> => {
+  return performHealthCheck();
 };
 
 export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
@@ -159,17 +116,47 @@ export const generateResumeContent = async (data: GenerationRequest): Promise<Ge
       interests: data.interests
     });
 
-    console.log('LangChain: Resume content chain result:', result);
+    console.log('LangChain: Raw resume content chain result:', result);
 
-    if (!result.summary || !Array.isArray(result.skills)) {
-      console.error('LangChain: Invalid response structure:', result);
-      throw new Error('Invalid response structure from AI');
+    // Handle the result more robustly
+    let parsedResult;
+    if (typeof result === 'string') {
+      const cleanedResponse = cleanAiResponse(result);
+      console.log('LangChain: Cleaned response:', cleanedResponse);
+      
+      parsedResult = safeJsonParse(cleanedResponse, { summary: '', skills: [] });
+    } else if (result && typeof result === 'object') {
+      parsedResult = result;
+    } else {
+      throw new Error('Invalid response format from AI');
     }
 
-    return {
-      summary: result.summary,
-      skills: result.skills
-    };
+    // Validate the structure
+    if (!validateJsonStructure(parsedResult, ['summary', 'skills'])) {
+      console.error('LangChain: Invalid response structure:', parsedResult);
+      throw new Error('AI response missing required fields (summary or skills)');
+    }
+
+    // Additional validation using zod schema
+    try {
+      const validatedResult = resumeContentSchema.parse(parsedResult);
+      return {
+        summary: validatedResult.summary,
+        skills: validatedResult.skills
+      };
+    } catch (validationError) {
+      console.error('LangChain: Schema validation failed:', validationError);
+      
+      // Fallback with basic validation
+      if (parsedResult.summary && Array.isArray(parsedResult.skills)) {
+        return {
+          summary: String(parsedResult.summary),
+          skills: parsedResult.skills.filter(skill => typeof skill === 'string' && skill.trim().length > 0)
+        };
+      }
+      
+      throw new Error('Generated content does not meet quality standards');
+    }
   } catch (error) {
     console.error('LangChain: Error generating resume content:', error);
     
@@ -195,7 +182,14 @@ export const generateJobResponsibilities = async (data: ResponsibilityGeneration
       industry: data.industry ? `in the ${data.industry} industry` : ''
     });
 
-    return result.text || "Failed to generate responsibilities";
+    // Handle string or object result
+    if (typeof result === 'string') {
+      return result;
+    } else if (result && typeof result === 'object' && 'text' in result) {
+      return String(result.text);
+    }
+
+    return "Failed to generate responsibilities";
   } catch (error) {
     console.error('Error generating job responsibilities with LangChain:', error);
     throw new Error('Failed to generate job responsibilities');
@@ -214,7 +208,13 @@ export const generateEducationDescription = async (
       school
     });
 
-    return result.text || '';
+    if (typeof result === 'string') {
+      return result;
+    } else if (result && typeof result === 'object' && 'text' in result) {
+      return String(result.text);
+    }
+
+    return '';
   } catch (error) {
     console.error('Error generating education description with LangChain:', error);
     return '';
@@ -228,12 +228,38 @@ export const analyzeResume = async (resumeContent: string, jobDescription: strin
       jobDescription: jobDescription
     });
 
-    return {
-      score: result?.score || 0,
-      matchedKeywords: Array.isArray(result?.matchedKeywords) ? result.matchedKeywords : [],
-      missedKeywords: Array.isArray(result?.missedKeywords) ? result.missedKeywords : [],
-      suggestions: Array.isArray(result?.suggestions) ? result.suggestions : []
-    };
+    console.log('LangChain: Raw resume analysis result:', result);
+
+    let parsedResult;
+    if (typeof result === 'string') {
+      const cleanedResponse = cleanAiResponse(result);
+      parsedResult = safeJsonParse(cleanedResponse, {
+        score: 0,
+        matchedKeywords: [],
+        missedKeywords: [],
+        suggestions: []
+      });
+    } else if (result && typeof result === 'object') {
+      parsedResult = result;
+    } else {
+      throw new Error('Invalid response format from AI');
+    }
+
+    // Validate using zod schema
+    try {
+      const validatedResult = resumeAnalysisSchema.parse(parsedResult);
+      return validatedResult;
+    } catch (validationError) {
+      console.warn('LangChain: Schema validation failed, using fallback parsing:', validationError);
+      
+      // Fallback validation
+      return {
+        score: typeof parsedResult?.score === 'number' ? Math.max(0, Math.min(100, parsedResult.score)) : 0,
+        matchedKeywords: Array.isArray(parsedResult?.matchedKeywords) ? parsedResult.matchedKeywords : [],
+        missedKeywords: Array.isArray(parsedResult?.missedKeywords) ? parsedResult.missedKeywords : [],
+        suggestions: Array.isArray(parsedResult?.suggestions) ? parsedResult.suggestions : []
+      };
+    }
   } catch (error) {
     console.error('Error analyzing resume with LangChain:', error);
     throw new Error('Failed to analyze resume');
@@ -250,7 +276,24 @@ export const suggestSkills = async (
       experience: experience.join(', ')
     });
 
-    return Array.isArray(result) ? result : [];
+    console.log('LangChain: Raw skills suggestion result:', result);
+
+    let parsedResult;
+    if (typeof result === 'string') {
+      const cleanedResponse = cleanAiResponse(result);
+      parsedResult = safeJsonParse(cleanedResponse, []);
+    } else if (Array.isArray(result)) {
+      parsedResult = result;
+    } else {
+      parsedResult = [];
+    }
+
+    // Ensure we return an array of strings
+    if (Array.isArray(parsedResult)) {
+      return parsedResult.filter(skill => typeof skill === 'string' && skill.trim().length > 0);
+    }
+
+    return [];
   } catch (error) {
     console.error('Error suggesting skills with LangChain:', error);
     return [];

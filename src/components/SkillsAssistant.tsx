@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -10,6 +9,7 @@ import {
   clearSkillsConversationMemory 
 } from '../services/langchain/langchainService';
 import { useToast } from './ui/use-toast';
+import { ExamplePrompts } from './ExamplePrompts';
 
 interface Message {
   id: string;
@@ -86,92 +86,102 @@ export const SkillsAssistant = () => {
     }
   };
 
+  const handlePromptSelect = (prompt: string) => {
+    setInput(prompt);
+  };
+
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            Skills Development
-          </CardTitle>
-          {messages.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearConversation}
-              className="flex items-center gap-2"
-            >
-              <Trash2 className="h-4 w-4" />
-              Clear
-            </Button>
-          )}
-        </div>
-      </CardHeader>
+    <div className="space-y-4">
+      {messages.length === 0 && (
+        <ExamplePrompts type="skills" onPromptSelect={handlePromptSelect} />
+      )}
       
-      <CardContent className="flex-1 flex flex-col gap-4">
-        <ScrollArea className="flex-1 min-h-[400px] max-h-[500px]">
-          <div className="space-y-4 pr-4">
-            {messages.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
-                <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Let's develop your skills together!</p>
-                <p className="text-sm mt-2">
-                  Ask about skill gaps, learning paths, certifications, and more.
-                </p>
-              </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                      message.isUser
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
-                    <span>Thinking...</span>
-                  </div>
-                </div>
-              </div>
+      <Card className="h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              Skills Development
+            </CardTitle>
+            {messages.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearConversation}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Clear
+              </Button>
             )}
           </div>
-        </ScrollArea>
+        </CardHeader>
         
-        <div className="flex gap-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask about skills development, learning resources, certifications..."
-            className="flex-1 min-h-[80px] resize-none"
-            disabled={isLoading}
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!input.trim() || isLoading}
-            size="sm"
-            className="self-end"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        <CardContent className="flex-1 flex flex-col gap-4">
+          <ScrollArea className="flex-1 min-h-[400px] max-h-[500px]">
+            <div className="space-y-4 pr-4">
+              {messages.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Let's develop your skills together!</p>
+                  <p className="text-sm mt-2">
+                    Ask about skill gaps, learning paths, certifications, and more.
+                  </p>
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        message.isUser
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                      <span>Thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+          
+          <div className="flex gap-2">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask about skills development, learning resources, certifications..."
+              className="flex-1 min-h-[80px] resize-none"
+              disabled={isLoading}
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={!input.trim() || isLoading}
+              size="sm"
+              className="self-end"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

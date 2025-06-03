@@ -7,6 +7,8 @@ Name: {name}
 Education: {course} from {school}
 Interests: {interests}
 
+IMPORTANT: You MUST respond with ONLY a valid JSON object. Do not include any explanatory text, markdown formatting, or additional content outside the JSON.
+
 Generate:
 1. A compelling career objective/professional summary (2-3 sentences) that:
    - Highlights educational background
@@ -14,11 +16,13 @@ Generate:
    - Connects interests with professional goals
 2. A list of 5-7 relevant technical and soft skills based on the course and interests
 
-Return ONLY a JSON object with the following structure, nothing else:
+Return ONLY this exact JSON structure with no additional text:
 {{
   "summary": "career objective here",
-  "skills": ["skill1", "skill2", ...]
+  "skills": ["skill1", "skill2", "skill3", "skill4", "skill5"]
 }}
+
+Do NOT include any text before or after the JSON object.
 `);
 
 export const workDescriptionPrompt = PromptTemplate.fromTemplate(`
@@ -35,6 +39,7 @@ Include:
 - 3-4 bullet points
 
 Format each point starting with "• " and separate with newlines.
+Return only the bullet points, no additional text.
 `);
 
 export const educationDescriptionPrompt = PromptTemplate.fromTemplate(`
@@ -49,7 +54,7 @@ Focus on:
 - Research or projects if applicable
 - Skills developed
 
-Keep it to 2-3 sentences maximum.
+Keep it to 2-3 sentences maximum. Return only the description text.
 `);
 
 export const resumeAnalysisPrompt = PromptTemplate.fromTemplate(`
@@ -61,21 +66,23 @@ RESUME:
 JOB DESCRIPTION:
 {jobDescription}
 
+IMPORTANT: You MUST respond with ONLY a valid JSON object. Do not include any explanatory text, markdown formatting, or additional content outside the JSON.
+
 Provide a detailed analysis with the following components:
-1. A match score as a percentage (0-100%) representing how well the resume matches the job requirements.
+1. A match score as a percentage (0-100) representing how well the resume matches the job requirements.
 2. A list of keywords from the job description that are present in the resume.
 3. A list of important keywords from the job description that are missing from the resume.
 4. Specific suggestions for improving the resume to better match this job description.
 
-Return the analysis as a JSON object with the following format:
+Return ONLY this exact JSON structure with no additional text:
 {{
-  "score": number,
-  "matchedKeywords": string[],
-  "missedKeywords": string[],
-  "suggestions": string[]
+  "score": 75,
+  "matchedKeywords": ["keyword1", "keyword2"],
+  "missedKeywords": ["keyword3", "keyword4"],
+  "suggestions": ["suggestion1", "suggestion2"]
 }}
 
-Be thorough but concise. The score should reflect the overall match quality.
+Do NOT include any text before or after the JSON object.
 `);
 
 export const skillsSuggestionPrompt = PromptTemplate.fromTemplate(`
@@ -90,5 +97,10 @@ Include:
 - Tools and technologies
 - Certifications if applicable
 
-Return only a JSON array of skills, nothing else.
+IMPORTANT: Return only a JSON array of skills with no additional text or formatting.
+
+Example format:
+["skill1", "skill2", "skill3", "skill4", "skill5"]
+
+Do NOT include any text before or after the JSON array.
 `);
