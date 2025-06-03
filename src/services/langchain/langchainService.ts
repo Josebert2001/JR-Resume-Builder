@@ -1,3 +1,4 @@
+
 import {
   resumeContentChain,
   workDescriptionChain,
@@ -252,7 +253,7 @@ export const analyzeResume = async (resumeContent: string, jobDescription: strin
     } catch (validationError) {
       console.warn('LangChain: Schema validation failed, using fallback parsing:', validationError);
       
-      // Fallback validation
+      // Fallback validation with guaranteed required properties
       return {
         score: typeof parsedResult?.score === 'number' ? Math.max(0, Math.min(100, parsedResult.score)) : 0,
         matchedKeywords: Array.isArray(parsedResult?.matchedKeywords) ? parsedResult.matchedKeywords : [],
