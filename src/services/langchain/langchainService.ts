@@ -1,3 +1,4 @@
+
 import {
   resumeContentChain,
   workDescriptionChain,
@@ -8,7 +9,10 @@ import {
 import {
   resumeConversationChain,
   skillsConversationChain,
-  careerConversationChain
+  careerConversationChain,
+  resumeConversationMemory,
+  skillsConversationMemory,
+  careerConversationMemory
 } from "./chains/conversationChains";
 import {
   comprehensiveResumeAnalysisChain,
