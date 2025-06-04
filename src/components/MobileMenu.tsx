@@ -32,10 +32,31 @@ export const MobileMenu = () => {
               <ChevronRight className="h-4 w-4" />
             </Link>
             <Link 
+              to="/resume-builder"
+              className="flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 p-3 rounded-lg hover:bg-accent"
+            >
+              Resume Builder
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+            <Link 
+              to="/ai-assistance"
+              className="flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 p-3 rounded-lg hover:bg-accent"
+            >
+              AI Assistant
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+            <Link 
               to="/job-search"
               className="flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 p-3 rounded-lg hover:bg-accent"
             >
               Job Search
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+            <Link 
+              to="/templates"
+              className="flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 p-3 rounded-lg hover:bg-accent"
+            >
+              Templates
               <ChevronRight className="h-4 w-4" />
             </Link>
             <Link 
@@ -46,7 +67,7 @@ export const MobileMenu = () => {
               <ChevronRight className="h-4 w-4" />
             </Link>
             <Link 
-              to="/cover-letter-guide"
+              to="/cover-letter"
               className="flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 p-3 rounded-lg hover:bg-accent"
             >
               Cover Letter Guide
@@ -57,8 +78,9 @@ export const MobileMenu = () => {
             <Button 
               variant="default" 
               className="w-full bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 transition-all duration-200"
+              asChild
             >
-              Create Resume
+              <Link to="/resume-builder">Create Resume</Link>
             </Button>
           </div>
         </nav>

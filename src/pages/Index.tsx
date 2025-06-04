@@ -1,15 +1,5 @@
 
 import React from 'react';
-import { PersonalInfoForm } from '@/components/PersonalInfoForm';
-import { EducationForm } from '@/components/EducationForm';
-import { ResumePreview } from '@/components/ResumePreview';
-import { StepIndicator } from '@/components/StepIndicator';
-import { useResumeContext } from '@/context/ResumeContext';
-import { WorkExperienceForm } from '@/components/WorkExperienceForm';
-import { SkillsForm } from '@/components/SkillsForm';
-import { ResumeTemplates } from '@/components/ResumeTemplates';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResumeChecker } from '@/components/ResumeChecker';
 import { Link } from 'react-router-dom';
 import Footer from '@/components/Footer';
 import { Button } from "@/components/ui/button";
@@ -20,86 +10,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import { ProjectsForm } from '@/components/ProjectsForm';
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { JobSearch } from "@/components/JobSearch";
-import { JobApplicationTracker } from "@/components/JobApplicationTracker";
 import { FileText, 
   Search, 
-  Calendar,
-  CheckSquare,
-  Palette,
-  ArrowRight,
-  ArrowLeft,
   Bot,
   MessageSquare,
-  TrendingUp
+  TrendingUp,
+  Palette
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-// Main content that uses useResumeContext
-const ResumeBuilder = () => {
-  const { currentStep, resumeData } = useResumeContext();
-  
-  // Total number of steps in the resume building process
-  const totalSteps = 7;
-  
-  console.log("Current step:", currentStep);
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <h1 className="text-4xl font-bold text-center py-8">Resume Builder</h1>
-      <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
-      
-      {/* Step 1: Template Selection */}
-      {currentStep === 1 && <ResumeTemplates />}
-      
-      {/* Step 2: Personal Information */}
-      {currentStep === 2 && <PersonalInfoForm />}
-      
-      {/* Step 3: Education */}
-      {currentStep === 3 && <EducationForm />}
-      
-      {/* Step 4: Work Experience */}
-      {currentStep === 4 && <WorkExperienceForm />}
-      
-      {/* Step 5: Skills */}
-      {currentStep === 5 && <SkillsForm />}
-
-      {/* Step 6: Projects */}
-      {currentStep === 6 && <ProjectsForm />}
-      
-      {/* Step 7: Final Preview */}
-      {currentStep === 7 && (
-        <Tabs defaultValue="preview" className="max-w-4xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="preview">Resume Preview</TabsTrigger>
-            <TabsTrigger value="templates">Change Template</TabsTrigger>
-            <TabsTrigger value="check">Resume Check</TabsTrigger>
-          </TabsList>
-          <TabsContent value="preview">
-            <ResumePreview />
-          </TabsContent>
-          <TabsContent value="templates">
-            <ResumeTemplates />
-          </TabsContent>
-          <TabsContent value="check">
-            <ResumeChecker resumeData={resumeData} />
-          </TabsContent>
-        </Tabs>
-      )}
-    </div>
-  );
-};
-
 const Index = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('home');
-  const { resumeData } = useResumeContext();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -120,16 +42,13 @@ const Index = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <a href="#tips" className="cursor-pointer">Resume Tips</a>
+                  <Link to="/cover-letter" className="cursor-pointer">Cover Letter Guide</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/cover-letter-guide" className="cursor-pointer">Cover Letter Guide</Link>
+                  <Link to="/job-search" className="cursor-pointer">Job Search Tips</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/job-search-tips" className="cursor-pointer">Job Search Tips</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/interview-preparation" className="cursor-pointer">Interview Preparation</Link>
+                  <Link to="/interview-prep" className="cursor-pointer">Interview Preparation</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -137,7 +56,7 @@ const Index = () => {
         </div>
       </header>
       
-      {/* Main hero section - always shows first */}
+      {/* Main hero section */}
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
@@ -151,7 +70,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => setActiveTab('resume')}
+              onClick={() => navigate('/resume-builder')}
             >
               <CardHeader className="text-center">
                 <FileText className="h-12 w-12 mx-auto text-blue-600 mb-2" />
@@ -173,7 +92,7 @@ const Index = () => {
             
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => setActiveTab('job-search')}
+              onClick={() => navigate('/job-search')}
             >
               <CardHeader className="text-center">
                 <Search className="h-12 w-12 mx-auto text-green-600 mb-2" />
@@ -184,7 +103,7 @@ const Index = () => {
             
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => setActiveTab('templates')}
+              onClick={() => navigate('/templates')}
             >
               <CardHeader className="text-center">
                 <Palette className="h-12 w-12 mx-auto text-orange-600 mb-2" />
@@ -225,22 +144,6 @@ const Index = () => {
           </div>
         </div>
       </main>
-      
-      {/* Show ResumeBuilder when activeTab is 'resume' */}
-      {activeTab === 'resume' && <ResumeBuilder />}
-      
-      {/* Show other content based on activeTab */}
-      {activeTab === 'job-search' && (
-        <div className="container mx-auto px-4 py-8">
-          <JobSearch resumeData={resumeData} />
-        </div>
-      )}
-      
-      {activeTab === 'templates' && (
-        <div className="container mx-auto px-4 py-8">
-          <ResumeTemplates />
-        </div>
-      )}
       
       <Footer />
     </div>

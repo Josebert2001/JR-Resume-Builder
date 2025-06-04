@@ -5,6 +5,7 @@ import { Toaster } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
 import FontLoader from "./components/FontLoader";
 import Index from "./pages/Index";
+import ResumeBuilder from "./pages/ResumeBuilder";
 import ResumeTemplatesPage from "./pages/ResumeTemplatesPage";
 import InterviewPreparation from "./pages/InterviewPreparation";
 import JobSearchTips from "./pages/JobSearchTips";
@@ -28,6 +29,7 @@ function App() {
               <div className="min-h-screen bg-background">
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/resume-builder" element={<ResumeBuilder />} />
                   <Route path="/templates" element={<ResumeTemplatesPage />} />
                   <Route path="/interview-prep" element={<InterviewPreparation />} />
                   <Route path="/job-search" element={<JobSearchTips />} />
