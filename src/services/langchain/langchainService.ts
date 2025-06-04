@@ -1,594 +1,285 @@
+import { OpenAI } from "langchain/llms/openai";
 import {
-  resumeContentChain,
-  workDescriptionChain,
-  educationDescriptionChain,
-  resumeAnalysisChain,
-  skillsSuggestionChain
-} from "./chains/resumeChains";
-import {
-  resumeConversationChain,
-  skillsConversationChain,
-  careerConversationChain,
-  resumeConversationMemory,
-  skillsConversationMemory,
-  careerConversationMemory
-} from "./chains/conversationChains";
-import {
-  comprehensiveResumeAnalysisChain,
-  industryOptimizationChain
-} from "./chains/advancedResumeChains";
-import { 
-  safeJsonParse, 
-  validateJsonStructure, 
-  resumeContentSchema, 
-  resumeAnalysisSchema,
-  cleanAiResponse 
-} from "./utils/responseParser";
-import { performHealthCheck, HealthCheckResult } from "./utils/healthCheck";
+  StructuredOutputParser,
+  OutputFixingParser,
+} from "langchain/output_parsers";
+import { PromptTemplate } from "langchain/prompts";
+import { loadQARefineChain } from "langchain/chains";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import * as fs from 'fs';
+import { Document } from "langchain/document";
+import { z } from "zod";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { BufferMemory, ChatMessageHistory } from "langchain/memory";
+import { ConversationChain } from "langchain/chains";
+import { AIChatMessage, HumanChatMessage } from "langchain/schema";
 
-export type GenerationRequest = {
-  name: string;
-  email: string;
-  phone: string;
-  course: string;
-  school: string;
-  interests: string;
-};
+const apiKey = process.env.GROQ_API_KEY;
 
-export type GenerationResponse = {
-  summary: string;
-  skills: string[];
-};
+const llm = new OpenAI({
+  apiKey: apiKey,
+  temperature: 0.7,
+  modelName: 'mixtral-8x7b-32768',
+  cache: true,
+  maxTokens: 1024,
+});
 
-export type ResponsibilityGenerationRequest = {
-  position: string;
-  company: string;
-  industry?: string;
-};
+const chat = new ChatOpenAI({ 
+  apiKey: apiKey,
+  temperature: 0.7,
+  modelName: 'gpt-3.5-turbo',
+  cache: true,
+  maxTokens: 1024,
+});
 
-export type ResumeAnalysisResponse = {
+// Define Zod schema for resume analysis
+const resumeAnalysisSchema = z.object({
+  score: z.number().describe("A score indicating the overall quality of the resume."),
+  matchedKeywords: z.array(z.string()).describe("Keywords from the job description that are present in the resume."),
+  missedKeywords: z.array(z.string()).describe("Keywords from the job description that are missing from the resume."),
+  suggestions: z.array(z.string()).describe("Specific suggestions for improving the resume."),
+});
+
+// Define types based on the Zod schema
+type ResumeAnalysis = z.infer<typeof resumeAnalysisSchema>;
+
+interface ResumeAnalysisResponse extends ResumeAnalysis {
   score: number;
   matchedKeywords: string[];
   missedKeywords: string[];
   suggestions: string[];
-};
+}
 
-export type ComprehensiveAnalysisResponse = {
-  analysis: {
-    strengths: string[];
-    weaknesses: string[];
-    missingElements: string[];
-    industryAlignment: string;
-    overallScore: number;
-  };
-  improvements: {
-    priorityActions: string[];
-    contentSuggestions: {
-      summary: string;
-      skills: string[];
-      experiences: string[];
-    };
-    formattingTips: string[];
-    keywordOptimization: string[];
-  };
-  atsOptimization: {
-    atsScore: number;
-    formatIssues: string[];
-    keywordMatches: string[];
-    missingKeywords: string[];
-    optimizedSections: {
-      skills: string[];
-      experience: string[];
-    };
-    recommendations: string[];
-  };
-};
-
-export type ConversationResponse = {
-  response: string;
-  context: string;
-};
-
-// Health check function using new dedicated service
-export const checkLangchainHealth = async (): Promise<HealthCheckResult> => {
-  return performHealthCheck();
-};
-
-export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
-  console.log('LangChain: Starting resume content generation', data);
-  
-  if (!data.course || !data.school || !data.interests) {
-    throw new Error('Missing required fields for resume content generation');
-  }
-
-  // Check API key before proceeding
-  const apiKey = localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error('Groq API key not configured. Please add your API key in the settings.');
-  }
-
+// Function to safely parse JSON with error handling
+function safeJsonParse<T>(jsonString: string, defaultReturn: T): T {
   try {
-    console.log('LangChain: Invoking resume content chain');
-    const result = await resumeContentChain.invoke({
-      name: data.name,
-      course: data.course,
-      school: data.school,
-      interests: data.interests
-    });
-
-    console.log('LangChain: Raw resume content chain result:', result);
-
-    // Handle the result more robustly
-    let parsedResult;
-    if (typeof result === 'string') {
-      const cleanedResponse = cleanAiResponse(result);
-      console.log('LangChain: Cleaned response:', cleanedResponse);
-      
-      parsedResult = safeJsonParse(cleanedResponse, { summary: '', skills: [] });
-    } else if (result && typeof result === 'object') {
-      parsedResult = result;
-    } else {
-      throw new Error('Invalid response format from AI');
-    }
-
-    // Validate the structure
-    if (!validateJsonStructure(parsedResult, ['summary', 'skills'])) {
-      console.error('LangChain: Invalid response structure:', parsedResult);
-      throw new Error('AI response missing required fields (summary or skills)');
-    }
-
-    // Additional validation using zod schema
-    try {
-      const validatedResult = resumeContentSchema.parse(parsedResult);
-      return {
-        summary: validatedResult.summary,
-        skills: validatedResult.skills
-      };
-    } catch (validationError) {
-      console.error('LangChain: Schema validation failed:', validationError);
-      
-      // Fallback with basic validation
-      if (parsedResult.summary && Array.isArray(parsedResult.skills)) {
-        return {
-          summary: String(parsedResult.summary),
-          skills: parsedResult.skills.filter(skill => typeof skill === 'string' && skill.trim().length > 0)
-        };
-      }
-      
-      throw new Error('Generated content does not meet quality standards');
-    }
+    // Replace single quotes with double quotes, and ensure property names are double-quoted
+    const cleanedJsonString = jsonString.replace(/'/g, "\"").replace(/(\w+):/g, '"$1":');
+    return JSON.parse(cleanedJsonString) as T;
   } catch (error) {
-    console.error('LangChain: Error generating resume content:', error);
+    console.error('Failed to parse JSON:', error);
+    return defaultReturn;
+  }
+}
+
+const getResumeAnalysisPrompt = (resumeText: string) => {
+  return `
+    Analyze the following resume text and provide feedback:
+    ${resumeText}
+
+    Provide a score (0-100), matched keywords, missed keywords, and suggestions for improvement.
+    Ensure the response is valid JSON matching the ResumeAnalysisResponse interface.
+  `;
+};
+
+const getJobTargetedAnalysisPrompt = (resumeText: string, jobDescription: string) => {
+  return `
+    Analyze the following resume text in relation to the job description provided.
+    Resume Text: ${resumeText}
+    Job Description: ${jobDescription}
+
+    Provide a score (0-100), list of matched keywords, list of missed keywords, and suggestions for improvement to better align the resume with the job description.
+    Ensure the response is valid JSON matching the ResumeAnalysisResponse interface.
+  `;
+};
+
+export const analyzeResume = async (resumeText: string, jobDescription?: string): Promise<ResumeAnalysisResponse> => {
+  try {
+    if (!isApiKeyValid()) {
+      throw new Error('API key is not configured. Please set your Groq API key in the settings.');
+    }
+
+    const prompt = jobDescription 
+      ? getJobTargetedAnalysisPrompt(resumeText, jobDescription)
+      : getResumeAnalysisPrompt(resumeText);
+
+    const response = await llm.invoke(prompt);
     
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        throw new Error('Please configure your Groq API key to use AI features.');
-      } else if (error.message.includes('rate limit')) {
-        throw new Error('Rate limit exceeded. Please try again in a moment.');
-      } else if (error.message.includes('network')) {
-        throw new Error('Network error. Please check your connection and try again.');
-      }
-    }
-    
-    throw new Error(error instanceof Error ? error.message : 'Failed to generate resume content');
-  }
-};
-
-export const generateJobResponsibilities = async (data: ResponsibilityGenerationRequest): Promise<string> => {
-  try {
-    const result = await workDescriptionChain.invoke({
-      position: data.position,
-      company: data.company,
-      industry: data.industry ? `in the ${data.industry} industry` : ''
+    // Parse the response and ensure it matches our interface
+    const parsed = safeJsonParse<ResumeAnalysisResponse>(response, {
+      score: 0,
+      matchedKeywords: [],
+      missedKeywords: [],
+      suggestions: []
     });
 
-    // Handle string or object result
-    if (typeof result === 'string') {
-      return result;
-    } else if (result && typeof result === 'object' && 'text' in result) {
-      return String(result.text);
-    }
-
-    return "Failed to generate responsibilities";
-  } catch (error) {
-    console.error('Error generating job responsibilities with LangChain:', error);
-    throw new Error('Failed to generate job responsibilities');
-  }
-};
-
-export const generateEducationDescription = async (
-  degree: string,
-  fieldOfStudy: string,
-  school: string
-): Promise<string> => {
-  try {
-    const result = await educationDescriptionChain.invoke({
-      degree,
-      fieldOfStudy,
-      school
-    });
-
-    if (typeof result === 'string') {
-      return result;
-    } else if (result && typeof result === 'object' && 'text' in result) {
-      return String(result.text);
-    }
-
-    return '';
-  } catch (error) {
-    console.error('Error generating education description with LangChain:', error);
-    return '';
-  }
-};
-
-export const analyzeResume = async (resumeContent: string, jobDescription: string): Promise<ResumeAnalysisResponse> => {
-  try {
-    const result = await resumeAnalysisChain.invoke({
-      resumeText: resumeContent,
-      jobDescription: jobDescription
-    });
-
-    console.log('LangChain: Raw resume analysis result:', result);
-
-    let parsedResult;
-    if (typeof result === 'string') {
-      const cleanedResponse = cleanAiResponse(result);
-      parsedResult = safeJsonParse(cleanedResponse, {
-        score: 0,
-        matchedKeywords: [],
-        missedKeywords: [],
-        suggestions: []
-      });
-    } else if (result && typeof result === 'object') {
-      parsedResult = result;
-    } else {
-      throw new Error('Invalid response format from AI');
-    }
-
-    // Validate using zod schema
-    try {
-      const validatedResult = resumeAnalysisSchema.parse(parsedResult);
-      return validatedResult;
-    } catch (validationError) {
-      console.warn('LangChain: Schema validation failed, using fallback parsing:', validationError);
-      
-      // Fallback validation with guaranteed required properties
-      const fallbackResult: ResumeAnalysisResponse = {
-        score: typeof parsedResult?.score === 'number' ? Math.max(0, Math.min(100, parsedResult.score)) : 0,
-        matchedKeywords: Array.isArray(parsedResult?.matchedKeywords) ? parsedResult.matchedKeywords : [],
-        missedKeywords: Array.isArray(parsedResult?.missedKeywords) ? parsedResult.missedKeywords : [],
-        suggestions: Array.isArray(parsedResult?.suggestions) ? parsedResult.suggestions : []
-      };
-      return fallbackResult;
-    }
-  } catch (error) {
-    console.error('Error analyzing resume with LangChain:', error);
-    throw new Error('Failed to analyze resume');
-  }
-};
-
-export const suggestSkills = async (
-  position: string,
-  experience: string[]
-): Promise<string[]> => {
-  try {
-    const result = await skillsSuggestionChain.invoke({
-      position,
-      experience: experience.join(', ')
-    });
-
-    console.log('LangChain: Raw skills suggestion result:', result);
-
-    let parsedResult;
-    if (typeof result === 'string') {
-      const cleanedResponse = cleanAiResponse(result);
-      parsedResult = safeJsonParse(cleanedResponse, []);
-    } else if (Array.isArray(result)) {
-      parsedResult = result;
-    } else {
-      parsedResult = [];
-    }
-
-    // Ensure we return an array of strings
-    if (Array.isArray(parsedResult)) {
-      return parsedResult.filter(skill => typeof skill === 'string' && skill.trim().length > 0);
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Error suggesting skills with LangChain:', error);
-    return [];
-  }
-};
-
-export const getResumeConversationResponse = async (input: string): Promise<ConversationResponse> => {
-  try {
-    console.log('LangChain: Processing resume conversation input:', input);
-    
-    // Check API key
-    const apiKey = localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY;
-    if (!apiKey) {
-      throw new Error('Groq API key not configured. Please add your API key in the settings.');
-    }
-
-    // Validate input
-    if (!input || input.trim().length === 0) {
-      throw new Error('Please provide a valid question or request.');
-    }
-
-    const result = await resumeConversationChain.invoke({
-      input: input.trim()
-    });
-
-    console.log('LangChain: Resume conversation result:', result);
-
-    // Handle different possible response formats
-    let response = '';
-    if (typeof result === 'string') {
-      response = result;
-    } else if (result && typeof result === 'object') {
-      response = result.response || result.text || result.output || 'No response generated';
-    } else {
-      response = 'No response generated';
-    }
-
-    if (!response || response.trim().length === 0) {
-      throw new Error('Empty response from AI. Please try rephrasing your question.');
-    }
-
+    // Validate and return with required properties
     return {
-      response: response,
-      context: 'resume_assistance'
+      score: parsed.score ?? 0,
+      matchedKeywords: parsed.matchedKeywords ?? [],
+      missedKeywords: parsed.missedKeywords ?? [],
+      suggestions: parsed.suggestions ?? []
     };
   } catch (error) {
-    console.error('LangChain: Error in resume conversation:', error);
-    
-    // Provide more specific error messages
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        throw new Error('Please configure your Groq API key to use AI chat features.');
-      } else if (error.message.includes('additional_kwargs')) {
-        console.log('LangChain: Clearing conversation memory due to memory error');
-        await clearResumeConversationMemory();
-        throw new Error('Conversation memory error. Memory has been cleared - please try again.');
-      } else if (error.message.includes('rate limit')) {
-        throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
-      } else if (error.message.includes('network')) {
-        throw new Error('Network error. Please check your connection and try again.');
-      }
-    }
-    
-    throw new Error(error instanceof Error ? error.message : 'Failed to process resume conversation');
+    console.error('Resume analysis error:', error);
+    throw error;
   }
 };
 
-export const getSkillsConversationResponse = async (input: string): Promise<ConversationResponse> => {
-  try {
-    console.log('LangChain: Processing skills conversation input:', input);
-    
-    // Check API key
-    const apiKey = localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY;
-    if (!apiKey) {
-      throw new Error('Groq API key not configured. Please add your API key in the settings.');
-    }
-
-    if (!input || input.trim().length === 0) {
-      throw new Error('Please provide a valid question or request.');
-    }
-    
-    const result = await skillsConversationChain.invoke({
-      input: input.trim()
-    });
-
-    console.log('LangChain: Skills conversation result:', result);
-
-    let response = '';
-    if (typeof result === 'string') {
-      response = result;
-    } else if (result && typeof result === 'object') {
-      response = result.response || result.text || result.output || 'No response generated';
-    } else {
-      response = 'No response generated';
-    }
-
-    if (!response || response.trim().length === 0) {
-      throw new Error('Empty response from AI. Please try rephrasing your question.');
-    }
-
-    return {
-      response: response,
-      context: 'skills_development'
-    };
-  } catch (error) {
-    console.error('LangChain: Error in skills conversation:', error);
-    
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        throw new Error('Please configure your Groq API key to use AI chat features.');
-      } else if (error.message.includes('additional_kwargs')) {
-        console.log('LangChain: Clearing skills conversation memory due to memory error');
-        await clearSkillsConversationMemory();
-        throw new Error('Conversation memory error. Memory has been cleared - please try again.');
-      }
-    }
-    
-    throw new Error(error instanceof Error ? error.message : 'Failed to process skills conversation');
-  }
+// Function to check if the API key is valid
+export const isApiKeyValid = (): boolean => {
+  return !!apiKey;
 };
 
-export const getCareerConversationResponse = async (input: string): Promise<ConversationResponse> => {
-  try {
-    console.log('LangChain: Processing career conversation input:', input);
-    
-    // Check API key
-    const apiKey = localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY;
-    if (!apiKey) {
-      throw new Error('Groq API key not configured. Please add your API key in the settings.');
-    }
-
-    if (!input || input.trim().length === 0) {
-      throw new Error('Please provide a valid question or request.');
-    }
-    
-    const result = await careerConversationChain.invoke({
-      input: input.trim()
-    });
-
-    console.log('LangChain: Career conversation result:', result);
-
-    let response = '';
-    if (typeof result === 'string') {
-      response = result;
-    } else if (result && typeof result === 'object') {
-      response = result.response || result.text || result.output || 'No response generated';
-    } else {
-      response = 'No response generated';
-    }
-
-    if (!response || response.trim().length === 0) {
-      throw new Error('Empty response from AI. Please try rephrasing your question.');
-    }
-
-    return {
-      response: response,
-      context: 'career_guidance'
-    };
-  } catch (error) {
-    console.error('LangChain: Error in career conversation:', error);
-    
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        throw new Error('Please configure your Groq API key to use AI chat features.');
-      } else if (error.message.includes('additional_kwargs')) {
-        console.log('LangChain: Clearing career conversation memory due to memory error');
-        await clearCareerConversationMemory();
-        throw new Error('Conversation memory error. Memory has been cleared - please try again.');
-      }
-    }
-    
-    throw new Error(error instanceof Error ? error.message : 'Failed to process career conversation');
-  }
+// Function to set the API key
+export const setApiKey = (newApiKey: string): void => {
+  process.env.GROQ_API_KEY = newApiKey;
 };
 
-export const getComprehensiveResumeAnalysis = async (
-  resumeContent: string,
-  targetRole: string,
-  industry: string,
-  jobDescription: string
-): Promise<ComprehensiveAnalysisResponse> => {
-  try {
-    const result = await comprehensiveResumeAnalysisChain.invoke({
-      resumeContent,
-      targetRole,
-      industry,
-      jobDescription
-    });
+// Resume Conversation Chain
+let resumeConversationMemory: BufferMemory | null = null;
 
-    return {
-      analysis: result.analysis || {
-        strengths: [],
-        weaknesses: [],
-        missingElements: [],
-        industryAlignment: 'low',
-        overallScore: 0
-      },
-      improvements: result.improvements || {
-        priorityActions: [],
-        contentSuggestions: { summary: '', skills: [], experiences: [] },
-        formattingTips: [],
-        keywordOptimization: []
-      },
-      atsOptimization: result.atsOptimization || {
-        atsScore: 0,
-        formatIssues: [],
-        keywordMatches: [],
-        missingKeywords: [],
-        optimizedSections: { skills: [], experience: [] },
-        recommendations: []
-      }
-    };
-  } catch (error) {
-    console.error('Error in comprehensive resume analysis:', error);
-    throw new Error('Failed to perform comprehensive analysis');
-  }
+export const initializeResumeConversation = () => {
+  resumeConversationMemory = new BufferMemory({
+    chatHistory: new ChatMessageHistory([
+      new AIChatMessage("Hello! I am your resume assistant. How can I help you with your resume today?"),
+    ]),
+    memoryKey: "chat_history",
+    inputKey: "input",
+    outputKey: "response",
+    llm: chat,
+  });
 };
 
-export const getIndustryOptimization = async (
-  resumeContent: string,
-  targetRole: string,
-  industry: string
-): Promise<{
-  industryKeywords: string[];
-  preferredFormat: string;
-  essentialSkills: string[];
-  industryTrends: string[];
-  optimizedContent: {
-    summary: string;
-    skills: string[];
-    experience: string[];
-  };
-  additionalSections: string[];
-}> => {
+if (!resumeConversationMemory) {
+  initializeResumeConversation();
+}
+
+export const getResumeConversationResponse = async (input: string): Promise<{ response: string }> => {
+  if (!resumeConversationMemory) {
+    initializeResumeConversation();
+  }
+
+  const chain = new ConversationChain({
+    memory: resumeConversationMemory,
+    prompt: PromptTemplate.fromTemplate(`The following is a friendly conversation between a human and an AI resume assistant. The AI is helpful, creative, clever, and very friendly.
+
+    Current conversation:
+    {chat_history}
+    
+    Human: {input}
+    AI:`),
+    llm: chat,
+  });
+
   try {
-    const result = await industryOptimizationChain.invoke({
-      resumeContent,
-      targetRole,
-      industry
-    });
-
-    // Type assertion to handle ChainValues return type
-    const typedResult = result as any;
-
-    return {
-      industryKeywords: Array.isArray(typedResult?.industryKeywords) ? typedResult.industryKeywords : [],
-      preferredFormat: typedResult?.preferredFormat || '',
-      essentialSkills: Array.isArray(typedResult?.essentialSkills) ? typedResult.essentialSkills : [],
-      industryTrends: Array.isArray(typedResult?.industryTrends) ? typedResult.industryTrends : [],
-      optimizedContent: {
-        summary: typedResult?.optimizedContent?.summary || '',
-        skills: Array.isArray(typedResult?.optimizedContent?.skills) ? typedResult.optimizedContent.skills : [],
-        experience: Array.isArray(typedResult?.optimizedContent?.experience) ? typedResult.optimizedContent.experience : []
-      },
-      additionalSections: Array.isArray(typedResult?.additionalSections) ? typedResult.additionalSections : []
-    };
+    const response = await chain.call({ input });
+    return { response: response.response };
   } catch (error) {
-    console.error('Error in industry optimization:', error);
-    throw new Error('Failed to perform industry optimization');
+    console.error('Resume conversation error:', error);
+    throw error;
   }
 };
 
 export const clearResumeConversationMemory = async (): Promise<void> => {
-  try {
+  if (resumeConversationMemory) {
     await resumeConversationMemory.clear();
-    console.log('LangChain: Resume conversation memory cleared successfully');
+    initializeResumeConversation();
+  }
+};
+
+// Skills Conversation Chain
+let skillsConversationMemory: BufferMemory | null = null;
+
+export const initializeSkillsConversation = () => {
+  skillsConversationMemory = new BufferMemory({
+    chatHistory: new ChatMessageHistory([
+      new AIChatMessage("Hello! I am your skills development assistant. How can I help you with your skills today?"),
+    ]),
+    memoryKey: "chat_history",
+    inputKey: "input",
+    outputKey: "response",
+    llm: chat,
+  });
+};
+
+if (!skillsConversationMemory) {
+  initializeSkillsConversation();
+}
+
+export const getSkillsConversationResponse = async (input: string): Promise<{ response: string }> => {
+  if (!skillsConversationMemory) {
+    initializeSkillsConversation();
+  }
+
+  const chain = new ConversationChain({
+    memory: skillsConversationMemory,
+    prompt: PromptTemplate.fromTemplate(`The following is a friendly conversation between a human and an AI skills development assistant. The AI is helpful, creative, clever, and very friendly.
+
+    Current conversation:
+    {chat_history}
+    
+    Human: {input}
+    AI:`),
+    llm: chat,
+  });
+
+  try {
+    const response = await chain.call({ input });
+    return { response: response.response };
   } catch (error) {
-    console.error('LangChain: Error clearing resume conversation memory:', error);
+    console.error('Skills conversation error:', error);
+    throw error;
   }
 };
 
 export const clearSkillsConversationMemory = async (): Promise<void> => {
-  try {
+  if (skillsConversationMemory) {
     await skillsConversationMemory.clear();
-    console.log('LangChain: Skills conversation memory cleared successfully');
+    initializeSkillsConversation();
+  }
+};
+
+// Career Conversation Chain
+let careerConversationMemory: BufferMemory | null = null;
+
+export const initializeCareerConversation = () => {
+  careerConversationMemory = new BufferMemory({
+    chatHistory: new ChatMessageHistory([
+      new AIChatMessage("Hello! I am your career guidance assistant. How can I help you with your career today?"),
+    ]),
+    memoryKey: "chat_history",
+    inputKey: "input",
+    outputKey: "response",
+    llm: chat,
+  });
+};
+
+if (!careerConversationMemory) {
+  initializeCareerConversation();
+}
+
+export const getCareerConversationResponse = async (input: string): Promise<{ response: string }> => {
+  if (!careerConversationMemory) {
+    initializeCareerConversation();
+  }
+
+  const chain = new ConversationChain({
+    memory: careerConversationMemory,
+    prompt: PromptTemplate.fromTemplate(`The following is a friendly conversation between a human and an AI career guidance assistant. The AI is helpful, creative, clever, and very friendly.
+
+    Current conversation:
+    {chat_history}
+    
+    Human: {input}
+    AI:`),
+    llm: chat,
+  });
+
+  try {
+    const response = await chain.call({ input });
+    return { response: response.response };
   } catch (error) {
-    console.error('LangChain: Error clearing skills conversation memory:', error);
+    console.error('Career conversation error:', error);
+    throw error;
   }
 };
 
 export const clearCareerConversationMemory = async (): Promise<void> => {
-  try {
+  if (careerConversationMemory) {
     await careerConversationMemory.clear();
-    console.log('LangChain: Career conversation memory cleared successfully');
-  } catch (error) {
-    console.error('LangChain: Error clearing career conversation memory:', error);
+    initializeCareerConversation();
   }
-};
-
-export const clearAllConversationMemory = async (): Promise<void> => {
-  console.log('LangChain: Clearing all conversation memories');
-  await Promise.all([
-    clearResumeConversationMemory(),
-    clearSkillsConversationMemory(),
-    clearCareerConversationMemory()
-  ]);
 };
