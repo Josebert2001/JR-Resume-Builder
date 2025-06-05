@@ -70,14 +70,14 @@ export class AgentOrchestrator {
       data: { userProfile, type: 'daily_analysis' }
     });
 
-    // Schedule job market scan
+    // Schedule REAL job market scan using LangChain
     this.addTask({
-      id: `job_scan_${Date.now()}`,
+      id: `real_job_scan_${Date.now()}`,
       type: 'job_matching',
       priority: 'high',
       status: 'pending',
       scheduledFor: new Date(now.getTime() + 5000), // 5 seconds later
-      data: { userProfile, type: 'market_scan' }
+      data: { userProfile, type: 'real_job_search' }
     });
 
     // Schedule skills gap analysis
@@ -150,13 +150,27 @@ export class AgentOrchestrator {
           id: `job_opportunity_${Date.now()}_${Math.random()}`,
           type: 'opportunity',
           title: `New Job Match: ${job.title}`,
-          description: `Found a ${job.match}% match at ${job.company}. ${job.reason}`,
-          actionRequired: job.match > 80,
-          priority: job.match > 90 ? 'high' : job.match > 75 ? 'medium' : 'low',
+          description: `Found a ${job.match || job.matchScore}% match at ${job.company}. ${job.reason || 'Skills-based matching'}`,
+          actionRequired: (job.match || job.matchScore) > 80,
+          priority: (job.match || job.matchScore) > 90 ? 'high' : (job.match || job.matchScore) > 75 ? 'medium' : 'low',
           createdAt: new Date(),
           data: job
         });
       });
+
+      // Add market insights
+      if (task.result.marketInsights) {
+        this.addInsight({
+          id: `market_insight_${Date.now()}`,
+          type: 'recommendation',
+          title: 'Job Market Analysis',
+          description: `Found ${task.result.totalFound || task.result.marketInsights.totalJobs} jobs. Average salary: ${task.result.marketInsights.avgSalary}. Growth: ${task.result.marketInsights.growth}`,
+          actionRequired: false,
+          priority: 'medium',
+          createdAt: new Date(),
+          data: task.result.marketInsights
+        });
+      }
     }
 
     if (task.type === 'resume_optimization' && task.result.suggestions) {
