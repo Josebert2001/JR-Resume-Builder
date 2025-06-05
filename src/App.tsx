@@ -11,6 +11,7 @@ import InterviewPreparation from "./pages/InterviewPreparation";
 import JobSearchTips from "./pages/JobSearchTips";
 import CoverLetterGuide from "./pages/CoverLetterGuide";
 import AIAssistance from "./pages/AIAssistance";
+import AgenticAssistance from "./pages/AgenticAssistance";
 import NotFound from "./pages/NotFound";
 import { ResumeProvider } from "./context/ResumeContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -35,6 +36,7 @@ function App() {
                   <Route path="/job-search" element={<JobSearchTips />} />
                   <Route path="/cover-letter" element={<CoverLetterGuide />} />
                   <Route path="/ai-assistance" element={<AIAssistance />} />
+                  <Route path="/agentic-assistance" element={<AgenticAssistance />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>
