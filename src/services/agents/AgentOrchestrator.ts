@@ -175,6 +175,27 @@ export class AgentOrchestrator {
     }
   }
 
+  private async generateInsights() {
+    // Generate periodic insights based on current state
+    const completedTasks = this.tasks.filter(t => t.status === 'completed');
+    const recentTasks = completedTasks.filter(
+      t => t.result && Date.now() - new Date(t.scheduledFor).getTime() < 300000 // Last 5 minutes
+    );
+
+    if (recentTasks.length === 0) return;
+
+    // Generate summary insight
+    this.addInsight({
+      id: `summary_${Date.now()}`,
+      type: 'milestone',
+      title: 'Progress Update',
+      description: `Completed ${recentTasks.length} tasks in the last 5 minutes. Your career profile is being continuously optimized.`,
+      actionRequired: false,
+      priority: 'low',
+      createdAt: new Date()
+    });
+  }
+
   addTask(task: AgentTask) {
     this.tasks.push(task);
   }
