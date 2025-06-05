@@ -3,6 +3,7 @@ import { ChatGroq } from "@langchain/groq";
 import { DynamicTool } from "@langchain/core/tools";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { pull } from "langchain/hub";
 
 export interface JobSearchParams {
   query: string;
@@ -28,11 +29,11 @@ export interface JobResult {
 
 export class JobSearchAgent {
   private llm: ChatGroq;
-  private agent: AgentExecutor;
+  private executor: AgentExecutor | null = null;
 
   constructor(apiKey?: string) {
     this.llm = new ChatGroq({
-      apiKey: apiKey || process.env.GROQ_API_KEY,
+      apiKey: apiKey || process.env.GROQ_API_KEY || "gsk_placeholder",
       model: "mixtral-8x7b-32768",
       temperature: 0.1,
     });
@@ -40,57 +41,67 @@ export class JobSearchAgent {
     this.setupAgent();
   }
 
-  private setupAgent() {
-    const tools = [
-      new DynamicTool({
-        name: "search_indeed_jobs",
-        description: "Search for jobs on Indeed based on query and location",
-        func: async (input: string) => {
-          const params = JSON.parse(input) as JobSearchParams;
-          return this.searchIndeedJobs(params);
-        },
-      }),
-      new DynamicTool({
-        name: "search_remote_jobs",
-        description: "Search for remote job opportunities",
-        func: async (input: string) => {
-          const params = JSON.parse(input) as JobSearchParams;
-          return this.searchRemoteJobs(params);
-        },
-      }),
-      new DynamicTool({
-        name: "analyze_job_market",
-        description: "Analyze job market trends for a specific location and role",
-        func: async (input: string) => {
-          const params = JSON.parse(input) as JobSearchParams;
-          return this.analyzeJobMarket(params);
-        },
-      }),
-    ];
+  private async setupAgent() {
+    try {
+      const tools = [
+        new DynamicTool({
+          name: "search_indeed_jobs",
+          description: "Search for jobs on Indeed based on query and location",
+          func: async (input: string) => {
+            const params = JSON.parse(input) as JobSearchParams;
+            return this.searchIndeedJobs(params);
+          },
+        }),
+        new DynamicTool({
+          name: "search_remote_jobs",
+          description: "Search for remote job opportunities",
+          func: async (input: string) => {
+            const params = JSON.parse(input) as JobSearchParams;
+            return this.searchRemoteJobs(params);
+          },
+        }),
+        new DynamicTool({
+          name: "analyze_job_market",
+          description: "Analyze job market trends for a specific location and role",
+          func: async (input: string) => {
+            const params = JSON.parse(input) as JobSearchParams;
+            return this.analyzeJobMarket(params);
+          },
+        }),
+      ];
 
-    const prompt = ChatPromptTemplate.fromTemplate(`
-      You are a specialized job search agent. Your goal is to find the most relevant job opportunities for users based on their skills, location, and preferences.
+      const prompt = ChatPromptTemplate.fromTemplate(`
+        You are a specialized job search agent. Your goal is to find the most relevant job opportunities for users based on their skills, location, and preferences.
 
-      Available tools: {tools}
-      Tool names: {tool_names}
+        Available tools: {tools}
+        Tool names: {tool_names}
 
-      When searching for jobs:
-      1. Use the user's location to find local opportunities
-      2. Match their skills to job requirements
-      3. Consider their experience level and preferences
-      4. Provide salary insights when available
-      5. Rank results by relevance
+        When searching for jobs:
+        1. Use the user's location to find local opportunities
+        2. Match their skills to job requirements
+        3. Consider their experience level and preferences
+        4. Provide salary insights when available
+        5. Rank results by relevance
 
-      User request: {input}
-      
-      {agent_scratchpad}
-    `);
+        User request: {input}
+        
+        {agent_scratchpad}
+      `);
 
-    this.agent = createReactAgent({
-      llm: this.llm,
-      tools,
-      prompt,
-    });
+      const agent = await createReactAgent({
+        llm: this.llm,
+        tools,
+        prompt,
+      });
+
+      this.executor = new AgentExecutor({
+        agent,
+        tools,
+        verbose: true,
+      });
+    } catch (error) {
+      console.error('Failed to setup agent:', error);
+    }
   }
 
   private async searchIndeedJobs(params: JobSearchParams): Promise<string> {
@@ -170,40 +181,33 @@ export class JobSearchAgent {
 
   async searchJobs(params: JobSearchParams): Promise<JobResult[]> {
     try {
-      const executor = new AgentExecutor({
-        agent: this.agent,
-        tools: [
-          new DynamicTool({
-            name: "search_indeed_jobs",
-            description: "Search for jobs on Indeed",
-            func: this.searchIndeedJobs.bind(this),
-          }),
-          new DynamicTool({
-            name: "search_remote_jobs", 
-            description: "Search for remote jobs",
-            func: this.searchRemoteJobs.bind(this),
-          }),
-        ],
-      });
+      if (!this.executor) {
+        // If agent setup failed, fallback to direct search
+        return this.fallbackSearch(params);
+      }
 
-      const result = await executor.invoke({
+      const result = await this.executor.invoke({
         input: `Find ${params.query} jobs in ${params.location} for someone with skills: ${params.skills?.join(', ')}`,
       });
 
       // Parse the agent's response to extract job results
       const jobs = this.parseJobResults(result.output);
-      return jobs;
+      return jobs.length > 0 ? jobs : this.fallbackSearch(params);
     } catch (error) {
       console.error('Error in job search agent:', error);
       // Fallback to direct search
-      const indeedResults = await this.searchIndeedJobs(params);
-      const remoteResults = await this.searchRemoteJobs(params);
-      
-      return [
-        ...JSON.parse(indeedResults),
-        ...JSON.parse(remoteResults)
-      ];
+      return this.fallbackSearch(params);
     }
+  }
+
+  private async fallbackSearch(params: JobSearchParams): Promise<JobResult[]> {
+    const indeedResults = await this.searchIndeedJobs(params);
+    const remoteResults = await this.searchRemoteJobs(params);
+    
+    return [
+      ...JSON.parse(indeedResults),
+      ...JSON.parse(remoteResults)
+    ];
   }
 
   private parseJobResults(agentOutput: string): JobResult[] {

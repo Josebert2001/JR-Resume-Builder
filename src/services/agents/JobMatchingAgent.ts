@@ -1,4 +1,3 @@
-
 import { JobSearchAgent, JobSearchParams, JobResult } from '../langchain/agents/JobSearchAgent';
 import { LocationService } from '../locationService';
 
@@ -78,9 +77,9 @@ export class JobMatchingAgent {
 
   private inferJobTitle(userProfile: any): string {
     // Try to infer job title from experience or skills
-    const experience = userProfile?.experience?.[0];
-    if (experience?.position) {
-      return experience.position;
+    const workExperience = userProfile?.workExperience?.[0];
+    if (workExperience?.position) {
+      return workExperience.position;
     }
     
     const skills = userProfile?.skills?.map((s: any) => s.name) || [];
@@ -100,10 +99,10 @@ export class JobMatchingAgent {
   }
 
   private getExperienceLevel(userProfile: any): string {
-    const experience = userProfile?.experience || [];
+    const workExperience = userProfile?.workExperience || [];
     
-    if (experience.length === 0) return 'Entry Level';
-    if (experience.length >= 3) return 'Senior Level';
+    if (workExperience.length === 0) return 'Entry Level';
+    if (workExperience.length >= 3) return 'Senior Level';
     return 'Mid Level';
   }
 

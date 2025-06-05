@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -102,7 +101,7 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
   };
 
   const getExperienceLevel = (): string => {
-    const experience = resumeData?.experience || [];
+    const experience = resumeData?.workExperience || [];
     if (experience.length === 0) return 'Entry Level';
     if (experience.length >= 3) return 'Senior Level';
     return 'Mid Level';
