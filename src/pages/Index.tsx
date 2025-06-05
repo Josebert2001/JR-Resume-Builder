@@ -92,7 +92,7 @@ const Index = () => {
             
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-              onClick={() => navigate('/job-search')}
+              onClick={() => navigate('/job-search-ai')}
             >
               <CardHeader className="text-center">
                 <Search className="h-12 w-12 mx-auto text-green-600 mb-2" />

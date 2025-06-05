@@ -9,6 +9,7 @@ import ResumeBuilder from "./pages/ResumeBuilder";
 import ResumeTemplatesPage from "./pages/ResumeTemplatesPage";
 import InterviewPreparation from "./pages/InterviewPreparation";
 import JobSearchTips from "./pages/JobSearchTips";
+import JobSearchPage from "./pages/JobSearchPage";
 import CoverLetterGuide from "./pages/CoverLetterGuide";
 import AIAssistance from "./pages/AIAssistance";
 import AgenticAssistance from "./pages/AgenticAssistance";
@@ -34,6 +35,7 @@ function App() {
                   <Route path="/templates" element={<ResumeTemplatesPage />} />
                   <Route path="/interview-prep" element={<InterviewPreparation />} />
                   <Route path="/job-search" element={<JobSearchTips />} />
+                  <Route path="/job-search-ai" element={<JobSearchPage />} />
                   <Route path="/cover-letter" element={<CoverLetterGuide />} />
                   <Route path="/ai-assistance" element={<AIAssistance />} />
                   <Route path="/agentic-assistance" element={<AgenticAssistance />} />
