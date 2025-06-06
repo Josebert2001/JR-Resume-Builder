@@ -1,15 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Building2, ArrowUpRight, Loader2, Navigation } from 'lucide-react';
+import { Search, MapPin, Building2, ArrowUpRight, Loader2, Navigation, ExternalLink, AlertCircle } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
-import { JobSearchAgent, JobSearchParams, JobResult } from '../services/langchain/agents/JobSearchAgent';
+import { RealJobSearchService, RealJobResult, JobSearchQuery } from '../services/realJobSearchService';
 import { LocationService, LocationData } from '../services/locationService';
+import { Alert, AlertDescription } from './ui/alert';
 import type { ResumeData } from '@/context/ResumeContext';
 
 interface JobSearchProps {
@@ -18,12 +20,12 @@ interface JobSearchProps {
 
 export const JobSearch = ({ resumeData }: JobSearchProps) => {
   const [isSearching, setIsSearching] = useState(false);
-  const [jobs, setJobs] = useState<JobResult[]>([]);
+  const [jobs, setJobs] = useState<RealJobResult[]>([]);
   const [query, setQuery] = useState('');
   const [location, setLocation] = useState('');
   const [userLocation, setUserLocation] = useState<LocationData | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
-  const [jobSearchAgent] = useState(() => new JobSearchAgent());
+  const [searchError, setSearchError] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -31,6 +33,11 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
     const resumeLocation = LocationService.extractLocationFromResume(resumeData);
     if (resumeLocation) {
       setLocation(resumeLocation);
+    }
+
+    // Auto-populate query based on resume
+    if (resumeData.workExperience?.[0]?.position) {
+      setQuery(resumeData.workExperience[0].position);
     }
   }, [resumeData]);
 
@@ -55,12 +62,20 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
     if (!query.trim()) return;
     
     setIsSearching(true);
+    setSearchError(null);
 
     try {
+      // Check if API key is configured
+      const apiKey = localStorage.getItem('groq_api_key');
+      if (!apiKey) {
+        setSearchError('Please configure your API key in the API Setup tab first.');
+        return;
+      }
+
       // Extract skills from resume
       const skills = resumeData.skills?.map(s => s.name) || [];
       
-      const searchParams: JobSearchParams = {
+      const searchQuery: JobSearchQuery = {
         query: query.trim(),
         location: location || 'Remote',
         skills: skills,
@@ -68,10 +83,10 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
         jobType: 'Full-time'
       };
 
-      console.log('Searching with LangChain agent:', searchParams);
+      console.log('Searching with enhanced service:', searchQuery);
       
-      // Use LangChain agent for real job search
-      const searchResults = await jobSearchAgent.searchJobs(searchParams);
+      // Use real job search service
+      const searchResults = await RealJobSearchService.searchJobs(searchQuery);
       
       // Score jobs based on user's resume
       const scoredJobs = scoreJobsForUser(searchResults);
@@ -80,21 +95,8 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
       
     } catch (error) {
       console.error('Job search failed:', error);
-      // Fallback to mock data
-      setJobs([
-        {
-          id: '1',
-          title: 'Senior Software Engineer',
-          company: 'TechCorp',
-          location: location || 'San Francisco, CA',
-          salary: '$150,000 - $200,000',
-          description: 'Looking for an experienced software engineer...',
-          skills: ['React', 'TypeScript', 'Node.js'],
-          url: 'https://example.com/job1',
-          postedDate: new Date().toISOString(),
-          matchScore: 85
-        }
-      ]);
+      setSearchError('Job search failed. Please try again or check your internet connection.');
+      setJobs([]);
     } finally {
       setIsSearching(false);
     }
@@ -107,7 +109,7 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
     return 'Mid Level';
   };
 
-  const scoreJobsForUser = (jobResults: JobResult[]): JobResult[] => {
+  const scoreJobsForUser = (jobResults: RealJobResult[]): RealJobResult[] => {
     const userSkills = new Set(resumeData.skills?.map(s => s.name.toLowerCase()) || []);
     
     return jobResults.map(job => {
@@ -116,7 +118,7 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
       );
       
       const baseScore = job.matchScore || 50;
-      const skillBonus = matchingSkills.length * 10;
+      const skillBonus = matchingSkills.length * 5;
       const finalScore = Math.min(baseScore + skillBonus, 100);
       
       return {
@@ -176,13 +178,20 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
           {isSearching ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Searching with AI...
+              Searching real job boards...
             </>
           ) : (
             'Search Jobs with AI'
           )}
         </Button>
       </form>
+
+      {searchError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{searchError}</AlertDescription>
+        </Alert>
+      )}
 
       <ScrollArea className={cn(
         "border rounded-lg",
@@ -192,86 +201,94 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
           {isSearching ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin mb-4" />
-              <p>Using AI to find the best job matches for you...</p>
+              <p>Searching real job boards for the best matches...</p>
               <p className="text-sm mt-2">Analyzing skills, location, and market trends</p>
             </div>
           ) : jobs.length > 0 ? (
-            jobs.map(job => (
-              <TouchRipple key={job.id} className="rounded-lg">
-                <Card className={cn(
-                  "p-4 hover:shadow-md transition-all duration-200",
-                  isMobile && "active:scale-[0.99]"
-                )}>
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-start justify-between">
-                        <h3 className="font-medium leading-none">{job.title}</h3>
-                        <div className="flex items-center gap-2">
-                          {job.matchScore && (
-                            <Badge variant={job.matchScore > 80 ? "default" : "secondary"}>
-                              {job.matchScore}% match
+            <>
+              <div className="text-sm text-muted-foreground mb-4">
+                Found {jobs.length} jobs matching your criteria
+              </div>
+              {jobs.map(job => (
+                <TouchRipple key={job.id} className="rounded-lg">
+                  <Card className={cn(
+                    "p-4 hover:shadow-md transition-all duration-200",
+                    isMobile && "active:scale-[0.99]"
+                  )}>
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-medium leading-none">{job.title}</h3>
+                          <div className="flex items-center gap-2">
+                            {job.matchScore && (
+                              <Badge variant={job.matchScore > 80 ? "default" : "secondary"}>
+                                {job.matchScore}% match
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className="text-xs">
+                              {job.source}
                             </Badge>
-                          )}
-                          <a
-                            href={job.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={cn(
-                              "text-resume-primary hover:text-resume-secondary transition-colors",
-                              isMobile && "p-2 -m-2"
-                            )}
-                          >
-                            <ArrowUpRight className="h-4 w-4" />
-                          </a>
+                            <a
+                              href={job.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={cn(
+                                "text-resume-primary hover:text-resume-secondary transition-colors",
+                                isMobile && "p-2 -m-2"
+                              )}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Building2 className="h-3.5 w-3.5" />
-                          <span>{job.company}</span>
+                        
+                        <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Building2 className="h-3.5 w-3.5" />
+                            <span>{job.company}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5" />
+                            <span>{job.location}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5" />
-                          <span>{job.location}</span>
-                        </div>
-                      </div>
 
-                      {job.salary && (
-                        <p className="text-sm text-resume-primary font-medium">
-                          {job.salary}
+                        {job.salary && (
+                          <p className="text-sm text-resume-primary font-medium">
+                            {job.salary}
+                          </p>
+                        )}
+                        
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {job.description}
                         </p>
-                      )}
-                      
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {job.description}
-                      </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      {job.skills.map((skill, index) => {
-                        const isMatch = getMatchingSkills([skill]).length > 0;
-                        return (
-                          <Badge
-                            key={index}
-                            variant={isMatch ? "default" : "secondary"}
-                            className={cn(
-                              isMatch && "bg-resume-primary hover:bg-resume-secondary",
-                              "transition-colors",
-                              isMobile && "text-sm py-1"
-                            )}
-                          >
-                            {skill}
-                          </Badge>
-                        );
-                      })}
+                    <div className="mt-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        {job.skills.map((skill, index) => {
+                          const isMatch = getMatchingSkills([skill]).length > 0;
+                          return (
+                            <Badge
+                              key={index}
+                              variant={isMatch ? "default" : "secondary"}
+                              className={cn(
+                                isMatch && "bg-resume-primary hover:bg-resume-secondary",
+                                "transition-colors",
+                                isMobile && "text-sm py-1"
+                              )}
+                            >
+                              {skill}
+                            </Badge>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </TouchRipple>
-            ))
+                  </Card>
+                </TouchRipple>
+              ))}
+            </>
           ) : query ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <p>No jobs found matching your search.</p>
@@ -280,7 +297,7 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <p>Enter a job title or keywords to start searching.</p>
-              <p className="text-sm mt-1">AI will find personalized matches based on your skills</p>
+              <p className="text-sm mt-1">AI will find real job opportunities based on your skills</p>
             </div>
           )}
         </div>

@@ -2,16 +2,22 @@
 import React, { useEffect, useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { JobSearch } from '../components/JobSearch';
+import { ApiKeyConfig } from '../components/ApiKeyConfig';
 import { useResumeContext } from '../context/ResumeContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, Key } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const JobSearchPage = () => {
   const { resumeData } = useResumeContext();
   const [isInitializing, setIsInitializing] = useState(true);
+  const [hasValidApiKey, setHasValidApiKey] = useState(false);
 
   useEffect(() => {
-    // Simulate initialization
+    // Check if API key exists and is valid
+    const apiKey = localStorage.getItem('groq_api_key');
+    setHasValidApiKey(!!apiKey);
+    
     const timer = setTimeout(() => {
       setIsInitializing(false);
     }, 1000);
@@ -19,9 +25,13 @@ const JobSearchPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleApiKeyUpdate = (isValid: boolean) => {
+    setHasValidApiKey(isValid);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <PageHeader title="Job Search">
+      <PageHeader title="AI Job Search">
         <div className="text-sm text-muted-foreground">
           Find relevant job opportunities with AI-powered matching
         </div>
@@ -40,22 +50,49 @@ const JobSearchPage = () => {
               </div>
             </Card>
           ) : (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Search className="h-5 w-5" />
-                    AI-Powered Job Search
-                  </CardTitle>
-                  <CardDescription>
-                    Our AI will search for jobs that match your skills, experience, and location preferences.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <JobSearch resumeData={resumeData} />
-                </CardContent>
-              </Card>
-            </div>
+            <Tabs defaultValue={hasValidApiKey ? "search" : "setup"} className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="setup" className="flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  API Setup
+                </TabsTrigger>
+                <TabsTrigger value="search" disabled={!hasValidApiKey} className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Job Search
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="setup">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configure AI Access</CardTitle>
+                    <CardDescription>
+                      Set up your Groq API key to enable AI-powered job search functionality.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ApiKeyConfig onApiKeyUpdate={handleApiKeyUpdate} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="search">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Search className="h-5 w-5" />
+                      AI-Powered Job Search
+                    </CardTitle>
+                    <CardDescription>
+                      Our AI will search for jobs that match your skills, experience, and location preferences.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <JobSearch resumeData={resumeData} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           )}
         </div>
       </div>
