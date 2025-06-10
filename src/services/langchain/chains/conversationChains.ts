@@ -1,14 +1,28 @@
-
 import { ConversationChain } from "langchain/chains";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { GroqLLM } from "../groqLLM";
+import { ChatGroq } from "@langchain/groq";
 import { ConversationMemory } from "../memory/conversationMemory";
 
-// Initialize LLM and memory
-const llm = new GroqLLM({
-  temperature: 0.7,
-  maxTokens: 1024
-});
+// Get API key from localStorage or environment
+const getApiKey = () => {
+  return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || '';
+};
+
+// Initialize ChatGroq LLM
+const createGroqLLM = () => {
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    throw new Error('Groq API key is not configured. Please set your API key in the settings.');
+  }
+
+  return new ChatGroq({
+    apiKey: apiKey,
+    model: "mixtral-8x7b-32768",
+    temperature: 0.7,
+    maxTokens: 1024,
+  });
+};
 
 // Resume conversation memory with token limit
 export const resumeConversationMemory = new ConversationMemory({
@@ -37,7 +51,7 @@ Response:
 
 // Main conversation chain for resume assistance
 export const resumeConversationChain = new ConversationChain({
-  llm,
+  llm: createGroqLLM(),
   prompt: resumeConversationPrompt,
   memory: resumeConversationMemory,
   verbose: false
@@ -69,7 +83,7 @@ Response:
 
 // Skills conversation chain
 export const skillsConversationChain = new ConversationChain({
-  llm,
+  llm: createGroqLLM(),
   prompt: skillsConversationPrompt,
   memory: skillsConversationMemory,
   verbose: false
@@ -102,7 +116,7 @@ Response:
 
 // Career conversation chain
 export const careerConversationChain = new ConversationChain({
-  llm,
+  llm: createGroqLLM(),
   prompt: careerConversationPrompt,
   memory: careerConversationMemory,
   verbose: false

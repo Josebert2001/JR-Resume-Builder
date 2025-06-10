@@ -1,4 +1,3 @@
-
 import { ChatGroq } from "@langchain/groq";
 import { DynamicTool } from "@langchain/core/tools";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
@@ -32,7 +31,11 @@ export class JobSearchAgent {
 
   constructor() {
     // Get API key from localStorage
-    const apiKey = localStorage.getItem('groq_api_key') || process.env.GROQ_API_KEY || "gsk_placeholder";
+    const apiKey = localStorage.getItem('groq_api_key') || process.env.GROQ_API_KEY || "";
+    
+    if (!apiKey) {
+      throw new Error('Groq API key is not configured. Please set your API key in the settings.');
+    }
     
     this.llm = new ChatGroq({
       apiKey: apiKey,
@@ -65,7 +68,7 @@ export class JobSearchAgent {
       ];
 
       const prompt = ChatPromptTemplate.fromTemplate(`
-        You are a specialized job search agent. Your goal is to find the most relevant job opportunities for users based on their skills, location, and preferences.
+        You are a specialized job search agent powered by Groq's Mixtral model. Your goal is to find the most relevant job opportunities for users based on their skills, location, and preferences.
 
         Available tools: {tools}
         Tool names: {tool_names}

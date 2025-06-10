@@ -1,13 +1,28 @@
-
 import { LLMChain, SequentialChain } from "langchain/chains";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
-import { GroqLLM } from "../groqLLM";
+import { ChatGroq } from "@langchain/groq";
 
-const llm = new GroqLLM({
-  temperature: 0.7,
-  maxTokens: 1024
-});
+// Get API key from localStorage or environment
+const getApiKey = () => {
+  return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || '';
+};
+
+// Initialize the ChatGroq LLM instance
+const createGroqLLM = () => {
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    throw new Error('Groq API key is not configured. Please set your API key in the settings.');
+  }
+
+  return new ChatGroq({
+    apiKey: apiKey,
+    model: "mixtral-8x7b-32768",
+    temperature: 0.7,
+    maxTokens: 1024,
+  });
+};
 
 const jsonParser = new JsonOutputParser();
 
@@ -32,7 +47,7 @@ Analyze and return a JSON object with:
 `);
 
 export const contentAnalysisChain = new LLMChain({
-  llm,
+  llm: createGroqLLM(),
   prompt: contentAnalysisPrompt,
   outputKey: "analysis",
   outputParser: jsonParser
@@ -64,7 +79,7 @@ Provide detailed, actionable recommendations in JSON format:
 `);
 
 export const improvementChain = new LLMChain({
-  llm,
+  llm: createGroqLLM(),
   prompt: improvementPrompt,
   outputKey: "improvements",
   outputParser: jsonParser
@@ -95,7 +110,7 @@ Provide ATS optimization suggestions:
 `);
 
 export const atsOptimizationChain = new LLMChain({
-  llm,
+  llm: createGroqLLM(),
   prompt: atsOptimizationPrompt,
   outputKey: "atsOptimization",
   outputParser: jsonParser
@@ -134,7 +149,7 @@ Provide industry-specific optimization:
 `);
 
 export const industryOptimizationChain = new LLMChain({
-  llm,
+  llm: createGroqLLM(),
   prompt: industryOptimizationPrompt,
   outputParser: jsonParser
 });
