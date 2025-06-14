@@ -8,11 +8,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* More subtle animated background particles */}
-      <div className="absolute inset-0 particle-bg opacity-10" />
+      <div className="absolute inset-0 particle-bg opacity-4" />
       
       {/* Reduced floating orbs opacity */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/2 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/2 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       
       <div className="relative z-10">
         {/* Header */}
@@ -20,21 +20,21 @@ const Index = () => {
           <div className="container mx-auto px-4 flex items-center justify-between">
             <Link 
               to="/" 
-              className="flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg"
+              className="flex items-center space-x-4 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg p-2"
               aria-label="Home"
             >
-              <div className="relative animate-pulse-glow rounded-full p-1">
+              <div className="logo-glow">
                 <img 
                   src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
                   alt="JR Resume Builder Logo" 
-                  className="h-10 w-auto" 
+                  className="h-12 w-auto" 
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <h1 className="text-xl md:text-2xl font-bold gradient-text">
                   JR Resume Builder
                 </h1>
-                <Sparkles className="h-5 w-5 text-cyan-400 animate-pulse" />
+                <Sparkles className="h-5 w-5 text-slate-300/60 animate-pulse" />
               </div>
             </Link>
             <nav className="hidden md:flex items-center space-x-4" role="navigation">

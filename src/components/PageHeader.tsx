@@ -30,19 +30,19 @@ export const PageHeader = ({ title, showBackButton = true, children }: PageHeade
                 Home
               </Button>
             )}
-            <div className="flex items-center space-x-3">
-              <div className="relative animate-pulse-glow rounded-full p-1">
+            <div className="flex items-center space-x-4">
+              <div className="logo-glow">
                 <img 
                   src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
                   alt="JR Resume Builder Logo" 
-                  className="h-10 w-auto" 
+                  className="h-12 w-auto" 
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <h1 className="text-xl md:text-2xl font-bold gradient-text">
                   {title}
                 </h1>
-                <Sparkles className="h-5 w-5 text-cyan-400 animate-pulse" />
+                <Sparkles className="h-5 w-5 text-slate-300/60 animate-pulse" />
               </div>
             </div>
           </div>
