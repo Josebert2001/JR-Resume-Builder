@@ -1,197 +1,302 @@
-
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Sparkles, Star, Wand2, FileText, Book, Search, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Footer from '@/components/Footer';
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, 
-  Search, 
-  Bot,
-  MessageSquare,
-  TrendingUp,
-  Palette,
-  Sparkles,
-  Zap
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen relative particle-bg">
-      {/* Animated gradient overlay */}
-      <div className="absolute inset-0 gradient-animation opacity-20 pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* More subtle animated background particles */}
+      <div className="absolute inset-0 particle-bg opacity-10" />
       
-      <header className="relative z-10 glass-panel py-6 border-b border-white/10">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative animate-pulse-glow rounded-full p-2">
-              <img src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" alt="JR Resume Builder Logo" className="h-12 w-auto" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold gradient-text">
-                JR Resume Builder
-              </h1>
-              <p className="text-xs text-cyan-300/80 font-mono">v2.0 • AI-Powered</p>
-            </div>
-          </div>
-          <div className="md:flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="glass-card text-white hover:bg-white/10">
-                  Resources <ChevronDown size={16} className="ml-1" />
+      {/* Reduced floating orbs opacity */}
+      <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      
+      <div className="relative z-10">
+        {/* Header */}
+        <header className="glass-panel py-6 border-b border-white/10 sticky top-0 z-50 backdrop-blur-xl" role="banner">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <Link 
+              to="/" 
+              className="flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded-lg"
+              aria-label="Home"
+            >
+              <div className="relative animate-pulse-glow rounded-full p-1">
+                <img 
+                  src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
+                  alt="JR Resume Builder Logo" 
+                  className="h-10 w-auto" 
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-bold gradient-text">
+                  JR Resume Builder
+                </h1>
+                <Sparkles className="h-5 w-5 text-cyan-400 animate-pulse" />
+              </div>
+            </Link>
+            <nav className="hidden md:flex items-center space-x-4" role="navigation">
+              <a href="#features" className="text-cyan-100/70 hover:text-cyan-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded px-3 py-2">
+                Features
+              </a>
+              <a href="#templates" className="text-cyan-100/70 hover:text-cyan-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded px-3 py-2">
+                Templates
+              </a>
+              <a href="#ai-features" className="text-cyan-100/70 hover:text-cyan-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded px-3 py-2">
+                AI Features
+              </a>
+              <Link 
+                to="/job-search" 
+                className="flex items-center gap-2 text-cyan-100/70 hover:text-cyan-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded px-3 py-2"
+              >
+                Job Search
+                <Search className="h-4 w-4" />
+              </Link>
+              <Link to="/templates">
+                <Button variant="secondary" size="sm">
+                  View Templates
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="glass-panel border-white/20">
-                <DropdownMenuItem asChild>
-                  <Link to="/cover-letter" className="cursor-pointer text-white hover:bg-white/10">Cover Letter Guide</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/job-search" className="cursor-pointer text-white hover:bg-white/10">Job Search Tips</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/interview-prep" className="cursor-pointer text-white hover:bg-white/10">Interview Preparation</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </Link>
+            </nav>
           </div>
-        </div>
-      </header>
-      
-      {/* Main hero section */}
-      <main className="relative z-10 container mx-auto px-4 py-16">
-        <div className="text-center mb-16 animate-slide-up">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-8 w-8 text-cyan-400 animate-pulse" />
-            <h1 className="text-5xl md:text-7xl font-bold gradient-text typewriter">
-              Build Your Perfect Resume
-            </h1>
-            <Zap className="h-8 w-8 text-purple-400 animate-pulse" />
-          </div>
-          <p className="text-xl md:text-2xl text-cyan-100/80 mb-8 max-w-3xl mx-auto font-light">
-            Create a professional resume in minutes with our AI-powered builder
-          </p>
-          
-          {/* Navigation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <Card 
-              className="neo-card cursor-pointer magnetic-hover group"
-              onClick={() => navigate('/resume-builder')}
-            >
-              <CardHeader className="text-center p-8">
-                <div className="mx-auto mb-4 relative">
-                  <FileText className="h-16 w-16 mx-auto text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300" />
-                  <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl group-hover:bg-cyan-300/30 transition-all duration-300" />
-                </div>
-                <CardTitle className="text-white text-xl mb-2">Resume Builder</CardTitle>
-                <CardDescription className="text-cyan-100/70">Create and customize your resume</CardDescription>
-              </CardHeader>
-            </Card>
-            
-            <Card 
-              className="neo-card cursor-pointer magnetic-hover group"
-              onClick={() => navigate('/ai-assistance')}
-            >
-              <CardHeader className="text-center p-8">
-                <div className="mx-auto mb-4 relative">
-                  <Bot className="h-16 w-16 mx-auto text-purple-400 group-hover:text-purple-300 transition-colors duration-300" />
-                  <div className="absolute inset-0 bg-purple-400/20 rounded-full blur-xl group-hover:bg-purple-300/30 transition-all duration-300" />
-                </div>
-                <CardTitle className="text-white text-xl mb-2">AI Assistant</CardTitle>
-                <CardDescription className="text-cyan-100/70">Get personalized career guidance</CardDescription>
-              </CardHeader>
-            </Card>
-            
-            <Card 
-              className="neo-card cursor-pointer magnetic-hover group"
-              onClick={() => navigate('/job-search-ai')}
-            >
-              <CardHeader className="text-center p-8">
-                <div className="mx-auto mb-4 relative">
-                  <Search className="h-16 w-16 mx-auto text-green-400 group-hover:text-green-300 transition-colors duration-300" />
-                  <div className="absolute inset-0 bg-green-400/20 rounded-full blur-xl group-hover:bg-green-300/30 transition-all duration-300" />
-                </div>
-                <CardTitle className="text-white text-xl mb-2">Job Search</CardTitle>
-                <CardDescription className="text-cyan-100/70">Find relevant job opportunities</CardDescription>
-              </CardHeader>
-            </Card>
-            
-            <Card 
-              className="neo-card cursor-pointer magnetic-hover group"
-              onClick={() => navigate('/templates')}
-            >
-              <CardHeader className="text-center p-8">
-                <div className="mx-auto mb-4 relative">
-                  <Palette className="h-16 w-16 mx-auto text-orange-400 group-hover:text-orange-300 transition-colors duration-300" />
-                  <div className="absolute inset-0 bg-orange-400/20 rounded-full blur-xl group-hover:bg-orange-300/30 transition-all duration-300" />
-                </div>
-                <CardTitle className="text-white text-xl mb-2">Templates</CardTitle>
-                <CardDescription className="text-cyan-100/70">Choose from professional designs</CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
+        </header>
 
-        {/* Quick Actions */}
-        <div className="flex justify-center mb-12">
-          <div className="flex flex-wrap gap-6">
-            <Button 
-              onClick={() => navigate('/ai-assistance')}
-              className="cyber-button flex items-center gap-3 px-8 py-4 text-lg"
-              variant="outline"
-            >
-              <MessageSquare className="h-5 w-5" />
-              Chat with AI Assistant
-            </Button>
-            <Button 
-              onClick={() => navigate('/templates')}
-              className="cyber-button flex items-center gap-3 px-8 py-4 text-lg"
-              variant="outline"
-            >
-              <Palette className="h-5 w-5" />
-              Browse Templates
-            </Button>
-            <Button 
-              onClick={() => navigate('/interview-prep')}
-              className="cyber-button flex items-center gap-3 px-8 py-4 text-lg"
-              variant="outline"
-            >
-              <TrendingUp className="h-5 w-5" />
-              Interview Prep
-            </Button>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center px-4 pt-20" role="main">
+          <div className="container mx-auto text-center">
+            <div className="max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold gradient-text mb-6">
+                Craft Your <span className="neon-text">Perfect Resume</span> with AI
+              </h1>
+              <p className="text-lg md:text-xl text-cyan-100/70 mb-8">
+                Unlock your career potential with our AI-powered resume builder. Create professional, ATS-friendly resumes in minutes.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link to="/builder">
+                  <Button size="lg" className="flex items-center gap-3">
+                    <FileText className="h-5 w-5" />
+                    Start Building Now
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/templates">
+                  <Button variant="outline" size="lg" className="border-cyan-400/50 text-cyan-300 hover:bg-cyan-400/10 hover:border-cyan-400">
+                    <Sparkles className="h-5 w-5" />
+                    Explore Templates
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="mt-12 relative">
+              <img 
+                src="/hero-resume-preview.webp" 
+                alt="Resume Builder Preview" 
+                className="max-w-full rounded-3xl shadow-2xl neo-card mx-auto" 
+              />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-3xl bg-black/10 backdrop-blur-md z-0 pointer-events-none" />
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Feature highlights */}
-        <div className="text-center">
-          <div className="inline-flex items-center gap-4 glass-panel px-8 py-4 rounded-full">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-green-300 text-sm font-mono">AI Powered</span>
+        {/* Features Section */}
+        <section className="py-20 px-4 relative" id="features">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold gradient-text mb-4">
+                Key Features
+              </h2>
+              <p className="text-lg text-cyan-100/70">
+                Empowering your job search with cutting-edge tools and technology.
+              </p>
             </div>
-            <div className="w-px h-4 bg-white/20"></div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-              <span className="text-cyan-300 text-sm font-mono">Real-time Job Search</span>
-            </div>
-            <div className="w-px h-4 bg-white/20"></div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-              <span className="text-purple-300 text-sm font-mono">Professional Templates</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* AI-Powered Assistance */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <Wand2 className="h-6 w-6 text-cyan-400" />
+                  <h3 className="text-xl font-medium gradient-text">AI Assistance</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  Get AI-driven suggestions to optimize your resume content and highlight your strengths.
+                </p>
+              </div>
+
+              {/* ATS Optimization */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <Star className="h-6 w-6 text-purple-400" />
+                  <h3 className="text-xl font-medium gradient-text">ATS Optimization</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  Ensure your resume passes through Applicant Tracking Systems with our optimization tools.
+                </p>
+              </div>
+
+              {/* Professional Templates */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <FileText className="h-6 w-6 text-cyan-400" />
+                  <h3 className="text-xl font-medium gradient-text">Professional Templates</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  Choose from a variety of professionally designed templates to create a standout resume.
+                </p>
+              </div>
+
+              {/* Skills Matching */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <Sparkles className="h-6 w-6 text-purple-400" />
+                  <h3 className="text-xl font-medium gradient-text">Skills Matching</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  Identify and incorporate the most relevant skills for your desired job roles.
+                </p>
+              </div>
+
+              {/* Real-time Preview */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <Search className="h-6 w-6 text-cyan-400" />
+                  <h3 className="text-xl font-medium gradient-text">Real-time Preview</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  See your resume come to life with our real-time preview feature, ensuring every detail is perfect.
+                </p>
+              </div>
+
+              {/* Expert Tips & Guides */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <Book className="h-6 w-6 text-purple-400" />
+                  <h3 className="text-xl font-medium gradient-text">Expert Tips & Guides</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  Access expert tips and guides to help you craft a compelling and effective resume.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-      
-      <Footer />
+        </section>
+
+        {/* Templates Showcase */}
+        <section className="py-20 px-4 relative" id="templates">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold gradient-text mb-4">
+                Resume Templates
+              </h2>
+              <p className="text-lg text-cyan-100/70">
+                Choose from our professionally designed resume templates to get started.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Template Cards - Replace with actual template components */}
+              <div className="neo-card p-4 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300">
+                <div>
+                  <h3 className="text-xl font-medium gradient-text mb-2">Modern Template</h3>
+                  <p className="text-cyan-100/80 text-sm">Clean and modern design for a professional look.</p>
+                </div>
+                <Button variant="secondary" size="sm">Select Template</Button>
+              </div>
+              <div className="neo-card p-4 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300">
+                <div>
+                  <h3 className="text-xl font-medium gradient-text mb-2">Classic Template</h3>
+                  <p className="text-cyan-100/80 text-sm">Traditional and elegant, perfect for any industry.</p>
+                </div>
+                <Button variant="secondary" size="sm">Select Template</Button>
+              </div>
+              <div className="neo-card p-4 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300">
+                <div>
+                  <h3 className="text-xl font-medium gradient-text mb-2">Creative Template</h3>
+                  <p className="text-cyan-100/80 text-sm">Showcase your creativity with a unique and stylish design.</p>
+                </div>
+                <Button variant="secondary" size="sm">Select Template</Button>
+              </div>
+              <div className="neo-card p-4 flex flex-col justify-between hover:scale-[1.02] transition-all duration-300">
+                <div>
+                  <h3 className="text-xl font-medium gradient-text mb-2">Minimalist Template</h3>
+                  <p className="text-cyan-100/80 text-sm">Simple and clean, focusing on readability and clarity.</p>
+                </div>
+                <Button variant="secondary" size="sm">Select Template</Button>
+              </div>
+            </div>
+            <div className="mt-8 text-center">
+              <Link to="/templates">
+                <Button variant="outline" size="lg" className="border-cyan-400/50 text-cyan-300 hover:bg-cyan-400/10 hover:border-cyan-400">
+                  View All Templates
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* AI Features Section */}
+        <section className="py-20 px-4 relative bg-gradient-to-br from-slate-800/50 to-purple-800/30" id="ai-features">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold gradient-text mb-4">
+                AI-Powered Features
+              </h2>
+              <p className="text-lg text-cyan-100/70">
+                Leverage the power of AI to enhance your resume and job search.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* AI Resume Checker */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <Wand2 className="h-6 w-6 text-cyan-400" />
+                  <h3 className="text-xl font-medium gradient-text">AI Resume Checker</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  Get instant feedback on your resume with our AI-powered checker. Identify areas for improvement and ensure your resume is top-notch.
+                </p>
+                <Link to="/builder">
+                  <Button variant="secondary" size="sm" className="mt-4">Check Your Resume</Button>
+                </Link>
+              </div>
+
+              {/* AI Skills Matcher */}
+              <div className="neo-card p-6 hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <Sparkles className="h-6 w-6 text-purple-400" />
+                  <h3 className="text-xl font-medium gradient-text">AI Skills Matcher</h3>
+                </div>
+                <p className="text-cyan-100/80">
+                  Find the perfect job by matching your skills with job requirements. Our AI analyzes job descriptions and highlights relevant skills.
+                </p>
+                <Link to="/job-search">
+                  <Button variant="secondary" size="sm" className="mt-4">Match Your Skills</Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 px-4 relative">
+          <div className="container mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold gradient-text mb-6">
+              Ready to Transform Your Career?
+            </h2>
+            <p className="text-lg text-cyan-100/70 mb-8">
+              Start building your professional resume today and take the next step towards your dream job.
+            </p>
+            <Link to="/builder">
+              <Button size="xl" className="flex items-center gap-3">
+                <FileText className="h-6 w-6" />
+                Build Your Resume Now
+                <ArrowRight className="h-6 w-6" />
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        <Footer />
+      </div>
     </div>
   );
 };

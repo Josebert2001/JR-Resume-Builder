@@ -31,12 +31,12 @@ const JobSearchPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated background particles */}
-      <div className="absolute inset-0 particle-bg opacity-30" />
+      {/* More subtle animated background particles */}
+      <div className="absolute inset-0 particle-bg opacity-8" />
       
-      {/* Floating orbs */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      {/* Reduced floating orbs opacity */}
+      <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/3 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       
       <div className="relative z-10">
         <PageHeader title="AI Job Search">
