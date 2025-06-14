@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -67,15 +68,15 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				resume: {
-					primary: '#1e40af', // Deep blue
-					secondary: '#3b82f6', // Bright blue
-					accent: '#60a5fa', // Light blue
-					success: '#059669', // Green
-					warning: '#d97706', // Amber
-					error: '#dc2626', // Red
-					light: '#f8fafc', // Very light blue-gray
-					dark: '#1e293b', // Dark blue-gray
-					muted: '#64748b', // Slate
+					primary: 'hsl(var(--resume-primary))',
+					secondary: 'hsl(var(--resume-secondary))',
+					accent: 'hsl(var(--resume-accent))',
+					success: 'hsl(var(--resume-success))',
+					warning: 'hsl(var(--resume-warning))',
+					error: 'hsl(var(--resume-error))',
+					light: 'hsl(var(--resume-light))',
+					dark: 'hsl(var(--resume-dark))',
+					muted: 'hsl(var(--resume-muted))',
 				},
 				'coral-red': '#e76f51',
 			},

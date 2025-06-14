@@ -36,7 +36,7 @@ export const PageHeader = ({ title, showBackButton = true, children }: PageHeade
                 alt="JR Resume Builder Logo" 
                 className="h-8 w-auto" 
               />
-              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text">
+              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-resume-primary to-resume-secondary text-transparent bg-clip-text">
                 {title}
               </h1>
             </div>

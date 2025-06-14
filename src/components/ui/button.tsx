@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -18,7 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        gradient: "bg-gradient-to-r from-resume-primary to-resume-secondary text-white hover:opacity-90",
+        gradient: "bg-gradient-to-r from-resume-primary to-resume-secondary text-white hover:opacity-90 shadow-sm hover:shadow-md",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -62,7 +63,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           // Add tap highlight color for mobile
           isMobile && "tap-highlight-color-transparent",
           // Add hover animation for desktop
-          !isMobile && "hover:scale-[1.02] transition-transform duration-200"
+          !isMobile && "hover:-translate-y-px transition-transform duration-200"
         )}
         ref={ref}
         // Enhanced mobile accessibility
