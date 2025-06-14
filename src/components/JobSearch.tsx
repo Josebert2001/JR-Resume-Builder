@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Building2, ArrowUpRight, Loader2, Navigation, ExternalLink, AlertCircle } from 'lucide-react';
+import { Search, MapPin, Building2, ArrowUpRight, Loader2, Navigation, ExternalLink, AlertCircle, Zap, Target, TrendingUp, Star } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
@@ -134,174 +134,270 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
     return jobSkills.filter(skill => userSkills.has(skill.toLowerCase()));
   };
 
+  const getMatchScoreColor = (score: number) => {
+    if (score >= 90) return 'from-emerald-500 to-green-400';
+    if (score >= 80) return 'from-cyan-500 to-blue-400';
+    if (score >= 70) return 'from-yellow-500 to-amber-400';
+    return 'from-gray-500 to-slate-400';
+  };
+
   return (
-    <div className="space-y-4 animate-in fade-in-50">
-      <form onSubmit={handleSearch} className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={cn("pl-9 pr-4", isMobile && "h-12")}
-            placeholder="Search for jobs (e.g., Frontend Developer, Data Scientist)..."
-          />
-        </div>
-        
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="space-y-6 animate-slide-up">
+      {/* Search Form */}
+      <form onSubmit={handleSearch} className="space-y-4">
+        <div className="relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-cyan-400" />
             <Input
               type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className={cn("pl-9 pr-4", isMobile && "h-12")}
-              placeholder="Location (e.g., San Francisco, CA or Remote)..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className={cn(
+                "pl-12 pr-4 h-14 bg-white/5 border-white/20 rounded-2xl backdrop-blur-xl",
+                "text-white placeholder:text-cyan-100/50",
+                "focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20",
+                "transition-all duration-300",
+                isMobile && "h-12"
+              )}
+              placeholder="Search for jobs (e.g., Frontend Developer, Data Scientist)..."
             />
+          </div>
+        </div>
+        
+        <div className="flex gap-3">
+          <div className="relative flex-1 group">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-cyan-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-400" />
+              <Input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className={cn(
+                  "pl-12 pr-4 h-14 bg-white/5 border-white/20 rounded-2xl backdrop-blur-xl",
+                  "text-white placeholder:text-cyan-100/50",
+                  "focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20",
+                  "transition-all duration-300",
+                  isMobile && "h-12"
+                )}
+                placeholder="Location (e.g., San Francisco, CA or Remote)..."
+              />
+            </div>
           </div>
           <Button
             type="button"
-            variant="outline"
+            variant="cyber"
             onClick={handleDetectLocation}
             disabled={isDetectingLocation}
-            className={cn(isMobile && "h-12 px-3")}
+            className={cn("h-14 px-6 rounded-2xl", isMobile && "h-12 px-3")}
           >
             {isDetectingLocation ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Navigation className="h-4 w-4" />
+              <Navigation className="h-5 w-5" />
             )}
           </Button>
         </div>
         
-        <Button type="submit" disabled={isSearching || !query.trim()} className="w-full">
+        <Button 
+          type="submit" 
+          disabled={isSearching || !query.trim()} 
+          variant="cyber"
+          size="lg"
+          className="w-full h-14 rounded-2xl text-base font-semibold"
+        >
           {isSearching ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Searching real job boards...
+              <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+              <span>Searching real job boards...</span>
+              <div className="ml-3 flex items-center gap-1">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+              </div>
             </>
           ) : (
-            'Search Jobs with AI'
+            <>
+              <Zap className="mr-2 h-5 w-5" />
+              <span>Search Jobs with AI</span>
+            </>
           )}
         </Button>
       </form>
 
+      {/* Error Alert */}
       {searchError && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="border-red-500/20 bg-red-500/10 backdrop-blur-xl">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{searchError}</AlertDescription>
+          <AlertDescription className="text-red-100">{searchError}</AlertDescription>
         </Alert>
       )}
 
-      <ScrollArea className={cn(
-        "border rounded-lg",
-        isMobile ? "h-[calc(100vh-400px)]" : "h-[500px]"
-      )}>
-        <div className="p-4 space-y-4">
-          {isSearching ? (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin mb-4" />
-              <p>Searching real job boards for the best matches...</p>
-              <p className="text-sm mt-2">Analyzing skills, location, and market trends</p>
-            </div>
-          ) : jobs.length > 0 ? (
-            <>
-              <div className="text-sm text-muted-foreground mb-4">
-                Found {jobs.length} jobs matching your criteria
+      {/* Results */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent rounded-2xl" />
+        <ScrollArea className={cn(
+          "relative border border-white/10 rounded-2xl bg-white/5 backdrop-blur-xl",
+          isMobile ? "h-[calc(100vh-500px)]" : "h-[600px]"
+        )}>
+          <div className="p-6 space-y-4">
+            {isSearching ? (
+              <div className="flex flex-col items-center justify-center py-12 text-cyan-100/70">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl animate-pulse" />
+                  <Loader2 className="relative h-12 w-12 animate-spin text-cyan-400" />
+                </div>
+                <div className="text-center space-y-3">
+                  <p className="text-lg font-medium">Searching real job boards for the best matches...</p>
+                  <p className="text-sm opacity-70">Analyzing skills, location, and market trends</p>
+                  <div className="flex items-center justify-center gap-2 mt-4">
+                    <Target className="h-4 w-4 text-purple-400 animate-pulse" />
+                    <TrendingUp className="h-4 w-4 text-cyan-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                    <Star className="h-4 w-4 text-yellow-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                  </div>
+                </div>
               </div>
-              {jobs.map(job => (
-                <TouchRipple key={job.id} className="rounded-lg">
-                  <Card className={cn(
-                    "p-4 hover:shadow-md transition-all duration-200",
-                    isMobile && "active:scale-[0.99]"
-                  )}>
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-start justify-between">
-                          <h3 className="font-medium leading-none">{job.title}</h3>
-                          <div className="flex items-center gap-2">
-                            {job.matchScore && (
-                              <Badge variant={job.matchScore > 80 ? "default" : "secondary"}>
-                                {job.matchScore}% match
-                              </Badge>
+            ) : jobs.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="text-sm text-cyan-100/70">
+                    Found <span className="text-cyan-400 font-semibold">{jobs.length}</span> jobs matching your criteria
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                    <span className="text-xs text-emerald-400">Live Results</span>
+                  </div>
+                </div>
+                {jobs.map((job, index) => (
+                  <TouchRipple key={job.id} className="rounded-2xl">
+                    <Card className={cn(
+                      "group relative overflow-hidden transition-all duration-500 hover:scale-[1.02]",
+                      "animate-slide-up",
+                      isMobile && "active:scale-[0.99]"
+                    )} style={{ animationDelay: `${index * 0.1}s` }}>
+                      {/* Animated background gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                      
+                      {/* Scan line effect */}
+                      <div className="scan-line opacity-0 group-hover:opacity-100" />
+                      
+                      <div className="relative p-6">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="space-y-3 flex-1">
+                            <div className="flex items-start justify-between">
+                              <h3 className="font-semibold text-lg text-white leading-tight group-hover:text-cyan-100 transition-colors">
+                                {job.title}
+                              </h3>
+                              <div className="flex items-center gap-3">
+                                {job.matchScore && (
+                                  <div className="relative">
+                                    <Badge className={cn(
+                                      "bg-gradient-to-r text-white border-0 px-3 py-1.5 font-medium",
+                                      getMatchScoreColor(job.matchScore)
+                                    )}>
+                                      <Star className="h-3 w-3 mr-1" />
+                                      {job.matchScore}% match
+                                    </Badge>
+                                    {job.matchScore >= 90 && (
+                                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-ping" />
+                                    )}
+                                  </div>
+                                )}
+                                <Badge variant="outline" className="text-xs border-white/20 text-cyan-100/70">
+                                  {job.source}
+                                </Badge>
+                                <a
+                                  href={job.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={cn(
+                                    "text-cyan-400 hover:text-cyan-300 transition-all duration-300 hover:scale-110",
+                                    isMobile && "p-2 -m-2"
+                                  )}
+                                >
+                                  <ExternalLink className="h-5 w-5" />
+                                </a>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-4 text-sm text-cyan-100/70">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-purple-400" />
+                                <span className="font-medium">{job.company}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-cyan-400" />
+                                <span>{job.location}</span>
+                              </div>
+                            </div>
+
+                            {job.salary && (
+                              <p className="text-lg font-semibold gradient-text">
+                                {job.salary}
+                              </p>
                             )}
-                            <Badge variant="outline" className="text-xs">
-                              {job.source}
-                            </Badge>
-                            <a
-                              href={job.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={cn(
-                                "text-resume-primary hover:text-resume-secondary transition-colors",
-                                isMobile && "p-2 -m-2"
-                              )}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Building2 className="h-3.5 w-3.5" />
-                            <span>{job.company}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5" />
-                            <span>{job.location}</span>
+                            
+                            <p className="text-sm text-cyan-100/80 line-clamp-2 leading-relaxed">
+                              {job.description}
+                            </p>
                           </div>
                         </div>
 
-                        {job.salary && (
-                          <p className="text-sm text-resume-primary font-medium">
-                            {job.salary}
-                          </p>
-                        )}
-                        
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {job.description}
-                        </p>
+                        <div className="mt-6 pt-4 border-t border-white/10">
+                          <div className="flex flex-wrap gap-2">
+                            {job.skills.map((skill, skillIndex) => {
+                              const isMatch = getMatchingSkills([skill]).length > 0;
+                              return (
+                                <Badge
+                                  key={skillIndex}
+                                  variant={isMatch ? "default" : "secondary"}
+                                  className={cn(
+                                    "transition-all duration-300 hover:scale-105",
+                                    isMatch 
+                                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0 shadow-lg hover:shadow-cyan-500/25" 
+                                      : "bg-white/10 text-cyan-100/70 border-white/20 hover:bg-white/20",
+                                    isMobile && "text-sm py-1.5 px-3"
+                                  )}
+                                >
+                                  {skill}
+                                  {isMatch && <Zap className="h-3 w-3 ml-1" />}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <div className="flex flex-wrap gap-1.5">
-                        {job.skills.map((skill, index) => {
-                          const isMatch = getMatchingSkills([skill]).length > 0;
-                          return (
-                            <Badge
-                              key={index}
-                              variant={isMatch ? "default" : "secondary"}
-                              className={cn(
-                                isMatch && "bg-resume-primary hover:bg-resume-secondary",
-                                "transition-colors",
-                                isMobile && "text-sm py-1"
-                              )}
-                            >
-                              {skill}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </Card>
-                </TouchRipple>
-              ))}
-            </>
-          ) : query ? (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <p>No jobs found matching your search.</p>
-              <p className="text-sm mt-1">Try different keywords or locations</p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <p>Enter a job title or keywords to start searching.</p>
-              <p className="text-sm mt-1">AI will find real job opportunities based on your skills</p>
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+                    </Card>
+                  </TouchRipple>
+                ))}
+              </>
+            ) : query ? (
+              <div className="flex flex-col items-center justify-center py-12 text-cyan-100/70">
+                <div className="relative mb-4">
+                  <Search className="h-12 w-12 text-cyan-400/50" />
+                  <div className="absolute inset-0 bg-cyan-400/10 rounded-full blur-lg" />
+                </div>
+                <p className="text-lg font-medium">No jobs found matching your search.</p>
+                <p className="text-sm opacity-70 mt-1">Try different keywords or locations</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-cyan-100/70">
+                <div className="relative mb-4">
+                  <div className="flex items-center gap-3">
+                    <Search className="h-8 w-8 text-cyan-400" />
+                    <Zap className="h-6 w-6 text-purple-400 animate-pulse" />
+                    <Target className="h-7 w-7 text-cyan-400" />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 via-purple-400/10 to-cyan-400/10 rounded-full blur-xl animate-pulse" />
+                </div>
+                <p className="text-lg font-medium">Enter a job title or keywords to start searching.</p>
+                <p className="text-sm opacity-70 mt-1">AI will find real job opportunities based on your skills</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
