@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,7 +82,7 @@ const TemplateCard = ({
         <div className="flex flex-col sm:flex-row w-full gap-2">
           <Button 
             className="w-full"
-            variant="cyber"
+            variant="default"
             onClick={handleSelect}
             aria-label={`Select ${title} template`}
           >
@@ -262,7 +263,7 @@ const ResumeTemplatesPage = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link to="/">
-                    <Button variant="cyber" className="flex items-center gap-2">
+                    <Button variant="default" className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
                       Start Building Your Resume
                     </Button>

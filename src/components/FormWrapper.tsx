@@ -99,7 +99,7 @@ export const FormWrapper = ({
               type="button"
               onClick={handleNext}
               disabled={nextDisabled}
-              variant="gradient"
+              variant="default"
               className={cn(
                 isMobile && "order-1 h-12 w-full",
                 !showBackButton && !showSkip && "w-full"

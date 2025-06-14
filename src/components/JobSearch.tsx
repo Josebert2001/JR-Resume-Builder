@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -187,7 +186,7 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
           </div>
           <Button
             type="button"
-            variant="cyber"
+            variant="secondary"
             onClick={handleDetectLocation}
             disabled={isDetectingLocation}
             className={cn("h-14 px-6 rounded-2xl", isMobile && "h-12 px-3")}
@@ -203,7 +202,7 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
         <Button 
           type="submit" 
           disabled={isSearching || !query.trim()} 
-          variant="cyber"
+          variant="default"
           size="lg"
           className="w-full h-14 rounded-2xl text-base font-semibold"
         >

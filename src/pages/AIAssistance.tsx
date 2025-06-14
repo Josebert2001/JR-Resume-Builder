@@ -42,7 +42,7 @@ const AIAssistance = () => {
             </div>
             <Dialog open={isApiKeyConfigOpen} onOpenChange={setIsApiKeyConfigOpen}>
               <DialogTrigger asChild>
-                <Button variant="cyber" size="sm" className="flex items-center gap-2">
+                <Button variant="secondary" size="sm" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
                   Settings
                 </Button>
