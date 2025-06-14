@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -6,23 +5,27 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]",
-        destructive: "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg hover:from-red-700 hover:to-red-800 hover:shadow-xl",
-        outline: "border-2 border-slate-600 bg-transparent text-slate-200 shadow-sm hover:bg-slate-800/50 hover:border-slate-500 hover:text-white transition-colors",
-        secondary: "bg-gradient-to-r from-slate-700 to-slate-800 text-white shadow-md hover:from-slate-600 hover:to-slate-700 hover:shadow-lg hover:scale-[1.02]",
-        ghost: "text-slate-300 hover:bg-slate-800/60 hover:text-white transition-colors",
-        link: "text-blue-400 underline-offset-4 hover:underline hover:text-blue-300",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+        gradient: "bg-gradient-to-r from-resume-primary to-resume-secondary text-white hover:opacity-90",
       },
       size: {
-        default: "h-11 px-6 py-3",
-        sm: "h-9 rounded-lg px-4 text-sm",
-        lg: "h-12 rounded-xl px-8 text-base",
-        icon: "h-11 w-11",
-        xl: "h-14 rounded-2xl px-10 text-lg font-semibold",
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+        xl: "h-12 rounded-md px-10 text-base",
       },
     },
     defaultVariants: {
@@ -43,13 +46,31 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const isMobile = useIsMobile();
     const Comp = asChild ? Slot : "button";
     
+    // Auto-adjust size for better touch targets on mobile
+    const mobileAdjustedSize = isMobile && size === "default" ? "lg" : 
+                              isMobile && size === "sm" ? "default" : 
+                              isMobile && size === "icon" ? "icon" : size;
+    
     return (
       <Comp
         className={cn(
-          buttonVariants({ variant, size, className }),
-          isMobile && "active:scale-95 touch-callout-none tap-highlight-color-transparent",
+          buttonVariants({ variant, size: mobileAdjustedSize, className }),
+          // Enhanced touch feedback for mobile
+          isMobile && "active:scale-[0.98] active:opacity-90 touch-callout-none",
+          // Improved tap target size for mobile
+          isMobile && size === "icon" && "h-12 w-12",
+          // Add tap highlight color for mobile
+          isMobile && "tap-highlight-color-transparent",
+          // Add hover animation for desktop
+          !isMobile && "hover:scale-[1.02] transition-transform duration-200"
         )}
         ref={ref}
+        // Enhanced mobile accessibility
+        {...(isMobile && {
+          role: "button",
+          tabIndex: props.disabled ? -1 : 0,
+          "aria-disabled": props.disabled,
+        })}
         {...props}
       />
     );
