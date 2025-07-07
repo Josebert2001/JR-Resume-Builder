@@ -30,11 +30,11 @@ export class JobSearchAgent {
   private executor: AgentExecutor | null = null;
 
   constructor() {
-    // Get API key from localStorage
-    const apiKey = localStorage.getItem('groq_api_key') || process.env.GROQ_API_KEY || "";
+    // Get API key from environment
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY || "";
     
     if (!apiKey) {
-      throw new Error('Groq API key is not configured. Please set your API key in the settings.');
+      throw new Error('Groq API key is not configured in environment variables.');
     }
     
     this.llm = new ChatGroq({

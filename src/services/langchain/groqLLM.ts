@@ -19,13 +19,11 @@ export class GroqLLM extends LLM {
   constructor(fields: GroqLLMParams = {}) {
     super(fields);
     
-    // Get API key from localStorage or environment variable
-    const apiKey = fields.apiKey || 
-                   localStorage.getItem('groq_api_key') || 
-                   import.meta.env.VITE_GROQ_API_KEY || '';
+    // Get API key from environment variable
+    const apiKey = fields.apiKey || import.meta.env.VITE_GROQ_API_KEY || '';
 
     if (!apiKey) {
-      console.warn('No Groq API key found. Please configure your API key.');
+      console.warn('No Groq API key found in environment variables.');
     }
     
     this.groq = new Groq({
@@ -50,10 +48,10 @@ export class GroqLLM extends LLM {
     try {
       console.log('GroqLLM: Making API call with model:', this.model);
       
-      // Check if API key is available
-      const apiKey = localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY;
+      // Check if API key is available from environment
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
       if (!apiKey) {
-        throw new Error('Groq API key not configured. Please add your API key in the settings.');
+        throw new Error('Groq API key not configured in environment variables.');
       }
 
       const completion = await this.groq.chat.completions.create({
@@ -83,17 +81,6 @@ export class GroqLLM extends LLM {
       }
       
       throw new Error(`Groq API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  // Method to test API key validity
-  async testConnection(): Promise<boolean> {
-    try {
-      await this._call("Test connection", {});
-      return true;
-    } catch (error) {
-      console.error('GroqLLM: Connection test failed:', error);
-      return false;
     }
   }
 }

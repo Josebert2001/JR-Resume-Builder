@@ -5,7 +5,7 @@ import { ChatGroq } from "@langchain/groq";
 
 // Get API key from localStorage or environment
 const getApiKey = () => {
-  return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || '';
+  return import.meta.env.VITE_GROQ_API_KEY || '';
 };
 
 // Initialize the ChatGroq LLM instance

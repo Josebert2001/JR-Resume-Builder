@@ -1,68 +1,30 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Button } from '../components/ui/button';
-import { Settings, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { ResumeAssistant } from '../components/ResumeAssistant';
 import { SkillsAssistant } from '../components/SkillsAssistant';
 import { CareerAssistant } from '../components/CareerAssistant';
 import { AdvancedResumeAnalysis } from '../components/AdvancedResumeAnalysis';
-import { ApiKeyConfig } from '../components/ApiKeyConfig';
 import { SystemStatus } from '../components/SystemStatus';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { PageHeader } from '../components/PageHeader';
 
 const AIAssistance = () => {
-  const [isApiKeyConfigOpen, setIsApiKeyConfigOpen] = useState(false);
-  const [isApiKeyValid, setIsApiKeyValid] = useState<boolean | null>(null);
-
-  const handleApiKeyUpdate = (isValid: boolean) => {
-    setIsApiKeyValid(isValid);
-    if (isValid) {
-      setIsApiKeyConfigOpen(false);
-    }
-  };
+  const hasApiKey = !!import.meta.env.VITE_GROQ_API_KEY;
 
   return (
     <div className="min-h-screen bg-background">
-      <PageHeader title="AI Career Assistant">
-        <Dialog open={isApiKeyConfigOpen} onOpenChange={setIsApiKeyConfigOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Settings
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>AI Configuration</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6">
-              <ApiKeyConfig onApiKeyUpdate={handleApiKeyUpdate} />
-              <SystemStatus onOpenSettings={() => {}} />
-            </div>
-          </DialogContent>
-        </Dialog>
-      </PageHeader>
+      <PageHeader title="AI Career Assistant" />
 
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            {isApiKeyValid === false && (
+            {!hasApiKey && (
               <Alert className="mb-6 max-w-2xl mx-auto">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  AI features require a valid Groq API key. Click the Settings button above to configure your API key.
-                  Get a free API key from{' '}
-                  <a
-                    href="https://console.groq.com/keys"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    Groq Console
-                  </a>.
+                  AI features are currently unavailable. Please contact the administrator to configure the API key.
                 </AlertDescription>
               </Alert>
             )}

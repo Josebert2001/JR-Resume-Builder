@@ -8,7 +8,7 @@ import { z } from "zod";
 
 // Get API key from localStorage or environment
 const getApiKey = () => {
-  return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || '';
+  return import.meta.env.VITE_GROQ_API_KEY || '';
 };
 
 // Initialize ChatGroq instead of ChatOpenAI
@@ -236,10 +236,6 @@ Example: ["skill1", "skill2", "skill3", "skill4", "skill5"]`;
 
 export const analyzeResume = async (resumeText: string, jobDescription?: string): Promise<ResumeAnalysisResponse> => {
   try {
-    if (!isApiKeyValid()) {
-      throw new Error('API key is not configured. Please set your Groq API key in the settings.');
-    }
-
     const chat = createGroqChat();
 
     const prompt = jobDescription 
@@ -299,12 +295,6 @@ Return JSON with: score (0-100), matchedKeywords array, missedKeywords array, su
     console.error('Resume analysis error:', error);
     throw error;
   }
-};
-
-// Function to check if the API key is valid
-export const isApiKeyValid = (): boolean => {
-  const apiKey = getApiKey();
-  return !!apiKey && apiKey.startsWith('gsk-');
 };
 
 // Resume Conversation Chain
