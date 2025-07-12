@@ -3,11 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Activity, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { Activity, RefreshCw, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { checkLangchainHealth } from '../services/langchain/langchainService';
 import { useToast } from './ui/use-toast';
 
-export const SystemStatus: React.FC = () => {
+interface SystemStatusProps {
+  onOpenSettings?: () => void;
+}
+
+export const SystemStatus: React.FC<SystemStatusProps> = ({ onOpenSettings }) => {
   const [healthStatus, setHealthStatus] = useState<{
     isHealthy: boolean;
     errors: string[];
@@ -69,6 +73,17 @@ export const SystemStatus: React.FC = () => {
               <RefreshCw className={`h-4 w-4 ${isChecking ? 'animate-spin' : ''}`} />
               {isChecking ? 'Checking...' : 'Check'}
             </Button>
+            {onOpenSettings && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onOpenSettings}
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>

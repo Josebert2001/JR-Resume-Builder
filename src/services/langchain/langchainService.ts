@@ -8,7 +8,7 @@ import { z } from "zod";
 
 // Get API key from localStorage or environment
 const getApiKey = () => {
-  return import.meta.env.VITE_GROQ_API_KEY || '';
+  return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || '';
 };
 
 // Initialize ChatGroq instead of ChatOpenAI
@@ -146,9 +146,8 @@ export const generateJobResponsibilities = async (data: ResponsibilityGeneration
   try {
     const chat = createGroqChat();
     
-    const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}${data.jobDescription ? `. Target job requirements: ${data.jobDescription}` : ''}.
+    const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}.
     Focus on specific, measurable achievements and key responsibilities.
-    ${data.jobDescription ? 'Align the responsibilities with the target job requirements mentioned above.' : ''}
     Format each bullet point starting with "• " and separate with newlines.`;
 
     const response = await chat.invoke([
@@ -190,14 +189,13 @@ Keep it to 2-3 sentences maximum. Return only the description text.`;
   }
 };
 
-export const suggestSkills = async (position: string, experience: string[], jobDescription?: string): Promise<string[]> => {
+export const suggestSkills = async (position: string, experience: string[]): Promise<string[]> => {
   try {
     const chat = createGroqChat();
     
     const prompt = `Suggest relevant professional skills for:
 Position: ${position}
 Experience: ${experience.join(', ')}
-${jobDescription ? `Target Job Description: ${jobDescription}` : ''}
 
 Include:
 - Technical skills
@@ -205,7 +203,6 @@ Include:
 - Industry-specific skills
 - Tools and technologies
 - Certifications if applicable
-${jobDescription ? '- Skills specifically mentioned in the job description' : ''}
 
 Return only a JSON array of skills, nothing else.
 Example: ["skill1", "skill2", "skill3", "skill4", "skill5"]`;
@@ -239,6 +236,10 @@ Example: ["skill1", "skill2", "skill3", "skill4", "skill5"]`;
 
 export const analyzeResume = async (resumeText: string, jobDescription?: string): Promise<ResumeAnalysisResponse> => {
   try {
+    if (!isApiKeyValid()) {
+      throw new Error('API key is not configured. Please set your Groq API key in the settings.');
+    }
+
     const chat = createGroqChat();
 
     const prompt = jobDescription 
@@ -298,6 +299,12 @@ Return JSON with: score (0-100), matchedKeywords array, missedKeywords array, su
     console.error('Resume analysis error:', error);
     throw error;
   }
+};
+
+// Function to check if the API key is valid
+export const isApiKeyValid = (): boolean => {
+  const apiKey = getApiKey();
+  return !!apiKey && apiKey.startsWith('gsk-');
 };
 
 // Resume Conversation Chain

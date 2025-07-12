@@ -85,8 +85,6 @@ export type ResumeData = {
   template?: TemplateType;
   interests?: string;
   personalInfo?: PersonalInfo;
-  targetJobDescription?: string;
-  targetJobDescription?: string;
 };
 
 type ResumeContextType = {

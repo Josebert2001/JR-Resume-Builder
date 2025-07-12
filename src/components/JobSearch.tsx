@@ -65,10 +65,10 @@ export const JobSearch = ({ resumeData }: JobSearchProps) => {
     setSearchError(null);
 
     try {
-      // Check if API key is configured in environment
-      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+      // Check if API key is configured
+      const apiKey = localStorage.getItem('groq_api_key');
       if (!apiKey) {
-        setSearchError('AI search is currently unavailable. Please contact the administrator.');
+        setSearchError('Please configure your API key in the API Setup tab first.');
         return;
       }
 
