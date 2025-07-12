@@ -141,8 +141,7 @@ Return only a JSON array of skills, nothing else.`;
 export const analyzeResume = async (
   resumeText: string,
   jobDescription: string
-  industry?: string,
-  jobDescription?: string
+): Promise<{
   score: number;
   matchedKeywords: string[];
   missedKeywords: string[];
@@ -150,7 +149,7 @@ export const analyzeResume = async (
 }> => {
   try {
     // Try LangChain first
-    return await lcGenerateJobResponsibilities({ position, company, industry, jobDescription });
+    return await lcAnalyzeResume(resumeText, jobDescription);
   } catch (error) {
     console.warn('LangChain analysis failed, falling back to direct Groq:', error);
     
