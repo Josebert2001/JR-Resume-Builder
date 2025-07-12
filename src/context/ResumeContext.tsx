@@ -86,6 +86,7 @@ export type ResumeData = {
   interests?: string;
   personalInfo?: PersonalInfo;
   targetJobDescription?: string;
+  targetJobDescription?: string;
 };
 
 type ResumeContextType = {

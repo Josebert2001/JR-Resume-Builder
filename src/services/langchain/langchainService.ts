@@ -146,8 +146,9 @@ export const generateJobResponsibilities = async (data: ResponsibilityGeneration
   try {
     const chat = createGroqChat();
     
-    const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}.
+    const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}${data.jobDescription ? `. Target job requirements: ${data.jobDescription}` : ''}.
     Focus on specific, measurable achievements and key responsibilities.
+    ${data.jobDescription ? 'Align the responsibilities with the target job requirements mentioned above.' : ''}
     Format each bullet point starting with "• " and separate with newlines.`;
 
     const response = await chat.invoke([
@@ -189,13 +190,14 @@ Keep it to 2-3 sentences maximum. Return only the description text.`;
   }
 };
 
-export const suggestSkills = async (position: string, experience: string[]): Promise<string[]> => {
+export const suggestSkills = async (position: string, experience: string[], jobDescription?: string): Promise<string[]> => {
   try {
     const chat = createGroqChat();
     
     const prompt = `Suggest relevant professional skills for:
 Position: ${position}
 Experience: ${experience.join(', ')}
+${jobDescription ? `Target Job Description: ${jobDescription}` : ''}
 
 Include:
 - Technical skills
@@ -203,6 +205,7 @@ Include:
 - Industry-specific skills
 - Tools and technologies
 - Certifications if applicable
+${jobDescription ? '- Skills specifically mentioned in the job description' : ''}
 
 Return only a JSON array of skills, nothing else.
 Example: ["skill1", "skill2", "skill3", "skill4", "skill5"]`;

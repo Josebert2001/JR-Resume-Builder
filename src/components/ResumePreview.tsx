@@ -10,6 +10,7 @@ import { ZoomIn, ZoomOut, Maximize2, Download, Settings, Eye } from 'lucide-reac
 import { FormattedResume } from './FormattedResume';
 import { usePDF } from 'react-to-pdf';
 import { toast } from 'sonner';
+import { analytics } from '../services/analytics';
 
 export const ResumePreview = () => {
   const { resumeData, template } = useResumeContext();
@@ -120,6 +121,9 @@ export const ResumePreview = () => {
       
       // Use the toPDF function from the usePDF hook
       await toPDF();
+      
+      // Track download event
+      analytics.trackResumeDownloaded('pdf');
       
       toast.success('Resume successfully downloaded!', {
         description: `Your resume has been saved as ${pdfOptions.filename}`

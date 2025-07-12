@@ -121,6 +121,7 @@ export const SkillsForm = () => {
         recentPosition, 
         experienceDescriptions,
         resumeData.targetJobDescription
+        resumeData.targetJobDescription
       );
       
       // Filter out skills that already exist
@@ -147,6 +148,7 @@ export const SkillsForm = () => {
       setSuggestDialogOpen(true);
       
       // Track AI feature usage
+      analytics.trackAIFeatureUsed('skills_suggestion', resumeData.targetJobDescription ? 'with_job_description' : 'without_job_description');
       analytics.trackAIFeatureUsed('skills_suggestion', resumeData.targetJobDescription ? 'with_job_description' : 'without_job_description');
       
     } catch (error) {

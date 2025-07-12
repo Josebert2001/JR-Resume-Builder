@@ -55,11 +55,12 @@ Keep it to 2-3 sentences maximum.`;
 export const generateWorkDescription = async (
   position: string,
   company: string,
-  industry?: string
+  industry?: string,
+  jobDescription?: string
 ): Promise<string> => {
   try {
     // Try LangChain first
-    return await lcGenerateJobResponsibilities({ position, company, industry });
+    return await lcGenerateJobResponsibilities({ position, company, industry, jobDescription });
   } catch (error) {
     console.warn('LangChain generation failed, falling back to direct Groq:', error);
     
@@ -68,6 +69,7 @@ export const generateWorkDescription = async (
 Position: ${position}
 Company: ${company}
 ${industry ? `Industry: ${industry}` : ''}
+${jobDescription ? `Target Job Description: ${jobDescription}` : ''}
 
 Include:
 - Key responsibilities
@@ -75,6 +77,7 @@ Include:
 - Impact on the organization
 - Use action verbs and quantifiable results
 - 3-4 bullet points
+${jobDescription ? '- Align with requirements mentioned in the target job description' : ''}
 
 Format each point starting with "• " and separate with newlines.`;
 
@@ -117,6 +120,7 @@ Include:
 - Industry-specific skills
 - Tools and technologies
 - Certifications if applicable
+${jobDescription ? '- Skills specifically mentioned in the job description' : ''}
 ${jobDescription ? '- Skills specifically mentioned in the job description' : ''}
 
 Return only a JSON array of skills, nothing else.`;
