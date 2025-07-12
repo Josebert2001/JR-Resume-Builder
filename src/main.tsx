@@ -3,9 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import "./i18n/config";
-import "./i18n/config";
 import { ResumeProvider } from "@/context/ResumeContext";
-import { analytics } from "./services/analytics";
 import { analytics } from "./services/analytics";
 
 // Add global error handler
@@ -29,9 +27,6 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-
-// Track initial page load
-analytics.trackPageView('app_start');
 
 // Track initial page load
 analytics.trackPageView('app_start');
