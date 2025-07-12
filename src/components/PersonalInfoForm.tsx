@@ -1,22 +1,33 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useResumeContext } from '@/context/ResumeContext';
 import { ArrowRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { motion } from 'framer-motion';
+import { analytics } from '../services/analytics';
 
 export const PersonalInfoForm = () => {
-  const { personalInfo, updatePersonalInfo, nextStep } = useResumeContext();
+  const { personalInfo, updatePersonalInfo, nextStep, resumeData, updateResumeData } = useResumeContext();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    analytics.trackUserEngagement('personal_info_completed', 'resume_builder');
     nextStep();
   };
 
+  const handleTargetJobChange = (value: string) => {
+    updateResumeData({ targetJobDescription: value });
+    if (value.length > 50) {
+      analytics.trackUserEngagement('target_job_added', 'personalization');
+    }
+  };
   const formVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -46,27 +57,29 @@ export const PersonalInfoForm = () => {
         <motion.div variants={itemVariants} className="grid gap-5 sm:grid-cols-2">
           <div className="form-field">
             <Label htmlFor="firstName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              First Name
+              {t('personalInfo.firstName')}
             </Label>
             <Input
               id="firstName"
-              placeholder="Enter your first name"
+              placeholder={t('personalInfo.firstName')}
               value={personalInfo.firstName}
               onChange={(e) => updatePersonalInfo({ firstName: e.target.value })}
               className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
+              aria-label={t('personalInfo.firstName')}
               required
             />
           </div>
           <div className="form-field">
             <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Last Name
+              {t('personalInfo.lastName')}
             </Label>
             <Input
               id="lastName"
-              placeholder="Enter your last name"
+              placeholder={t('personalInfo.lastName')}
               value={personalInfo.lastName}
               onChange={(e) => updatePersonalInfo({ lastName: e.target.value })}
               className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
+              aria-label={t('personalInfo.lastName')}
               required
             />
           </div>
@@ -74,60 +87,81 @@ export const PersonalInfoForm = () => {
 
         <motion.div variants={itemVariants} className="form-field">
           <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Email
+            {t('personalInfo.email')}
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="your.email@example.com"
+            placeholder={t('personalInfo.email')}
             value={personalInfo.email}
             onChange={(e) => updatePersonalInfo({ email: e.target.value })}
             className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
+            aria-label={t('personalInfo.email')}
             required
           />
         </motion.div>
 
         <motion.div variants={itemVariants} className="form-field">
           <Label htmlFor="phone" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Phone
+            {t('personalInfo.phone')}
           </Label>
           <Input
             id="phone"
             type="tel"
-            placeholder="Your phone number"
+            placeholder={t('personalInfo.phone')}
             value={personalInfo.phone}
             onChange={(e) => updatePersonalInfo({ phone: e.target.value })}
             className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
+            aria-label={t('personalInfo.phone')}
             required
           />
         </motion.div>
 
         <motion.div variants={itemVariants} className="form-field">
           <Label htmlFor="location" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Location
+            {t('personalInfo.location')}
           </Label>
           <Input
             id="location"
-            placeholder="City, Country"
+            placeholder={t('personalInfo.location')}
             value={personalInfo.location || ''}
             onChange={(e) => updatePersonalInfo({ location: e.target.value })}
             className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
+            aria-label={t('personalInfo.location')}
             required
           />
         </motion.div>
 
         <motion.div variants={itemVariants} className="form-field">
           <Label htmlFor="portfolio" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Portfolio URL
+            {t('personalInfo.portfolio')}
           </Label>
           <Input
             id="portfolio"
             type="url"
-            placeholder="https://your-portfolio.com"
+            placeholder={t('personalInfo.portfolio')}
             value={personalInfo.portfolio || ''}
             onChange={(e) => updatePersonalInfo({ portfolio: e.target.value })}
             className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20"
+            aria-label={t('personalInfo.portfolio')}
           />
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="form-field">
+          <Label htmlFor="targetJob" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('personalInfo.targetJob')}
+          </Label>
+          <Textarea
+            id="targetJob"
+            placeholder={t('personalInfo.targetJobPlaceholder')}
+            value={resumeData.targetJobDescription || ''}
+            onChange={(e) => handleTargetJobChange(e.target.value)}
+            className="mt-1.5 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-resume-primary focus:ring-resume-primary/20 min-h-[120px]"
+            aria-label={t('personalInfo.targetJob')}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            This helps our AI provide more personalized suggestions throughout the resume building process.
+          </p>
         </motion.div>
       </div>
 
@@ -138,8 +172,9 @@ export const PersonalInfoForm = () => {
         <Button 
           type="submit"
           className="w-full sm:w-auto bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+          aria-label={t('common.next')}
         >
-          Next Step
+          {t('common.next')}
           <ArrowRight size={16} className="ml-2" />
         </Button>
       </motion.div>

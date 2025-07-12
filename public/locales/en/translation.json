@@ -1,0 +1,131 @@
+{
+  "common": {
+    "next": "Next Step",
+    "previous": "Previous Step",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "download": "Download",
+    "share": "Share",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "navigation": {
+    "home": "Home",
+    "resumeBuilder": "Resume Builder",
+    "templates": "Templates",
+    "aiAssistance": "AI Assistant",
+    "jobSearch": "Job Search",
+    "interviewPrep": "Interview Preparation",
+    "coverLetter": "Cover Letter Guide"
+  },
+  "home": {
+    "title": "Build Your Perfect Resume",
+    "subtitle": "Create a professional resume in minutes with our AI-powered builder",
+    "getStarted": "Get Started",
+    "features": {
+      "aiPowered": "AI-Powered Content",
+      "professionalTemplates": "Professional Templates",
+      "atsOptimized": "ATS Optimized",
+      "easyToUse": "Easy to Use"
+    }
+  },
+  "resumeBuilder": {
+    "title": "Resume Builder",
+    "steps": {
+      "template": "Choose Template",
+      "personal": "Personal Info",
+      "education": "Education",
+      "experience": "Work Experience",
+      "skills": "Skills",
+      "projects": "Projects",
+      "preview": "Preview & Download"
+    }
+  },
+  "personalInfo": {
+    "title": "Personal Information",
+    "description": "Let's start with your basic information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "portfolio": "Portfolio URL",
+    "targetJob": "Target Job Description",
+    "targetJobPlaceholder": "Paste the job description you're applying for to get personalized suggestions..."
+  },
+  "education": {
+    "title": "Education",
+    "description": "Add your educational background",
+    "school": "School",
+    "degree": "Degree",
+    "fieldOfStudy": "Field of Study",
+    "graduationDate": "Graduation Date",
+    "description": "Description",
+    "gpa": "GPA (Optional)",
+    "addEducation": "Add Education",
+    "generateWithAI": "Generate with AI"
+  },
+  "workExperience": {
+    "title": "Work Experience",
+    "description": "Add your relevant work history",
+    "position": "Job Title",
+    "company": "Company",
+    "location": "Location",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "description": "Description",
+    "addExperience": "Add Work Experience",
+    "generateWithAI": "Generate with AI"
+  },
+  "skills": {
+    "title": "Skills",
+    "description": "Add your technical and professional skills",
+    "addSkill": "Add Skill",
+    "suggestWithAI": "Suggest Skills with AI"
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "Add your notable projects and achievements",
+    "name": "Project Name",
+    "url": "Project URL",
+    "technologies": "Technologies Used",
+    "description": "Project Description",
+    "addProject": "Add Project"
+  },
+  "templates": {
+    "title": "Choose a Template",
+    "description": "Select a template that best represents your professional style",
+    "professional": "Professional",
+    "modern": "Modern",
+    "creative": "Creative",
+    "minimal": "Minimal",
+    "selectTemplate": "Select Template",
+    "useTemplate": "Use This Template"
+  },
+  "analytics": {
+    "resumeGenerated": "Resume Generated",
+    "templateSelected": "Template Selected",
+    "aiFeatureUsed": "AI Feature Used",
+    "resumeDownloaded": "Resume Downloaded",
+    "skillsSuggested": "Skills Suggested",
+    "descriptionGenerated": "Description Generated"
+  },
+  "sharing": {
+    "shareResume": "Share Resume",
+    "shareTitle": "Share Your Resume",
+    "shareDescription": "Share this link with others to get feedback on your resume",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied to clipboard!"
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitToScreen": "Fit to screen"
+  }
+}

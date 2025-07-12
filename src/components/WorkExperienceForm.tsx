@@ -81,12 +81,15 @@ export const WorkExperienceForm = () => {
     try {
       const description = await generateWorkDescription(
         exp.position,
-        exp.company
+        exp.company,
+        undefined,
+        resumeData.targetJobDescription
       );
       
       if (description) {
         handleUpdateExperience(id, 'description', description);
         toast.success('Job description generated!');
+        analytics.trackAIFeatureUsed('work_description_generation', resumeData.targetJobDescription ? 'with_job_description' : 'without_job_description');
       } else {
         toast.error('Failed to generate description. Please try again.');
       }

@@ -1,0 +1,27 @@
+{
+  "name": "JR Resume Builder",
+  "short_name": "JR Resume",
+  "description": "AI-powered resume builder for creating professional resumes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "lang": "en",
+  "dir": "ltr"
+}

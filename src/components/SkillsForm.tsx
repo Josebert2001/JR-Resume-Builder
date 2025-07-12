@@ -117,7 +117,11 @@ export const SkillsForm = () => {
       const existingSkills = new Set(resumeData.skills?.map(s => s.name.toLowerCase()));
       
       // Get AI suggested skills
-      const suggestions = await suggestSkills(recentPosition, experienceDescriptions);
+      const suggestions = await suggestSkills(
+        recentPosition, 
+        experienceDescriptions,
+        resumeData.targetJobDescription
+      );
       
       // Filter out skills that already exist
       const filteredSuggestions = suggestions.filter(
@@ -141,6 +145,9 @@ export const SkillsForm = () => {
       
       // Open the dialog
       setSuggestDialogOpen(true);
+      
+      // Track AI feature usage
+      analytics.trackAIFeatureUsed('skills_suggestion', resumeData.targetJobDescription ? 'with_job_description' : 'without_job_description');
       
     } catch (error) {
       console.error('Error suggesting skills:', error);

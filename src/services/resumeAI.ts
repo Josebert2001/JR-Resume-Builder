@@ -96,11 +96,12 @@ Format each point starting with "• " and separate with newlines.`;
 
 export const suggestSkills = async (
   position: string,
-  experience: string[]
+  experience: string[],
+  jobDescription?: string
 ): Promise<string[]> => {
   try {
     // Try LangChain first
-    return await lcSuggestSkills(position, experience);
+    return await lcSuggestSkills(position, experience, jobDescription);
   } catch (error) {
     console.warn('LangChain generation failed, falling back to direct Groq:', error);
     
@@ -108,6 +109,7 @@ export const suggestSkills = async (
     const prompt = `Suggest relevant professional skills for:
 Position: ${position}
 Experience: ${experience.join(', ')}
+${jobDescription ? `Target Job Description: ${jobDescription}` : ''}
 
 Include:
 - Technical skills
@@ -115,6 +117,7 @@ Include:
 - Industry-specific skills
 - Tools and technologies
 - Certifications if applicable
+${jobDescription ? '- Skills specifically mentioned in the job description' : ''}
 
 Return only a JSON array of skills, nothing else.`;
 
@@ -138,7 +141,8 @@ Return only a JSON array of skills, nothing else.`;
 export const analyzeResume = async (
   resumeText: string,
   jobDescription: string
-): Promise<{
+  industry?: string,
+  jobDescription?: string
   score: number;
   matchedKeywords: string[];
   missedKeywords: string[];
@@ -146,7 +150,7 @@ export const analyzeResume = async (
 }> => {
   try {
     // Try LangChain first
-    return await lcAnalyzeResume(resumeText, jobDescription);
+    return await lcGenerateJobResponsibilities({ position, company, industry, jobDescription });
   } catch (error) {
     console.warn('LangChain analysis failed, falling back to direct Groq:', error);
     
@@ -155,6 +159,7 @@ export const analyzeResume = async (
 
 RESUME:
 ${resumeText}
+${jobDescription ? `Target Job Requirements: ${jobDescription}` : ''}
 
 JOB DESCRIPTION:
 ${jobDescription}
@@ -172,6 +177,7 @@ Return the analysis as a JSON object with the following format:
   "missedKeywords": string[],
   "suggestions": string[]
 }
+${jobDescription ? '- Align with requirements mentioned in the target job description' : ''}
 
 Be thorough but concise. The score should reflect the overall match quality.`;
 
