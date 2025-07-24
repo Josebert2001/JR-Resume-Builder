@@ -4,7 +4,7 @@ import {
   generateJobResponsibilities as lcGenerateJobResponsibilities,
   suggestSkills as lcSuggestSkills,
   analyzeResume as lcAnalyzeResume
-} from './langchain/langchainService';
+} from './langchain/resume/resumeService';
 
 const groq = new Groq({
   apiKey: import.meta.env.VITE_GROQ_API_KEY || '',

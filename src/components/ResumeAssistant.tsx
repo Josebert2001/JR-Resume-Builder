@@ -8,7 +8,7 @@ import { MessageCircle, Send, Trash2 } from 'lucide-react';
 import { 
   getResumeConversationResponse, 
   clearResumeConversationMemory 
-} from '../services/langchain/langchainService';
+} from '../services/langchain/conversation/conversationService';
 import { useToast } from './ui/use-toast';
 import { ExamplePrompts } from './ExamplePrompts';
 
