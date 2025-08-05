@@ -2,9 +2,9 @@ import { Groq } from "groq-sdk";
 import {
   generateResumeContent as lcGenerateResumeContent,
   generateJobResponsibilities as lcGenerateJobResponsibilities,
-  analyzeResume as lcAnalyzeResume,
   suggestSkills as lcSuggestSkills
 } from './langchain/resume/resumeService';
+import { analyzeResume as lcAnalyzeResume } from './langchain/analysis/analysisService';
 
 const groq = new Groq({
   apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
