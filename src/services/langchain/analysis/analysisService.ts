@@ -21,7 +21,7 @@ export interface ResumeAnalysisResponse extends ResumeAnalysis {
 
 export const analyzeResume = async (resumeText: string, jobDescription?: string): Promise<ResumeAnalysisResponse> => {
   try {
-    const chat = createGroqChat();
+  const chat = await createGroqChat();
 
     const prompt = jobDescription 
       ? `Analyze this resume against the job description and provide feedback in JSON format.
@@ -89,7 +89,7 @@ export const getComprehensiveResumeAnalysis = async (
   jobDescription: string
 ): Promise<any> => {
   try {
-    const chat = createGroqChat();
+    const chat = await createGroqChat();
     
     const prompt = `Perform a comprehensive analysis of this resume for a ${targetRole} position in the ${industry} industry.
 
@@ -171,7 +171,7 @@ export const getIndustryOptimization = async (
   industry: string
 ): Promise<any> => {
   try {
-    const chat = createGroqChat();
+    const chat = await createGroqChat();
     
     const prompt = `Optimize this resume for the ${industry} industry and ${targetRole} role.
 

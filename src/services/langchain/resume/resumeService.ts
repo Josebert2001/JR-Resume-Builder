@@ -23,7 +23,7 @@ export interface ResponsibilityGenerationRequest {
 
 export const generateResumeContent = async (data: GenerationRequest): Promise<GenerationResponse> => {
   try {
-    const chat = createGroqChat();
+    const chat = await createGroqChat();
     
     if (!data.course || !data.school || !data.interests) {
       throw new Error('Missing required fields for resume content generation');
@@ -74,7 +74,7 @@ Return ONLY a JSON object with the following structure:
 
 export const generateJobResponsibilities = async (data: ResponsibilityGenerationRequest): Promise<string> => {
   try {
-    const chat = createGroqChat();
+    const chat = await createGroqChat();
     
     const prompt = `Generate 4-5 detailed bullet points describing key responsibilities for a ${data.position} role at ${data.company}${data.industry ? ` in the ${data.industry} industry` : ''}.
     Focus on specific, measurable achievements and key responsibilities.
@@ -93,7 +93,7 @@ export const generateJobResponsibilities = async (data: ResponsibilityGeneration
 
 export const generateEducationDescription = async (degree: string, fieldOfStudy: string, school: string): Promise<string> => {
   try {
-    const chat = createGroqChat();
+    const chat = await createGroqChat();
     
     const prompt = `Generate a concise, professional description for an education entry with:
 Degree: ${degree}
@@ -121,7 +121,7 @@ Keep it to 2-3 sentences maximum. Return only the description text.`;
 
 export const suggestSkills = async (position: string, experience: string[]): Promise<string[]> => {
   try {
-    const chat = createGroqChat();
+    const chat = await createGroqChat();
     
     const prompt = `Suggest relevant professional skills for:
 Position: ${position}

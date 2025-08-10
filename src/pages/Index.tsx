@@ -2,6 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '@/components/Footer';
+import { NavHeader } from '@/components/NavHeader';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import {
@@ -22,39 +24,11 @@ import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-resume-light dark:bg-gray-900">
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm py-4 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <img src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" alt="JR Resume Builder Logo" className="h-12 w-auto" />
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-resume-primary to-resume-secondary text-transparent bg-clip-text">JR Resume Builder</h1>
-            </div>
-          </div>
-          <div className="md:flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  Resources <ChevronDown size={16} className="ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/cover-letter" className="cursor-pointer">Cover Letter Guide</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/job-search" className="cursor-pointer">Job Search Tips</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/interview-prep" className="cursor-pointer">Interview Preparation</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </header>
+      <NavHeader />
       
       {/* Main hero section */}
       <main className="container mx-auto px-4 py-16 sm:py-24">
@@ -69,8 +43,8 @@ const Index = () => {
           {/* Navigation Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             <Card 
-              className="cursor-pointer"
-              onClick={() => navigate('/resume-builder')}
+              className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
+              onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
             >
               <CardHeader className="text-center p-8">
                 <FileText className="h-12 w-12 mx-auto text-resume-primary mb-4" />
@@ -80,8 +54,8 @@ const Index = () => {
             </Card>
             
             <Card 
-              className="cursor-pointer"
-              onClick={() => navigate('/ai-assistance')}
+              className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
+              onClick={() => user ? navigate('/ai-assistance') : navigate('/auth')}
             >
               <CardHeader className="text-center p-8">
                 <Bot className="h-12 w-12 mx-auto text-resume-primary mb-4" />
@@ -91,8 +65,8 @@ const Index = () => {
             </Card>
             
             <Card 
-              className="cursor-pointer"
-              onClick={() => navigate('/job-search-ai')}
+              className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
+              onClick={() => user ? navigate('/job-search-ai') : navigate('/auth')}
             >
               <CardHeader className="text-center p-8">
                 <Search className="h-12 w-12 mx-auto text-resume-primary mb-4" />

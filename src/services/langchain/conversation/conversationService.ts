@@ -28,7 +28,7 @@ export const getResumeConversationResponse = async (input: string): Promise<{ re
     initializeResumeConversation();
   }
 
-  const chat = createGroqChat();
+  const chat = await createGroqChat();
 
   const chain = new ConversationChain({
     memory: resumeConversationMemory,
@@ -81,7 +81,7 @@ export const getSkillsConversationResponse = async (input: string): Promise<{ re
     initializeSkillsConversation();
   }
 
-  const chat = createGroqChat();
+  const chat = await createGroqChat();
 
   const chain = new ConversationChain({
     memory: skillsConversationMemory,
@@ -134,7 +134,7 @@ export const getCareerConversationResponse = async (input: string): Promise<{ re
     initializeCareerConversation();
   }
 
-  const chat = createGroqChat();
+  const chat = await createGroqChat();
 
   const chain = new ConversationChain({
     memory: careerConversationMemory,

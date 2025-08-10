@@ -5,7 +5,7 @@ import { createGroqChat, isApiKeyValid } from '../core/llmCore';
 
 export const checkLangchainHealth = async (): Promise<{ isHealthy: boolean; errors: string[]; details: Record<string, any> }> => {
   try {
-    const hasApiKey = isApiKeyValid();
+    const hasApiKey = await isApiKeyValid();
     const errors: string[] = [];
     
     if (!hasApiKey) {
@@ -17,7 +17,7 @@ export const checkLangchainHealth = async (): Promise<{ isHealthy: boolean; erro
 
     if (hasApiKey) {
       try {
-        const chat = createGroqChat();
+        const chat = await createGroqChat();
         const testResponse = await chat.invoke([
           { role: "user", content: "Say 'OK' if you can read this." }
         ]);

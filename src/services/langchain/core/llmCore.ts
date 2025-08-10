@@ -1,14 +1,36 @@
 
 import { ChatGroq } from "@langchain/groq";
+import { SecureApiService } from '@/services/secureApiService';
 
-// Get API key from localStorage or environment
-const getApiKey = () => {
-  return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || '';
+// Get API key from secure storage, fallback to localStorage for migration
+const getApiKey = async (): Promise<string> => {
+  try {
+    // Try to get from secure storage first
+    const secureKey = await SecureApiService.getApiKey('groq', 'api_key');
+    if (secureKey) {
+      return secureKey;
+    }
+
+    // Fallback to localStorage (for migration)
+    const localKey = localStorage.getItem('groq_api_key');
+    if (localKey) {
+      // Migrate to secure storage
+      await SecureApiService.storeApiKey('groq', 'api_key', localKey);
+      localStorage.removeItem('groq_api_key');
+      return localKey;
+    }
+
+    return import.meta.env.VITE_GROQ_API_KEY || '';
+  } catch (error) {
+    console.error('Error getting API key:', error);
+    // Fallback to localStorage
+    return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || '';
+  }
 };
 
 // Initialize ChatGroq
-export const createGroqChat = () => {
-  const apiKey = getApiKey();
+export const createGroqChat = async () => {
+  const apiKey = await getApiKey();
   
   if (!apiKey) {
     throw new Error('Groq API key is not configured. Please set your API key in the settings.');
@@ -23,9 +45,14 @@ export const createGroqChat = () => {
 };
 
 // Function to check if the API key is valid
-export const isApiKeyValid = (): boolean => {
-  const apiKey = getApiKey();
-  return !!apiKey && apiKey.startsWith('gsk-');
+export const isApiKeyValid = async (): Promise<boolean> => {
+  try {
+    const apiKey = await getApiKey();
+    return !!apiKey && apiKey.startsWith('gsk-');
+  } catch (error) {
+    console.error('Error validating API key:', error);
+    return false;
+  }
 };
 
 // Function to safely parse JSON with error handling
