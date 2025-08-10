@@ -6,6 +6,12 @@ This project is proudly developed under **JR Digital Insights**, founded by Sund
 
 ## ✨ Key Features
 
+### 🔐 Secure Authentication System
+- **User Accounts**: Sign up/sign in with email and password
+- **Protected Routes**: Secure access to premium features
+- **Encrypted API Storage**: API keys stored securely in Supabase
+- **Profile Management**: User profiles with automatic creation
+
 ### 🤖 AI-Powered Resume Building
 - **Smart Content Generation**: AI generates professional summaries, work descriptions, and education details
 - **Skills Suggestion**: Intelligent skill recommendations based on your experience and target role
@@ -103,21 +109,21 @@ src/
    npm install
    ```
 
-3. **Set up environment variables**
-   ```bash
-   # Create .env file (optional - API key can be set in the app)
-   echo "VITE_GROQ_API_KEY=your_groq_api_key_here" > .env
-   ```
-
-4. **Start development server**
+3. **Start development server**
    ```bash
    npm run dev
    ```
 
+4. **Create an account**
+   - Visit the app and click "Get Started"
+   - Sign up with your email and password
+   - Your profile will be created automatically
+
 5. **Configure AI Features**
-   - Visit the app and go to AI Assistant → Settings
-   - Add your Groq API key for full AI functionality
-   - The app will guide you through the setup process
+   - Sign in to access protected features
+   - Go to AI Assistant or any AI-powered feature
+   - Add your Groq API key securely in the app
+   - API keys are encrypted and stored in your user account
 
 ## 📱 Features Overview
 
@@ -217,10 +223,12 @@ npm run preview
 
 ## 🔐 Privacy & Security
 
-- **Local-First**: Resume data stored locally in your browser
-- **Optional Cloud Sync**: Supabase integration for cross-device access
-- **API Key Security**: Keys stored locally, never transmitted to our servers
-- **No Data Collection**: We don't collect or store your personal information
+- **User Authentication**: Secure sign up/sign in with Supabase Auth
+- **Encrypted Storage**: API keys encrypted and stored securely in database
+- **Row-Level Security**: Database access controlled by user authentication
+- **Protected Routes**: Sensitive features require authentication
+- **No Data Leakage**: Resume data isolated to your account only
+- **Optional Cloud Sync**: Cross-device access with secure cloud storage
 
 ## 🤝 Contributing
 
