@@ -31,11 +31,9 @@ export const PageHeader = ({ title, showBackButton = true, children }: PageHeade
               </Button>
             )}
             <div className="flex items-center space-x-3">
-              <img 
-                src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
-                alt="JR Resume Builder Logo" 
-                className="h-8 w-auto" 
-              />
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">R</span>
+              </div>
               <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-resume-primary to-resume-secondary text-transparent bg-clip-text">
                 {title}
               </h1>

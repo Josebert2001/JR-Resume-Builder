@@ -16,10 +16,7 @@ import {
   FileText, 
   User, 
   LogOut, 
-  Settings,
-  Briefcase,
-  MessageSquare,
-  Bot
+  Settings
 } from 'lucide-react';
 
 export function NavHeader() {
@@ -30,11 +27,6 @@ export function NavHeader() {
   const navigationItems = [
     { label: 'Templates', href: '/templates', icon: FileText },
     { label: 'Resume Builder', href: '/resume-builder', icon: FileText, protected: true },
-    { label: 'Interview Prep', href: '/interview-prep', icon: MessageSquare },
-    { label: 'Job Search', href: '/job-search', icon: Briefcase },
-    { label: 'AI Job Search', href: '/job-search-ai', icon: Bot, protected: true },
-    { label: 'AI Assistant', href: '/ai-assistance', icon: Bot, protected: true },
-    { label: 'Agentic AI', href: '/agentic-assistance', icon: Bot, protected: true },
   ];
 
   const handleSignOut = async () => {
@@ -71,9 +63,11 @@ export function NavHeader() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <FileText className="h-6 w-6 text-resume-primary" />
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <FileText className="h-5 w-5 text-white" />
+          </div>
           <span className="text-xl font-bold text-resume-dark dark:text-resume-light">
-            Resume Builder
+            ResumAI
           </span>
         </Link>
 
@@ -128,7 +122,7 @@ export function NavHeader() {
               <Button variant="ghost" asChild>
                 <Link to="/auth">Sign In</Link>
               </Button>
-              <Button asChild className="bg-resume-primary hover:bg-resume-secondary text-white">
+              <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                 <Link to="/auth">Get Started</Link>
               </Button>
             </div>
@@ -154,7 +148,7 @@ export function NavHeader() {
                     <Button variant="ghost" asChild onClick={() => setIsOpen(false)}>
                       <Link to="/auth">Sign In</Link>
                     </Button>
-                    <Button asChild className="bg-resume-primary hover:bg-resume-secondary text-white" onClick={() => setIsOpen(false)}>
+                    <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={() => setIsOpen(false)}>
                       <Link to="/auth">Get Started</Link>
                     </Button>
                   </div>

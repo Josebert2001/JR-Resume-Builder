@@ -10,13 +10,14 @@ const Footer = () => {
         
         {/* Logo & Tagline */}
         <div className="flex flex-col space-y-2">
-          <img 
-            src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
-            alt="JR Logo" 
-            className="h-8 w-auto object-contain" 
-          />
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">R</span>
+            </div>
+            <span className="text-xl font-bold">ResumAI</span>
+          </div>
           <p className="text-sm font-medium max-w-sm">
-            Empowering your career with smart, professional AI-generated resumes.
+            Land interviews faster with AI-powered resumes.
           </p>
         </div>
 
@@ -59,7 +60,7 @@ const Footer = () => {
 
       {/* Footer Bar */}
       <div className="mt-6 border-t border-gray-200 dark:border-gray-800 pt-4 text-xs text-center text-gray-500 dark:text-gray-400">
-        © {new Date().getFullYear()} <strong>JR Resume Builder</strong> – Powered by{" "}
+        © {new Date().getFullYear()} <strong>ResumAI</strong> – Powered by{" "}
         <strong>JR Digital Insights</strong>. All rights reserved.
       </div>
     </footer>

@@ -9,9 +9,9 @@ import { WorkExperienceForm } from '@/components/WorkExperienceForm';
 import { SkillsForm } from '@/components/SkillsForm';
 import { ResumeTemplates } from '@/components/ResumeTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResumeChecker } from '@/components/ResumeChecker';
 import { ProjectsForm } from '@/components/ProjectsForm';
 import { PageHeader } from '@/components/PageHeader';
+import { ResumeImprover } from '@/components/ResumeImprover';
 
 const ResumeBuilder = () => {
   const { currentStep, resumeData } = useResumeContext();
@@ -23,7 +23,7 @@ const ResumeBuilder = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PageHeader title="Resume Builder" />
+      <PageHeader title="ResumAI Builder" />
       
       <div className="container mx-auto px-4 py-8">
         <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
@@ -48,11 +48,11 @@ const ResumeBuilder = () => {
         
         {/* Step 7: Final Preview */}
         {currentStep === 7 && (
-          <Tabs defaultValue="preview" className="max-w-4xl mx-auto">
+          <Tabs defaultValue="preview" className="max-w-6xl mx-auto">
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="preview">Resume Preview</TabsTrigger>
               <TabsTrigger value="templates">Change Template</TabsTrigger>
-              <TabsTrigger value="check">Resume Check</TabsTrigger>
+              <TabsTrigger value="improve">Improve Resume</TabsTrigger>
             </TabsList>
             <TabsContent value="preview">
               <ResumePreview />
@@ -60,8 +60,8 @@ const ResumeBuilder = () => {
             <TabsContent value="templates">
               <ResumeTemplates />
             </TabsContent>
-            <TabsContent value="check">
-              <ResumeChecker resumeData={resumeData} />
+            <TabsContent value="improve">
+              <ResumeImprover resumeData={resumeData} />
             </TabsContent>
           </Tabs>
         )}

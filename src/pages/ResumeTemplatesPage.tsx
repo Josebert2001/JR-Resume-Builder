@@ -147,14 +147,12 @@ const ResumeTemplatesPage = () => {
             className="flex items-center space-x-2 sm:space-x-4 focus:outline-none focus:ring-2 focus:ring-resume-primary rounded-lg"
             aria-label="Home"
           >
-            <img 
-              src="/lovable-uploads/a9717253-dac6-43c6-ae44-bf112da68b5e.png" 
-              alt="JR Resume Builder Logo" 
-              className="h-8 md:h-12 w-auto"
-            />
+            <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <FileText className="h-4 w-4 md:h-6 md:w-6 text-white" />
+            </div>
             <div>
               <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text font-heading">
-                JR Resume Builder
+                ResumAI
               </h1>
               <p className="text-resume-muted text-xs md:text-sm">Create professional resumes with ease</p>
             </div>

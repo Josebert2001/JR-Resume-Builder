@@ -131,10 +131,10 @@ export default function AuthPage() {
         <Card className="shadow-lg border-0 bg-white dark:bg-gray-800">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-2xl font-bold text-resume-dark dark:text-resume-light">
-              Welcome to Resume Builder
+              Welcome to ResumAI
             </CardTitle>
             <CardDescription className="text-resume-muted">
-              Build professional resumes with AI assistance
+              Create job-ready resumes in 60 seconds with AI
             </CardDescription>
           </CardHeader>
           <CardContent>

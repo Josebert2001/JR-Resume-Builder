@@ -1,26 +1,23 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '@/components/Footer';
 import { NavHeader } from '@/components/NavHeader';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, 
-  Search, 
-  Bot,
-  MessageSquare,
-  TrendingUp,
-  Palette
+import { 
+  FileText, 
+  Zap, 
+  Download,
+  Shield,
+  Star,
+  CheckCircle,
+  ArrowRight,
+  Users,
+  Clock
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -30,94 +27,376 @@ const Index = () => {
     <div className="min-h-screen bg-resume-light dark:bg-gray-900">
       <NavHeader />
       
-      {/* Main hero section */}
-      <main className="container mx-auto px-4 py-16 sm:py-24">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-resume-primary to-resume-accent bg-clip-text text-transparent mb-4 animate-fade-in">
-            Build Your Perfect Resume
-          </h1>
-          <p className="text-lg md:text-xl text-resume-muted mb-8 max-w-3xl mx-auto animate-fade-in" style={{animationDelay: '0.2s'}}>
-            Create a professional resume in minutes with our AI-powered builder
-          </p>
-          
-          {/* Navigation Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
-              onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
-            >
-              <CardHeader className="text-center p-8">
-                <FileText className="h-12 w-12 mx-auto text-resume-primary mb-4" />
-                <CardTitle>Resume Builder</CardTitle>
-                <CardDescription>Create and customize your resume</CardDescription>
-              </CardHeader>
-            </Card>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="container mx-auto px-4 py-20 sm:py-32">
+          <div className="text-center max-w-4xl mx-auto">
+            <Badge className="mb-6 bg-blue-100 text-blue-800 hover:bg-blue-200">
+              🚀 AI-Powered Resume Builder
+            </Badge>
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-6 leading-tight">
+              Get Your Resume Job-Ready in 60 Seconds
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Create professional, ATS-friendly resumes with AI assistance. Land more interviews with resumes that actually get noticed.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+              <Button 
+                size="xl"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
+              >
+                Build My Resume
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="xl"
+                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg font-semibold"
+                onClick={() => navigate('/templates')}
+              >
+                View Templates
+              </Button>
+            </div>
             
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
-              onClick={() => user ? navigate('/ai-assistance') : navigate('/auth')}
-            >
-              <CardHeader className="text-center p-8">
-                <Bot className="h-12 w-12 mx-auto text-resume-primary mb-4" />
-                <CardTitle>AI Assistant</CardTitle>
-                <CardDescription>Get personalized career guidance</CardDescription>
-              </CardHeader>
-            </Card>
-            
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
-              onClick={() => user ? navigate('/job-search-ai') : navigate('/auth')}
-            >
-              <CardHeader className="text-center p-8">
-                <Search className="h-12 w-12 mx-auto text-resume-primary mb-4" />
-                <CardTitle>Job Search</CardTitle>
-                <CardDescription>Find relevant job opportunities</CardDescription>
-              </CardHeader>
-            </Card>
-            
-            <Card 
-              className="cursor-pointer"
-              onClick={() => navigate('/templates')}
-            >
-              <CardHeader className="text-center p-8">
-                <Palette className="h-12 w-12 mx-auto text-resume-primary mb-4" />
-                <CardTitle>Templates</CardTitle>
-                <CardDescription>Choose from professional designs</CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>ATS-Friendly</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>AI-Powered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>Professional Templates</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>Instant PDF Export</span>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Quick Actions */}
-        <div className="flex justify-center mb-8">
-          <div className="flex flex-wrap gap-4">
-            <Button 
-              onClick={() => navigate('/ai-assistance')}
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Chat with AI Assistant
-            </Button>
-            <Button 
-              onClick={() => navigate('/templates')}
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <Palette className="h-4 w-4" />
-              Browse Templates
-            </Button>
-            <Button 
-              onClick={() => navigate('/interview-prep')}
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <TrendingUp className="h-4 w-4" />
-              Interview Prep
-            </Button>
+      {/* How It Works Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Create your professional resume in just 3 simple steps
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="text-center group">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-xl">1</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Sign In & Choose Template</h3>
+              <p className="text-gray-600">
+                Create your account and select from our 4 professionally designed templates
+              </p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-xl">2</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Fill Details or Let AI Do It</h3>
+              <p className="text-gray-600">
+                Enter your information manually or use our AI assistant to generate professional content
+              </p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-xl">3</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Download ATS-Friendly Resume</h3>
+              <p className="text-gray-600">
+                Export your polished, ATS-optimized resume and start applying immediately
+              </p>
+            </div>
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose ResumAI?</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Powerful features designed to help you land more interviews
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <Zap className="h-12 w-12 mx-auto text-blue-600 mb-4" />
+              <CardTitle className="mb-2">AI-Powered</CardTitle>
+              <CardDescription>
+                Generate professional content in seconds with advanced AI
+              </CardDescription>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <Shield className="h-12 w-12 mx-auto text-green-600 mb-4" />
+              <CardTitle className="mb-2">ATS-Optimized</CardTitle>
+              <CardDescription>
+                Pass applicant tracking systems with optimized keywords
+              </CardDescription>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <Download className="h-12 w-12 mx-auto text-purple-600 mb-4" />
+              <CardTitle className="mb-2">Instant Export</CardTitle>
+              <CardDescription>
+                Download professional PDFs ready for job applications
+              </CardDescription>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <FileText className="h-12 w-12 mx-auto text-orange-600 mb-4" />
+              <CardTitle className="mb-2">Pro Templates</CardTitle>
+              <CardDescription>
+                Choose from 4 expertly designed resume templates
+              </CardDescription>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Users Say</h2>
+            <p className="text-xl text-gray-600">
+              Join thousands of job seekers who've landed interviews with ResumAI
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="p-6">
+              <div className="flex items-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-4">
+                "ResumAI helped me create a professional resume in minutes. I got 3 interview calls within a week!"
+              </p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                  S
+                </div>
+                <div>
+                  <p className="font-semibold">Sarah Johnson</p>
+                  <p className="text-sm text-gray-600">Software Engineer</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-6">
+              <div className="flex items-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-4">
+                "The AI suggestions were spot-on. My resume now passes ATS systems and looks incredibly professional."
+              </p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                  M
+                </div>
+                <div>
+                  <p className="font-semibold">Michael Chen</p>
+                  <p className="text-sm text-gray-600">Marketing Manager</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-6">
+              <div className="flex items-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-4">
+                "Finally, a resume builder that understands what employers want. The templates are beautiful and modern."
+              </p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                  A
+                </div>
+                <div>
+                  <p className="font-semibold">Amanda Rodriguez</p>
+                  <p className="text-sm text-gray-600">UX Designer</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-xl text-gray-600">
+              Choose the plan that works for your career goals
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Free Tier */}
+            <Card className="p-8 border-2 border-gray-200 hover:border-blue-300 transition-colors">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
+                <div className="text-4xl font-bold text-gray-900 mb-4">$0</div>
+                <p className="text-gray-600">Perfect for getting started</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>1 professional template</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Basic AI assistance</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>1 PDF export</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>ATS keyword suggestions</span>
+                </li>
+              </ul>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate('/auth')}
+              >
+                Get Started Free
+              </Button>
+            </Card>
+            
+            {/* Pro Tier */}
+            <Card className="p-8 border-2 border-blue-500 relative hover:shadow-xl transition-shadow">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-blue-500 text-white px-4 py-1">Most Popular</Badge>
+              </div>
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Pro</h3>
+                <div className="text-4xl font-bold text-blue-600 mb-4">$7<span className="text-lg text-gray-600">/month</span></div>
+                <p className="text-gray-600">Everything you need to land interviews</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>All 4 premium templates</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Unlimited AI-powered content</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Unlimited PDF exports</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Advanced ATS optimization</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Resume improvement suggestions</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Priority support</span>
+                </li>
+              </ul>
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700" 
+                onClick={() => navigate('/auth')}
+              >
+                Start Pro Trial
+              </Button>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Security & Trust Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Secure & Trusted</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Your privacy and data security are our top priorities
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <Shield className="h-12 w-12 mx-auto text-green-600 mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Bank-Level Security</h3>
+              <p className="text-gray-600">
+                Your data is encrypted and protected with enterprise-grade security
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <Users className="h-12 w-12 mx-auto text-blue-600 mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Trusted by Thousands</h3>
+              <p className="text-gray-600">
+                Join over 10,000+ professionals who trust ResumAI with their careers
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <Clock className="h-12 w-12 mx-auto text-purple-600 mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Always Available</h3>
+              <p className="text-gray-600">
+                24/7 access to your resumes with automatic cloud backup
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-white mb-4">
+            Ready to Land Your Dream Job?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of professionals who've accelerated their careers with AI-powered resumes
+          </p>
+          <Button 
+            size="xl"
+            className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg"
+            onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
+          >
+            Start Building Now - It's Free!
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+          <p className="text-blue-100 text-sm mt-4">
+            No credit card required • Get started in 60 seconds
+          </p>
+        </div>
+      </section>
       
       <Footer />
     </div>

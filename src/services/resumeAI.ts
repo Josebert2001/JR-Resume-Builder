@@ -1,10 +1,4 @@
 import { Groq } from "groq-sdk";
-import {
-  generateEducationDescription as lcGenerateEducationDescription,
-  generateJobResponsibilities as lcGenerateJobResponsibilities,
-  suggestSkills as lcSuggestSkills
-} from './langchain/resume/resumeService';
-import { analyzeResume as lcAnalyzeResume } from './langchain/analysis/analysisService';
 
 const groq = new Groq({
   apiKey: import.meta.env.VITE_GROQ_API_KEY || '',
@@ -16,13 +10,6 @@ export const generateEducationDescription = async (
   fieldOfStudy: string,
   school: string
 ): Promise<string> => {
-  try {
-    // Try LangChain first
-    return await lcGenerateEducationDescription(degree, fieldOfStudy, school);
-  } catch (error) {
-    console.warn('LangChain generation failed, falling back to direct Groq:', error);
-    
-    // Fallback to original implementation
     const prompt = `Generate a concise, professional description for an education entry with:
 Degree: ${degree}
 Field of Study: ${fieldOfStudy}
@@ -39,7 +26,7 @@ Keep it to 2-3 sentences maximum.`;
     try {
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "llama3-8b-8192",
+        model: "mixtral-8x7b-32768",
         temperature: 0.7,
         max_tokens: 200,
       });
@@ -49,7 +36,6 @@ Keep it to 2-3 sentences maximum.`;
       console.error('Error generating education description:', error);
       return '';
     }
-  }
 };
 
 export const generateWorkDescription = async (
@@ -57,13 +43,6 @@ export const generateWorkDescription = async (
   company: string,
   industry?: string
 ): Promise<string> => {
-  try {
-    // Try LangChain first
-    return await lcGenerateJobResponsibilities({ position, company, industry });
-  } catch (error) {
-    console.warn('LangChain generation failed, falling back to direct Groq:', error);
-    
-    // Fallback to original implementation
     const prompt = `Generate a professional work experience description for:
 Position: ${position}
 Company: ${company}
@@ -81,7 +60,7 @@ Format each point starting with "• " and separate with newlines.`;
     try {
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "llama3-8b-8192",
+        model: "mixtral-8x7b-32768",
         temperature: 0.7,
         max_tokens: 300,
       });
@@ -91,20 +70,12 @@ Format each point starting with "• " and separate with newlines.`;
       console.error('Error generating work description:', error);
       return '';
     }
-  }
 };
 
 export const suggestSkills = async (
   position: string,
   experience: string[]
 ): Promise<string[]> => {
-  try {
-    // Try LangChain first
-    return await lcSuggestSkills(position, experience);
-  } catch (error) {
-    console.warn('LangChain generation failed, falling back to direct Groq:', error);
-    
-    // Fallback to original implementation
     const prompt = `Suggest relevant professional skills for:
 Position: ${position}
 Experience: ${experience.join(', ')}
@@ -121,7 +92,7 @@ Return only a JSON array of skills, nothing else.`;
     try {
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "llama3-8b-8192",
+        model: "mixtral-8x7b-32768",
         temperature: 0.7,
         max_tokens: 200,
       });
@@ -132,7 +103,6 @@ Return only a JSON array of skills, nothing else.`;
       console.error('Error suggesting skills:', error);
       return [];
     }
-  }
 };
 
 export const analyzeResume = async (
@@ -144,13 +114,6 @@ export const analyzeResume = async (
   missedKeywords: string[];
   suggestions: string[];
 }> => {
-  try {
-    // Try LangChain first
-    return await lcAnalyzeResume(resumeText, jobDescription);
-  } catch (error) {
-    console.warn('LangChain analysis failed, falling back to direct Groq:', error);
-    
-    // Fallback to original implementation
     const prompt = `Analyze this resume against the following job description:
 
 RESUME:
@@ -178,7 +141,7 @@ Be thorough but concise. The score should reflect the overall match quality.`;
     try {
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "llama3-8b-8192",
+        model: "mixtral-8x7b-32768",
         temperature: 0.7,
         max_tokens: 1000,
         response_format: { type: "json_object" }
@@ -212,5 +175,4 @@ Be thorough but concise. The score should reflect the overall match quality.`;
         suggestions: ['Failed to complete AI analysis.']
       };
     }
-  }
 };

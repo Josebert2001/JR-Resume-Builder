@@ -7,12 +7,6 @@ import FontLoader from "./components/FontLoader";
 import Index from "./pages/Index";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import ResumeTemplatesPage from "./pages/ResumeTemplatesPage";
-import InterviewPreparation from "./pages/InterviewPreparation";
-import JobSearchTips from "./pages/JobSearchTips";
-import JobSearchPage from "./pages/JobSearchPage";
-import CoverLetterGuide from "./pages/CoverLetterGuide";
-import AIAssistance from "./pages/AIAssistance";
-import AgenticAssistance from "./pages/AgenticAssistance";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import { ResumeProvider } from "./context/ResumeContext";
@@ -42,24 +36,6 @@ function App() {
                       </ProtectedRoute>
                     } />
                     <Route path="/templates" element={<ResumeTemplatesPage />} />
-                    <Route path="/interview-prep" element={<InterviewPreparation />} />
-                    <Route path="/job-search" element={<JobSearchTips />} />
-                    <Route path="/job-search-ai" element={
-                      <ProtectedRoute>
-                        <JobSearchPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/cover-letter" element={<CoverLetterGuide />} />
-                    <Route path="/ai-assistance" element={
-                      <ProtectedRoute>
-                        <AIAssistance />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/agentic-assistance" element={
-                      <ProtectedRoute>
-                        <AgenticAssistance />
-                      </ProtectedRoute>
-                    } />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>
