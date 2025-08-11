@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { analyzeResume } from '@/services/resumeAI';
 import { toast } from 'sonner';
-import type { ResumeData } from '@/context/ResumeContext';
+import type { ResumeData, PersonalInfo } from '@/context/ResumeContext';
 
 interface ResumeImproverProps {
   resumeData: ResumeData;
@@ -34,7 +34,7 @@ export const ResumeImprover = ({ resumeData }: ResumeImproverProps) => {
   const isMobile = useIsMobile();
 
   const formatResumeData = () => {
-    const { personalInfo = {}, education = [], workExperience = [], skills = [] } = resumeData;
+    const { personalInfo = {} as PersonalInfo, education = [], workExperience = [], skills = [] } = resumeData;
     
     return `${personalInfo.firstName || ''} ${personalInfo.lastName || ''}
 ${personalInfo.email || ''}

@@ -8,7 +8,7 @@ import type { TemplateType } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
 import { TemplatePreview } from '@/components/TemplatePreview';
-import { Info, Book } from 'lucide-react';
+import { Info, Book, FileText } from 'lucide-react';
 
 // Simplified templates
 const templates = [
