@@ -338,12 +338,15 @@
       box-shadow: none !important;
       border: none !important;
       background: white !important;
+      font-size: 10.5pt; /* slightly smaller for better fit */
+      line-height: 1.35;  /* improve readability and avoid clipping */
     }
 
     /* Optional polish */
     #resume-print-area li {
       break-inside: avoid;
       page-break-inside: avoid;
+      margin-bottom: 4pt;
     }
 
     .no-print {

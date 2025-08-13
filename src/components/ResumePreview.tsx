@@ -26,9 +26,9 @@ export const ResumePreview = () => {
   
   // PDF options state
   const [pdfOptions, setPdfOptions] = useState({
-    format: 'letter',
+    format: 'a4',
     orientation: 'portrait',
-    margin: 0,
+    margin: 15,
     filename: 'resume.pdf'
   });
   
