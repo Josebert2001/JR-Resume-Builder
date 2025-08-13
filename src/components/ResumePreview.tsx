@@ -31,6 +31,24 @@ export const ResumePreview = () => {
     filename: 'resume.pdf'
   });
   
+  // Utility to map page format to exact millimeter dimensions
+  const getPageDimensions = (format: string, orientation: 'portrait' | 'landscape') => {
+    const base = (() => {
+      switch (format) {
+        case 'a4':
+          return { widthMm: 210, heightMm: 297 };
+        case 'legal':
+          return { widthMm: 216, heightMm: 356 };
+        case 'letter':
+        default:
+          return { widthMm: 216, heightMm: 279 };
+      }
+    })();
+    return orientation === 'landscape'
+      ? { widthMm: base.heightMm, heightMm: base.widthMm }
+      : base;
+  };
+
   // usePDF hook with dynamic options
   const { toPDF, targetRef } = usePDF({
     filename: pdfOptions.filename,
@@ -42,6 +60,7 @@ export const ResumePreview = () => {
     method: 'save'
   });
 
+  const pageDims = getPageDimensions(pdfOptions.format, pdfOptions.orientation as 'portrait' | 'landscape');
   // Update filename when user data changes
   useEffect(() => {
     const firstName = resumeData.personalInfo?.firstName || '';
@@ -113,14 +132,28 @@ export const ResumePreview = () => {
   };
 
   const handleDownload = async () => {
-    if (!targetRef.current) return;
-
     try {
       setIsDownloading(true);
-      
-      // Use the toPDF function from the usePDF hook
+
+      if (!targetRef.current) {
+        toast.error('Failed to prepare PDF', {
+          description: 'Export target not available'
+        });
+        return;
+      }
+
+      // Ensure web fonts are loaded before rendering
+      if ('fonts' in document && (document as any).fonts?.ready) {
+        try {
+          await (document as any).fonts.ready;
+        } catch {}
+      }
+
+      // Wait a frame to ensure DOM is painted
+      await new Promise((res) => requestAnimationFrame(() => res(undefined)));
+
       await toPDF();
-      
+
       toast.success('Resume successfully downloaded!', {
         description: `Your resume has been saved as ${pdfOptions.filename}`
       });
@@ -133,7 +166,6 @@ export const ResumePreview = () => {
       setIsDownloading(false);
     }
   };
-
   // Toggle PDF options panel
   const togglePdfOptions = () => {
     setShowPdfOptions(prev => !prev);
@@ -288,6 +320,29 @@ export const ResumePreview = () => {
         </div>
       )}
 
+      {/* Off-screen export container for PDF (unscaled, exact page size) */}
+      <div
+        ref={targetRef}
+        aria-hidden="true"
+        className="bg-background"
+        style={{
+          position: 'fixed',
+          left: '-10000px',
+          top: 0,
+          width: `${pageDims.widthMm}mm`,
+          minHeight: `${pageDims.heightMm}mm`,
+          padding: 0,
+          margin: 0,
+          boxShadow: 'none',
+          transform: 'none',
+          background: 'white'
+        }}
+      >
+        <div className="w-full h-full">
+          <FormattedResume template={template} resumeData={resumeData} />
+        </div>
+      </div>
+
       <div 
         ref={previewRef}
         className="h-full w-full overflow-auto bg-muted rounded-lg"
@@ -303,7 +358,7 @@ export const ResumePreview = () => {
             transition: isPanning ? 'none' : 'transform 0.2s ease-out'
           }}
         >
-          <Card className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={targetRef || resumeRef}>
+          <Card className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={resumeRef}>
             <FormattedResume template={template} resumeData={resumeData} />
           </Card>
         </div>
