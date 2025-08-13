@@ -1,6 +1,7 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
-// Helper to invoke the Edge Function (to be implemented) that proxies Groq API
+// Helper to invoke the Edge Function that proxies Groq API
 async function invokeGroq(action: string, payload: Record<string, unknown>) {
   const { data, error } = await supabase.functions.invoke("groq-generate", {
     body: { action, ...payload },
@@ -74,6 +75,11 @@ export const analyzeResume = async (
     };
   } catch (error) {
     console.error("Error analyzing resume:", error);
-    return { score: 0, matchedKeywords: [], missedKeywords: [], suggestions: ["Failed to complete AI analysis."] };
+    return { 
+      score: 0, 
+      matchedKeywords: [], 
+      missedKeywords: [], 
+      suggestions: ["Failed to complete AI analysis."] 
+    };
   }
 };
