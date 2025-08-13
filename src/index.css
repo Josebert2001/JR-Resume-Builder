@@ -316,17 +316,38 @@
       print-color-adjust: exact;
     }
 
-    .no-print {
-      display: none !important;
+    /* Hide everything, then reveal only the print area */
+    body * {
+      visibility: hidden !important;
     }
 
-    .resume-preview {
-      width: 210mm;
-      min-height: 297mm;
-      padding: 20mm;
-      margin: 0;
-      box-shadow: none;
-      border: none;
+    #resume-print-area,
+    #resume-print-area * {
+      visibility: visible !important;
+    }
+
+    #resume-print-area {
+      display: block !important;
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      width: 210mm; /* A4 width */
+      min-height: 297mm; /* A4 height */
+      margin: 0 auto !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: white !important;
+    }
+
+    /* Optional polish */
+    #resume-print-area li {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .no-print {
+      display: none !important;
     }
   }
 

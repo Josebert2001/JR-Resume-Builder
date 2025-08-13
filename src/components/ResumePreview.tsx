@@ -6,10 +6,11 @@ import { useResumeContext } from '@/context/ResumeContext';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { TouchRipple } from './ui/touch-ripple';
-import { ZoomIn, ZoomOut, Maximize2, Download, Settings, Eye } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Download, Settings, Eye, Printer } from 'lucide-react';
 import { FormattedResume } from './FormattedResume';
 import { usePDF } from 'react-to-pdf';
 import { toast } from 'sonner';
+import { printResume } from '@/utils/printPdf';
 
 export const ResumePreview = () => {
   const { resumeData, template } = useResumeContext();
@@ -247,6 +248,18 @@ export const ResumePreview = () => {
           <Button
             variant="secondary"
             size="icon"
+            onClick={() => printResume('resume-print-area')}
+            className={cn(isMobile && "h-12 w-12")}
+            aria-label="Print to PDF"
+          >
+            <Printer className="h-4 w-4" />
+          </Button>
+        </TouchRipple>
+
+        <TouchRipple className="rounded-full">
+          <Button
+            variant="secondary"
+            size="icon"
             onClick={handleDownload}
             disabled={isDownloading}
             className={cn(isMobile && "h-12 w-12")}
@@ -322,6 +335,7 @@ export const ResumePreview = () => {
 
       {/* Off-screen export container for PDF (unscaled, exact page size) */}
       <div
+        id="resume-print-area"
         ref={targetRef}
         aria-hidden="true"
         className="bg-background"
