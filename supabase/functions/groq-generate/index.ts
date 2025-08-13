@@ -210,7 +210,10 @@ Score the resume compatibility, identify matched and missed keywords, and provid
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content;
+    let content = data.choices[0].message.content as string;
+    const cleanedContent = (typeof content === 'string'
+      ? content.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim()
+      : '');
 
     console.log(`Generated content for ${action}:`, content);
 
@@ -218,7 +221,7 @@ Score the resume compatibility, identify matched and missed keywords, and provid
     let result: any;
     if (responseFormat === 'json') {
       try {
-        result = JSON.parse(content);
+        result = JSON.parse(cleanedContent || content);
 
         // Normalize shapes for compatibility
         if (action === 'skills') {
@@ -272,22 +275,34 @@ Score the resume compatibility, identify matched and missed keywords, and provid
         }
       } catch (e) {
         console.error('Failed to parse JSON response:', content);
-        // Fallback for malformed JSON
-        if (action === 'skills') {
-          result = { skills: [] };
-        } else if (action === 'skills_grouped') {
-          result = { skills: { technical: [], soft: [] } };
-        } else if (action === 'orchestrate') {
-          result = { summary: '', workBullets: [], educationEntries: [], skills: { technical: [], soft: [] } };
-        } else if (action === 'ats_optimize') {
-          result = { missingKeywords: [], suggestedImprovements: [], quantifiableSuggestions: [] };
-        } else if (action === 'analyze') {
-          result = {
-            score: 0,
-            matchedKeywords: [],
-            missedKeywords: [],
-            suggestions: ['Failed to analyze resume. Please try again.']
-          };
+        // Try to extract JSON object from within code fences or text
+        try {
+          const start = content.indexOf('{');
+          const end = content.lastIndexOf('}');
+          if (start !== -1 && end !== -1 && end > start) {
+            const extracted = content.slice(start, end + 1);
+            result = JSON.parse(extracted);
+          } else {
+            throw new Error('No JSON block found');
+          }
+        } catch (_e2) {
+          // Fallback for malformed JSON
+          if (action === 'skills') {
+            result = { skills: [] };
+          } else if (action === 'skills_grouped') {
+            result = { skills: { technical: [], soft: [] } };
+          } else if (action === 'orchestrate') {
+            result = { summary: '', workBullets: [], educationEntries: [], skills: { technical: [], soft: [] } };
+          } else if (action === 'ats_optimize') {
+            result = { missingKeywords: [], suggestedImprovements: [], quantifiableSuggestions: [] };
+          } else if (action === 'analyze') {
+            result = {
+              score: 0,
+              matchedKeywords: [],
+              missedKeywords: [],
+              suggestions: ['Failed to analyze resume. Please try again.']
+            };
+          }
         }
       }
     } else {
