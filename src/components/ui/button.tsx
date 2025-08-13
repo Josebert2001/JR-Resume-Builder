@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -63,7 +62,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           // Add tap highlight color for mobile
           isMobile && "tap-highlight-color-transparent",
           // Add hover animation for desktop
-          !isMobile && "hover:-translate-y-px transition-transform duration-200"
+          !isMobile && "hover:-translate-y-px transition-transform duration-200",
+          // Hide buttons in print
+          "print:hidden"
         )}
         ref={ref}
         // Enhanced mobile accessibility

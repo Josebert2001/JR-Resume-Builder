@@ -308,15 +308,26 @@
   @media print {
     @page {
       size: A4;
-      margin: 15mm;
+      margin: 10mm 15mm;
+    }
+    
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
     }
 
     body {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
+      font-size: 11pt !important;
+      line-height: 1.3 !important;
     }
 
-    /* Hide everything, then reveal only the print area */
+    /* Enhanced print visibility controls */
     body * {
       visibility: hidden !important;
     }
@@ -324,6 +335,7 @@
     #resume-print-area,
     #resume-print-area * {
       visibility: visible !important;
+      background: white !important;
     }
 
     #resume-print-area {
@@ -338,19 +350,74 @@
       box-shadow: none !important;
       border: none !important;
       background: white !important;
-      font-size: 10.5pt; /* slightly smaller for better fit */
-      line-height: 1.35;  /* improve readability and avoid clipping */
+      font-size: 11pt !important;
+      line-height: 1.3 !important;
+      overflow: visible !important;
+      page-break-inside: avoid !important;
     }
 
-    /* Optional polish */
+    /* Improved print formatting */
     #resume-print-area li {
       break-inside: avoid;
       page-break-inside: avoid;
-      margin-bottom: 4pt;
+      margin-bottom: 3pt;
+    }
+    
+    #resume-print-area h1,
+    #resume-print-area h2,
+    #resume-print-area h3 {
+      page-break-after: avoid !important;
+      break-after: avoid !important;
+    }
+    
+    #resume-print-area p,
+    #resume-print-area div {
+      orphans: 2 !important;
+      widows: 2 !important;
+    }
+    
+    /* Ensure proper spacing */
+    #resume-print-area .space-y-4 > * + * {
+      margin-top: 12pt !important;
+    }
+    
+    #resume-print-area .space-y-2 > * + * {
+      margin-top: 6pt !important;
+    }
+    
+    /* Hide interactive elements */
+    button,
+    .no-print,
+    [data-no-print] {
+      display: none !important;
     }
 
-    .no-print {
+    /* Ensure text is black for printing */
+    #resume-print-area,
+    #resume-print-area * {
+      color: black !important;
+    }
+    
+    /* Preserve important colors */
+    #resume-print-area .text-blue-600,
+    #resume-print-area .text-resume-primary {
+      color: #2563eb !important;
+    }
+    
+    #resume-print-area .bg-blue-50,
+    #resume-print-area .bg-gray-50 {
+      background-color: #f8fafc !important;
+    }
+    
+    /* Fix any hidden elements that should print */
+    .print-visible {
       display: none !important;
+    }
+    
+    @media print {
+      .print-visible {
+        display: block !important;
+      }
     }
   }
 

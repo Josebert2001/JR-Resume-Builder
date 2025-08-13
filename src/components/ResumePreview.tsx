@@ -136,6 +136,15 @@ export const ResumePreview = () => {
     try {
       setIsDownloading(true);
 
+      // Wait for fonts to load before PDF generation
+      await new Promise(resolve => {
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(resolve);
+        } else {
+          setTimeout(resolve, 1000);
+        }
+      });
+
       if (!targetRef.current) {
         toast.error('Failed to prepare PDF', {
           description: 'Export target not available'
@@ -143,15 +152,10 @@ export const ResumePreview = () => {
         return;
       }
 
-      // Ensure web fonts are loaded before rendering
-      if ('fonts' in document && (document as any).fonts?.ready) {
-        try {
-          await (document as any).fonts.ready;
-        } catch {}
-      }
-
-      // Wait a frame to ensure DOM is painted
-      await new Promise((res) => requestAnimationFrame(() => res(undefined)));
+      // Multiple frame wait to ensure proper rendering
+      await new Promise(resolve => requestAnimationFrame(() => 
+        requestAnimationFrame(() => resolve(undefined))
+      ));
 
       await toPDF();
 
@@ -225,7 +229,19 @@ export const ResumePreview = () => {
           <Button
             variant="secondary"
             size="icon"
-            onClick={() => printResume('resume-print-area')}
+            onClick={async () => {
+              try {
+                // Ensure fonts are loaded before printing
+                if (document.fonts && document.fonts.ready) {
+                  await document.fonts.ready;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+                printResume('resume-print-area');
+              } catch (error) {
+                console.error('Print error:', error);
+                toast.error('Print failed. Try using browser print (Ctrl+P)');
+              }
+            }}
             className={cn(isMobile && "h-12 w-12")}
             aria-label="Print to PDF"
           >
