@@ -6,7 +6,7 @@ import { useResumeContext } from '@/context/ResumeContext';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { TouchRipple } from './ui/touch-ripple';
-import { ZoomIn, ZoomOut, Maximize2, Download, Settings, Eye, Printer } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Download, Printer } from 'lucide-react';
 import { FormattedResume } from './FormattedResume';
 import { usePDF } from 'react-to-pdf';
 import { toast } from 'sonner';
@@ -21,7 +21,7 @@ export const ResumePreview = () => {
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
   const [isDownloading, setIsDownloading] = useState(false);
-  const [showPdfOptions, setShowPdfOptions] = useState(false);
+  
   const isMobile = useIsMobile();
   
   // PDF options state
@@ -167,18 +167,6 @@ export const ResumePreview = () => {
       setIsDownloading(false);
     }
   };
-  // Toggle PDF options panel
-  const togglePdfOptions = () => {
-    setShowPdfOptions(prev => !prev);
-  };
-
-  // Update PDF option
-  const updatePdfOption = (key: string, value: any) => {
-    setPdfOptions(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  };
 
   // Reset scroll position when scale changes
   useEffect(() => {
@@ -232,17 +220,6 @@ export const ResumePreview = () => {
           </Button>
         </TouchRipple>
 
-        <TouchRipple className="rounded-full">
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={togglePdfOptions}
-            className={cn(isMobile && "h-12 w-12")}
-            aria-label="PDF options"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-        </TouchRipple>
 
         <TouchRipple className="rounded-full">
           <Button
@@ -274,64 +251,6 @@ export const ResumePreview = () => {
         </TouchRipple>
       </div>
 
-      {showPdfOptions && (
-        <div className="absolute top-16 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg z-10 w-72 border border-border">
-          <h3 className="text-sm font-medium mb-2">PDF Options</h3>
-          
-          <div className="space-y-3">
-            <div>
-              <label htmlFor="pdf-format" className="block text-sm mb-1">Paper Format</label>
-              <select
-                id="pdf-format"
-                className="w-full p-2 text-sm rounded border border-input bg-transparent"
-                value={pdfOptions.format}
-                onChange={(e) => updatePdfOption('format', e.target.value)}
-              >
-                <option value="letter">US Letter</option>
-                <option value="a4">A4</option>
-                <option value="legal">Legal</option>
-              </select>
-            </div>
-            
-            <div>
-              <label htmlFor="pdf-orientation" className="block text-sm mb-1">Orientation</label>
-              <select
-                id="pdf-orientation"
-                className="w-full p-2 text-sm rounded border border-input bg-transparent"
-                value={pdfOptions.orientation}
-                onChange={(e) => updatePdfOption('orientation', e.target.value)}
-              >
-                <option value="portrait">Portrait</option>
-                <option value="landscape">Landscape</option>
-              </select>
-            </div>
-            
-            <div>
-              <label htmlFor="pdf-margin" className="block text-sm mb-1">Margin (mm)</label>
-              <input
-                id="pdf-margin"
-                type="number"
-                min="0"
-                max="50"
-                className="w-full p-2 text-sm rounded border border-input bg-transparent"
-                value={pdfOptions.margin}
-                onChange={(e) => updatePdfOption('margin', parseInt(e.target.value, 10))}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="pdf-filename" className="block text-sm mb-1">Filename</label>
-              <input
-                id="pdf-filename"
-                type="text"
-                className="w-full p-2 text-sm rounded border border-input bg-transparent"
-                value={pdfOptions.filename}
-                onChange={(e) => updatePdfOption('filename', e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Off-screen export container for PDF (unscaled, exact page size) */}
       <div
