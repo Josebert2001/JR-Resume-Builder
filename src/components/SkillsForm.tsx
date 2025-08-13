@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
-import { suggestSkills } from '@/services/resumeAI';
+import { suggestGroupedSkills } from '@/services/resumeAI';
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ export const SkillsForm = () => {
   const { resumeData, updateResumeData } = useResumeContext();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [suggestedSkills, setSuggestedSkills] = useState<{technical: string[], soft: string[]}>({technical: [], soft: []});
   const [selectedSkills, setSelectedSkills] = useState<Record<string, boolean>>({});
   const [suggestDialogOpen, setSuggestDialogOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -105,36 +105,64 @@ export const SkillsForm = () => {
     setIsSuggesting(true);
     
     try {
-      // Get the most recent position
-      const recentPosition = resumeData.workExperience[0].position;
+      // Gather comprehensive user data
+      const targetRole = resumeData.workExperience[0]?.position || 
+                        'Professional';
       
-      // Get all experience descriptions
+      // Get all experience descriptions with full context
       const experienceDescriptions = resumeData.workExperience.map(exp => 
-        `${exp.position} at ${exp.company}: ${exp.description || ''}`
+        `${exp.position} at ${exp.company} (${exp.startDate} - ${exp.endDate || 'Present'}): ${exp.description || ''}`
       );
       
-      // Existing skills to avoid duplicates
-      const existingSkills = new Set(resumeData.skills?.map(s => s.name.toLowerCase()));
+      // Include education context if available
+      if (resumeData.education?.length) {
+        experienceDescriptions.push(
+          ...resumeData.education.map(edu => 
+            `Education: ${edu.degree} in ${edu.fieldOfStudy} from ${edu.school} (${edu.graduationDate})`
+          )
+        );
+      }
       
-      // Get AI suggested skills
-      const suggestions = await suggestSkills(recentPosition, experienceDescriptions);
+      // Include projects if available
+      if (resumeData.projects?.length) {
+        experienceDescriptions.push(
+          ...resumeData.projects.map(proj => 
+            `Project: ${proj.name} - ${proj.description || ''} (Technologies: ${proj.technologies || 'N/A'})`
+          )
+        );
+      }
       
-      // Filter out skills that already exist
-      const filteredSuggestions = suggestions.filter(
+      // Current skills to avoid duplicates
+      const currentSkills = resumeData.skills?.map(s => s.name) || [];
+      
+      // Get AI suggested grouped skills
+      const suggestions = await suggestGroupedSkills(targetRole, experienceDescriptions, currentSkills);
+      
+      // Combine all suggested skills and filter duplicates
+      const allSuggestions = [...suggestions.technical, ...suggestions.soft];
+      const existingSkills = new Set(currentSkills.map(s => s.toLowerCase()));
+      
+      const filteredTechnical = suggestions.technical.filter(
+        skill => !existingSkills.has(skill.toLowerCase())
+      );
+      const filteredSoft = suggestions.soft.filter(
         skill => !existingSkills.has(skill.toLowerCase())
       );
       
-      if (filteredSuggestions.length === 0) {
-        toast.info('No new skills to suggest. Try adding more details to your work experience.');
+      if (filteredTechnical.length === 0 && filteredSoft.length === 0) {
+        toast.info('No new skills to suggest. Try adding more details to your experience.');
         return;
       }
       
-      // Set the suggested skills and open the dialog
-      setSuggestedSkills(filteredSuggestions);
+      // Set the grouped suggested skills
+      setSuggestedSkills({
+        technical: filteredTechnical,
+        soft: filteredSoft
+      });
       
       // Initialize selected skills object to all true
       const initialSelected: Record<string, boolean> = {};
-      filteredSuggestions.forEach(skill => {
+      [...filteredTechnical, ...filteredSoft].forEach(skill => {
         initialSelected[skill] = true;
       });
       setSelectedSkills(initialSelected);
@@ -158,8 +186,9 @@ export const SkillsForm = () => {
   };
 
   const handleAddSelectedSkills = () => {
-    // Get the selected skills
-    const skillsToAdd = suggestedSkills.filter(skill => selectedSkills[skill]);
+    // Get the selected skills from both categories
+    const allSuggestedSkills = [...suggestedSkills.technical, ...suggestedSkills.soft];
+    const skillsToAdd = allSuggestedSkills.filter(skill => selectedSkills[skill]);
     
     if (skillsToAdd.length === 0) {
       setSuggestDialogOpen(false);
@@ -330,22 +359,54 @@ export const SkillsForm = () => {
           </DialogHeader>
           
           <div className="py-4">
-            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-              {suggestedSkills.map((skill) => (
-                <div key={skill} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`skill-${skill}`} 
-                    checked={selectedSkills[skill]}
-                    onCheckedChange={() => handleToggleSkill(skill)}
-                  />
-                  <label
-                    htmlFor={`skill-${skill}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {skill}
-                  </label>
+            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+              {/* Technical Skills */}
+              {suggestedSkills.technical.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground mb-3">Technical Skills</h4>
+                  <div className="space-y-3">
+                    {suggestedSkills.technical.map((skill) => (
+                      <div key={skill} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`skill-${skill}`} 
+                          checked={selectedSkills[skill]}
+                          onCheckedChange={() => handleToggleSkill(skill)}
+                        />
+                        <label
+                          htmlFor={`skill-${skill}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {skill}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+              
+              {/* Soft Skills */}
+              {suggestedSkills.soft.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground mb-3">Soft Skills</h4>
+                  <div className="space-y-3">
+                    {suggestedSkills.soft.map((skill) => (
+                      <div key={skill} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`skill-${skill}`} 
+                          checked={selectedSkills[skill]}
+                          onCheckedChange={() => handleToggleSkill(skill)}
+                        />
+                        <label
+                          htmlFor={`skill-${skill}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {skill}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
