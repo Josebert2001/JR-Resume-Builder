@@ -401,15 +401,40 @@
       color: black !important;
     }
     
-    /* Preserve important colors */
+    /* Preserve important colors for simplified design */
     #resume-card .text-blue-600,
-    #resume-card .text-resume-primary {
+    #resume-card .text-resume-primary,
+    #resume-card .text-blue-500 {
       color: #2563eb !important;
     }
     
+    #resume-card .text-green-500,
+    #resume-card .text-green-600 {
+      color: #059669 !important;
+    }
+    
+    #resume-card .text-white {
+      color: white !important;
+    }
+    
     #resume-card .bg-blue-50,
-    #resume-card .bg-gray-50 {
+    #resume-card .bg-gray-50,
+    #resume-card .bg-blue-100 {
       background-color: #f8fafc !important;
+    }
+    
+    #resume-card .bg-gray-900,
+    #resume-card .bg-gray-800 {
+      background-color: #1f2937 !important;
+    }
+    
+    #resume-card .bg-blue-500,
+    #resume-card .bg-blue-600 {
+      background-color: #3b82f6 !important;
+    }
+    
+    #resume-card .bg-green-500 {
+      background-color: #10b981 !important;
     }
     
     /* Fix any hidden elements that should print */

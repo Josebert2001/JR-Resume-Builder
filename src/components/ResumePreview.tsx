@@ -291,6 +291,7 @@ export const ResumePreview = () => {
           }}
         >
           <Card id="resume-card" className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={resumeRef}>
+          <Card id="resume-card" className="w-[794px] h-[1123px] shadow-lg overflow-hidden" ref={resumeRef}>
             <FormattedResume template={template} resumeData={resumeData} />
           </Card>
         </div>

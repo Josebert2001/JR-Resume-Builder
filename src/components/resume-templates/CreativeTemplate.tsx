@@ -55,11 +55,11 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
     <div className="bg-white p-8 text-left shadow-sm h-full max-w-5xl mx-auto font-sans">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 h-full">
         {/* Left Sidebar */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 text-white p-8 rounded-2xl">
+        <div className="lg:col-span-2 bg-gray-900 text-white p-8 rounded-lg">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-3 leading-tight">{fullName}</h1>
-            <div className="w-12 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-4"></div>
+            <div className="w-12 h-1 bg-blue-500 mb-4"></div>
             <div className="space-y-2 text-slate-300 text-sm">
               {personalInfo.email && (
                 <div className="flex items-center">
@@ -97,7 +97,7 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
               <div className="space-y-3">
                 {skills.map((skill, index) => (
                   <div key={index} className="relative">
-                    <div className="bg-slate-700 rounded-lg p-3 hover:bg-slate-600 transition-colors">
+                    <div className="bg-gray-800 rounded-lg p-3 transition-colors">
                       <span className="text-sm font-medium text-white">{skill}</span>
                     </div>
                   </div>
@@ -183,7 +183,7 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
         <div className="lg:col-span-3 space-y-8">
           {/* Professional Summary */}
           {personalInfo.summary && (
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-100">
+            <div className="bg-blue-50 p-6 rounded-lg">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">About Me</h2>
               <p className="text-gray-700 leading-relaxed">{personalInfo.summary}</p>
             </div>
@@ -193,13 +193,13 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
           {experience && experience.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <div className="w-8 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mr-3"></div>
+                <div className="w-8 h-1 bg-blue-500 mr-3"></div>
                 Professional Experience
               </h2>
               <div className="space-y-6">
                 {experience.map((exp, index) => (
-                  <div key={index} className="relative bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500 rounded-l-xl"></div>
+                  <div key={index} className="relative bg-white rounded-lg p-6 border border-gray-100 transition-shadow">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-lg"></div>
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3 mb-4">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 mb-1">{exp.position}</h3>
@@ -208,7 +208,7 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
                           {exp.location && <span className="text-gray-500 font-normal"> • {exp.location}</span>}
                         </p>
                       </div>
-                      <div className="bg-gradient-to-r from-blue-100 to-purple-100 px-4 py-2 rounded-full text-sm font-medium text-gray-700 whitespace-nowrap">
+                      <div className="bg-gray-100 px-4 py-2 rounded-full text-sm font-medium text-gray-700 whitespace-nowrap">
                         {exp.startDate} - {exp.endDate}
                       </div>
                     </div>
@@ -227,12 +227,12 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
           {projects && projects.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <div className="w-8 h-1 bg-gradient-to-r from-green-500 to-blue-500 rounded-full mr-3"></div>
+                <div className="w-8 h-1 bg-green-500 mr-3"></div>
                 Featured Projects
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {projects.map((project) => (
-                  <div key={project.id} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all hover:scale-105">
+                  <div key={project.id} className="bg-gray-50 rounded-lg p-6 border border-gray-200 transition-all">
                     <div className="flex justify-between items-start mb-4">
                       <h3 className="text-lg font-bold text-gray-900">{project.name}</h3>
                       {project.url && (
@@ -250,7 +250,7 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
                     {project.technologies && (
                       <div className="flex flex-wrap gap-2">
                         {project.technologies.split(',').map((tech, idx) => (
-                          <span key={idx} className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                          <span key={idx} className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
                             {tech.trim()}
                           </span>
                         ))}
