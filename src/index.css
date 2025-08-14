@@ -332,56 +332,59 @@
       visibility: hidden !important;
     }
 
-    #resume-print-area,
-    #resume-print-area * {
+    #resume-card,
+    #resume-card * {
       visibility: visible !important;
       background: white !important;
     }
 
-    #resume-print-area {
+    #resume-card {
       display: block !important;
       position: static !important;
       left: auto !important;
       top: auto !important;
-      width: 210mm; /* A4 width */
-      min-height: 297mm; /* A4 height */
+      width: 210mm !important; /* A4 width */
+      height: auto !important;
+      max-width: none !important;
       margin: 0 auto !important;
-      padding: 0 !important;
+      padding: 15mm !important;
       box-shadow: none !important;
       border: none !important;
+      border-radius: 0 !important;
       background: white !important;
       font-size: 11pt !important;
       line-height: 1.3 !important;
       overflow: visible !important;
-      page-break-inside: avoid !important;
+      transform: none !important;
+      scale: 1 !important;
     }
 
     /* Improved print formatting */
-    #resume-print-area li {
+    #resume-card li {
       break-inside: avoid;
       page-break-inside: avoid;
       margin-bottom: 3pt;
     }
     
-    #resume-print-area h1,
-    #resume-print-area h2,
-    #resume-print-area h3 {
+    #resume-card h1,
+    #resume-card h2,
+    #resume-card h3 {
       page-break-after: avoid !important;
       break-after: avoid !important;
     }
     
-    #resume-print-area p,
-    #resume-print-area div {
+    #resume-card p,
+    #resume-card div {
       orphans: 2 !important;
       widows: 2 !important;
     }
     
     /* Ensure proper spacing */
-    #resume-print-area .space-y-4 > * + * {
+    #resume-card .space-y-4 > * + * {
       margin-top: 12pt !important;
     }
     
-    #resume-print-area .space-y-2 > * + * {
+    #resume-card .space-y-2 > * + * {
       margin-top: 6pt !important;
     }
     
@@ -393,19 +396,19 @@
     }
 
     /* Ensure text is black for printing */
-    #resume-print-area,
-    #resume-print-area * {
+    #resume-card,
+    #resume-card * {
       color: black !important;
     }
     
     /* Preserve important colors */
-    #resume-print-area .text-blue-600,
-    #resume-print-area .text-resume-primary {
+    #resume-card .text-blue-600,
+    #resume-card .text-resume-primary {
       color: #2563eb !important;
     }
     
-    #resume-print-area .bg-blue-50,
-    #resume-print-area .bg-gray-50 {
+    #resume-card .bg-blue-50,
+    #resume-card .bg-gray-50 {
       background-color: #f8fafc !important;
     }
     

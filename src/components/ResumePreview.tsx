@@ -236,7 +236,7 @@ export const ResumePreview = () => {
                   await document.fonts.ready;
                 }
                 await new Promise(resolve => setTimeout(resolve, 500));
-                printResume('resume-print-area');
+                printResume('resume-card');
               } catch (error) {
                 console.error('Print error:', error);
                 toast.error('Print failed. Try using browser print (Ctrl+P)');
@@ -268,26 +268,9 @@ export const ResumePreview = () => {
       </div>
 
 
-      {/* Off-screen export container for PDF (unscaled, exact page size) */}
-      <div
-        id="resume-print-area"
-        ref={targetRef}
-        aria-hidden="true"
-        className="bg-background"
-        style={{
-          position: 'fixed',
-          left: '-10000px',
-          top: 0,
-          width: `${pageDims.widthMm}mm`,
-          minHeight: `${pageDims.heightMm}mm`,
-          padding: 0,
-          margin: 0,
-          boxShadow: 'none',
-          transform: 'none',
-          background: 'white'
-        }}
-      >
-        <div className="w-full h-full">
+      {/* Hidden container for PDF export only */}
+      <div ref={targetRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+        <div style={{ width: `${pageDims.widthMm}mm`, minHeight: `${pageDims.heightMm}mm`, background: 'white' }}>
           <FormattedResume template={template} resumeData={resumeData} />
         </div>
       </div>
@@ -307,7 +290,7 @@ export const ResumePreview = () => {
             transition: isPanning ? 'none' : 'transform 0.2s ease-out'
           }}
         >
-          <Card className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={resumeRef}>
+          <Card id="resume-card" className="w-[816px] h-[1056px] shadow-lg overflow-hidden" ref={resumeRef}>
             <FormattedResume template={template} resumeData={resumeData} />
           </Card>
         </div>
