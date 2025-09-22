@@ -1,11 +1,12 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, FileText } from 'lucide-react';
+import { Download, FileText, Printer } from 'lucide-react';
 import { FormattedResume } from './FormattedResume';
 import { useResumeContext } from '@/context/ResumeContext';
 import { generatePDF } from '@/services/pdfService';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface ResumePreviewProps {
   className?: string;
@@ -15,31 +16,8 @@ export function ResumePreview({ className }: ResumePreviewProps) {
   const { resumeData, template } = useResumeContext();
 
   const handlePrint = () => {
-    const printContent = document.getElementById('resume-card');
-    if (printContent) {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Resume</title>
-              <style>
-                @media print {
-                  body { margin: 0; padding: 20px; }
-                  .no-print { display: none !important; }
-                }
-              </style>
-            </head>
-            <body>
-              ${printContent.innerHTML}
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
+    // Use the browser's native print functionality with our CSS
+    window.print();
   };
 
   const handleDownloadPDF = async () => {
@@ -57,9 +35,9 @@ export function ResumePreview({ className }: ResumePreviewProps) {
     <div className={className}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Preview</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 print-hidden">
           <Button onClick={handlePrint} variant="outline" size="sm">
-            <FileText className="w-4 h-4 mr-2" />
+            <Printer className="w-4 h-4 mr-2" />
             Print
           </Button>
           <Button onClick={handleDownloadPDF} variant="outline" size="sm">
@@ -69,11 +47,14 @@ export function ResumePreview({ className }: ResumePreviewProps) {
         </div>
       </div>
       
-      <Card id="resume-card" className="w-full max-w-4xl mx-auto bg-white shadow-lg">
-        <CardContent className="p-8">
+      <div className="resume-preview w-full max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden" data-print="true">
+        <div className={cn(
+          "p-8",
+          "print:p-0 print:shadow-none print:rounded-none"
+        )}>
           <FormattedResume template={template} resumeData={resumeData} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

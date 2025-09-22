@@ -52,7 +52,7 @@ export const MinimalTemplate: React.FC<{ data: TemplateData }> = ({ data }) => {
   const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim();
   
   return (
-    <div className="bg-white p-8 text-left shadow-sm h-full max-w-3xl mx-auto font-serif leading-normal">
+    <div className="bg-white p-8 text-left shadow-sm h-full max-w-3xl mx-auto font-serif leading-normal print:p-0 print:shadow-none print:max-w-none">
       {/* Header Section */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-normal text-gray-900 mb-3 tracking-wide">{fullName}</h1>

@@ -56,7 +56,7 @@ export const FormattedResume: React.FC<FormattedResumeProps> = ({ template, resu
   };
 
   return (
-    <div className="w-full h-full print:w-[210mm] print:h-[297mm] print:p-0">
+    <div className="w-full h-full print:w-full print:h-auto print:p-0 print:m-0">
       {renderTemplate()}
     </div>
   );

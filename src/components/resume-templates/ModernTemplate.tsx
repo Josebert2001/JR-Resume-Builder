@@ -52,7 +52,7 @@ export const ModernTemplate: React.FC<{ data: TemplateData }> = ({ data }) => {
   const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim();
   
   return (
-    <div className="bg-white p-8 text-left shadow-sm h-full max-w-4xl mx-auto font-sans">
+    <div className="bg-white p-8 text-left shadow-sm h-full max-w-4xl mx-auto font-sans print:p-0 print:shadow-none print:max-w-none">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6 mb-8 pb-6 border-b border-gray-200">
         <div className="flex-1">

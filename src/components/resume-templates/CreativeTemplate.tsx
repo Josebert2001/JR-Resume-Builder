@@ -52,7 +52,7 @@ export const CreativeTemplate: React.FC<{ data: TemplateData }> = ({ data }) => 
   const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim();
   
   return (
-    <div className="bg-white p-8 text-left shadow-sm h-full max-w-5xl mx-auto font-sans">
+    <div className="bg-white p-8 text-left shadow-sm h-full max-w-5xl mx-auto font-sans print:p-0 print:shadow-none print:max-w-none">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 h-full">
         {/* Left Sidebar */}
         <div className="lg:col-span-2 bg-gray-900 text-white p-8 rounded-lg">
