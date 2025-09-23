@@ -77,6 +77,8 @@ export default {
 					light: 'hsl(var(--resume-light))',
 					dark: 'hsl(var(--resume-dark))',
 					muted: 'hsl(var(--resume-muted))',
+					surface: 'hsl(var(--resume-surface))',
+					'surface-alt': 'hsl(var(--resume-surface-alt))',
 				},
 				'coral-red': '#e76f51',
 			},

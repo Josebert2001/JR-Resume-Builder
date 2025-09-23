@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import { NavHeader } from '@/components/NavHeader';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   FileText, 
   Zap, 
@@ -16,7 +16,8 @@ import {
   Users,
   Clock,
   Upload,
-  Sparkles
+  Sparkles,
+  Layout
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -26,33 +27,33 @@ const Index = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-resume-light dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <NavHeader />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-resume-secondary/5">
         <div className="container mx-auto px-4 py-20 sm:py-32">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-blue-100 text-blue-800 hover:bg-blue-200">
+            <Badge className="mb-6 bg-resume-primary/10 text-resume-primary hover:bg-resume-primary/20 border-resume-primary/20">
               🚀 AI-Powered Resume Builder
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-resume-primary to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
               Get Your Resume Job-Ready in 60 Seconds
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
               Create professional, ATS-friendly resumes with AI assistance. Land more interviews with resumes that actually get noticed.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button 
-                size="xl"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                size="lg"
+                className="bg-resume-primary hover:bg-resume-primary/90 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                 onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
               >
                 Build New Resume
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button 
-                size="xl"
+                size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                 onClick={() => navigate('/upload-resume')}
               >
@@ -61,29 +62,29 @@ const Index = () => {
               </Button>
               <Button 
                 variant="outline" 
-                size="xl"
-                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg font-semibold"
+                size="lg"
+                className="border-resume-primary/30 text-resume-primary hover:bg-resume-primary/5 hover:border-resume-primary/50 px-8 py-4 text-lg font-semibold"
                 onClick={() => navigate('/templates')}
               >
                 View Templates
               </Button>
             </div>
             
-            <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-resume-success" />
                 <span>ATS-Friendly</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-resume-success" />
                 <span>AI-Powered</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-resume-success" />
                 <span>Professional Templates</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-resume-success" />
                 <span>Instant PDF Export</span>
               </div>
             </div>
@@ -92,62 +93,70 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">3 Ways to Create Your Perfect Resume</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-foreground mb-4">3 Ways to Create Your Perfect Resume</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Choose the method that works best for you
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Card className="text-center p-8 hover:shadow-lg transition-shadow border-2 hover:border-blue-200">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FileText className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Build from Scratch</h3>
-              <p className="text-gray-600 mb-6">
-                Start fresh with our guided resume builder and AI assistance
-              </p>
-              <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
-              >
-                Start Building
-              </Button>
+            <Card className="group text-center border border-border/50 hover:border-resume-primary/30 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-resume-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-resume-primary/20 transition-colors">
+                  <FileText className="h-8 w-8 text-resume-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Build from Scratch</h3>
+                <p className="text-muted-foreground mb-6">
+                  Start fresh with our guided resume builder and AI assistance
+                </p>
+                <Button 
+                  className="w-full bg-resume-primary hover:bg-resume-primary/90 text-white"
+                  onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
+                >
+                  Start Building
+                </Button>
+              </CardContent>
             </Card>
             
-            <Card className="text-center p-8 hover:shadow-lg transition-shadow border-2 hover:border-purple-200">
-              <div className="bg-gradient-to-br from-purple-500 to-pink-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Upload className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Upload & Improve</h3>
-              <p className="text-gray-600 mb-6">
-                Upload your existing resume and get AI-powered improvement suggestions
-              </p>
-              <Button 
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                onClick={() => navigate('/upload-resume')}
-              >
-                Upload Resume
-              </Button>
+            <Card className="group text-center border border-border/50 hover:border-resume-primary/30 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-resume-secondary/50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-resume-secondary/70 transition-colors">
+                  <Upload className="h-8 w-8 text-resume-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Upload & Improve</h3>
+                <p className="text-muted-foreground mb-6">
+                  Upload your existing resume and get AI-powered improvement suggestions
+                </p>
+                <Button 
+                  variant="outline"
+                  className="w-full border-resume-primary text-resume-primary hover:bg-resume-primary hover:text-white"
+                  onClick={() => navigate('/upload-resume')}
+                >
+                  Upload Resume
+                </Button>
+              </CardContent>
             </Card>
             
-            <Card className="text-center p-8 hover:shadow-lg transition-shadow border-2 hover:border-green-200">
-              <div className="bg-gradient-to-br from-green-500 to-teal-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Browse Templates</h3>
-              <p className="text-gray-600 mb-6">
-                Explore our professional templates and get inspired
-              </p>
-              <Button 
-                className="w-full bg-green-600 hover:bg-green-700"
-                onClick={() => navigate('/templates')}
-              >
-                View Templates
-              </Button>
+            <Card className="group text-center border border-border/50 hover:border-resume-primary/30 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-resume-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-resume-accent/20 transition-colors">
+                  <Layout className="h-8 w-8 text-resume-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">Browse Templates</h3>
+                <p className="text-muted-foreground mb-6">
+                  Explore our professional templates and get inspired
+                </p>
+                <Button 
+                  variant="secondary"
+                  className="w-full bg-resume-secondary hover:bg-resume-secondary/80 text-foreground"
+                  onClick={() => navigate('/templates')}
+                >
+                  View Templates
+                </Button>
+              </CardContent>
             </Card>
           </div>
         </div>

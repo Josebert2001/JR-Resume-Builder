@@ -11,12 +11,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { 
   Menu, 
   FileText, 
   User, 
   LogOut, 
-  Settings
+  Settings,
+  Upload,
+  Layout
 } from 'lucide-react';
 
 export function NavHeader() {
@@ -25,9 +28,9 @@ export function NavHeader() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navigationItems = [
-    { label: 'Templates', href: '/templates', icon: FileText },
-    { label: 'Upload Resume', href: '/upload-resume', icon: FileText },
-    { label: 'Resume Builder', href: '/resume-builder', icon: FileText, protected: true },
+    { label: 'Templates', href: '/templates', icon: Layout },
+    { label: 'Upload & Improve', href: '/upload-resume', icon: Upload },
+    { label: 'Build from Scratch', href: '/resume-builder', icon: FileText, protected: true },
   ];
 
   const handleSignOut = async () => {
@@ -60,7 +63,7 @@ export function NavHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
@@ -77,8 +80,9 @@ export function NavHeader() {
           <NavLinks />
         </nav>
 
-        {/* User Menu / Auth Buttons */}
-        <div className="flex items-center space-x-4">
+        {/* Theme Toggle & User Menu / Auth Buttons */}
+        <div className="flex items-center space-x-2">
+          <ThemeToggle />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
