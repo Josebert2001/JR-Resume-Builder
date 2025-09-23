@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectsForm } from '@/components/ProjectsForm';
 import { PageHeader } from '@/components/PageHeader';
 import { ResumeImprover } from '@/components/ResumeImprover';
+import { ResumeUpload } from '@/components/ResumeUpload';
 
 const ResumeBuilder = () => {
   const { currentStep, resumeData } = useResumeContext();
@@ -49,9 +50,10 @@ const ResumeBuilder = () => {
         {/* Step 7: Final Preview */}
         {currentStep === 7 && (
           <Tabs defaultValue="preview" className="max-w-6xl mx-auto">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="preview">Resume Preview</TabsTrigger>
               <TabsTrigger value="templates">Change Template</TabsTrigger>
+              <TabsTrigger value="upload">Upload & Analyze</TabsTrigger>
               <TabsTrigger value="improve">Improve Resume</TabsTrigger>
             </TabsList>
             <TabsContent value="preview">
@@ -59,6 +61,9 @@ const ResumeBuilder = () => {
             </TabsContent>
             <TabsContent value="templates">
               <ResumeTemplates />
+            </TabsContent>
+            <TabsContent value="upload">
+              <ResumeUpload />
             </TabsContent>
             <TabsContent value="improve">
               <ResumeImprover resumeData={resumeData} />
