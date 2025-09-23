@@ -26,6 +26,7 @@ export function NavHeader() {
 
   const navigationItems = [
     { label: 'Templates', href: '/templates', icon: FileText },
+    { label: 'Upload Resume', href: '/upload-resume', icon: FileText },
     { label: 'Resume Builder', href: '/resume-builder', icon: FileText, protected: true },
   ];
 

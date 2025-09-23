@@ -14,7 +14,9 @@ import {
   CheckCircle,
   ArrowRight,
   Users,
-  Clock
+  Clock,
+  Upload,
+  Sparkles
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -46,8 +48,16 @@ const Index = () => {
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                 onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
               >
-                Build My Resume
+                Build New Resume
                 <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                size="xl"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                onClick={() => navigate('/upload-resume')}
+              >
+                <Upload className="mr-2 h-5 w-5" />
+                Upload & Improve
               </Button>
               <Button 
                 variant="outline" 
@@ -85,42 +95,60 @@ const Index = () => {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">3 Ways to Create Your Perfect Resume</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Create your professional resume in just 3 simple steps
+              Choose the method that works best for you
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center group">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-white font-bold text-xl">1</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <Card className="text-center p-8 hover:shadow-lg transition-shadow border-2 hover:border-blue-200">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FileText className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Sign In & Choose Template</h3>
-              <p className="text-gray-600">
-                Create your account and select from our 4 professionally designed templates
+              <h3 className="text-xl font-semibold mb-3">Build from Scratch</h3>
+              <p className="text-gray-600 mb-6">
+                Start fresh with our guided resume builder and AI assistance
               </p>
-            </div>
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
+              >
+                Start Building
+              </Button>
+            </Card>
             
-            <div className="text-center group">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-white font-bold text-xl">2</span>
+            <Card className="text-center p-8 hover:shadow-lg transition-shadow border-2 hover:border-purple-200">
+              <div className="bg-gradient-to-br from-purple-500 to-pink-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Upload className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Fill Details or Let AI Do It</h3>
-              <p className="text-gray-600">
-                Enter your information manually or use our AI assistant to generate professional content
+              <h3 className="text-xl font-semibold mb-3">Upload & Improve</h3>
+              <p className="text-gray-600 mb-6">
+                Upload your existing resume and get AI-powered improvement suggestions
               </p>
-            </div>
+              <Button 
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={() => navigate('/upload-resume')}
+              >
+                Upload Resume
+              </Button>
+            </Card>
             
-            <div className="text-center group">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-white font-bold text-xl">3</span>
+            <Card className="text-center p-8 hover:shadow-lg transition-shadow border-2 hover:border-green-200">
+              <div className="bg-gradient-to-br from-green-500 to-teal-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Download ATS-Friendly Resume</h3>
-              <p className="text-gray-600">
-                Export your polished, ATS-optimized resume and start applying immediately
+              <h3 className="text-xl font-semibold mb-3">Browse Templates</h3>
+              <p className="text-gray-600 mb-6">
+                Explore our professional templates and get inspired
               </p>
-            </div>
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700"
+                onClick={() => navigate('/templates')}
+              >
+                View Templates
+              </Button>
+            </Card>
           </div>
         </div>
       </section>
@@ -145,6 +173,14 @@ const Index = () => {
             </Card>
             
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <Upload className="h-12 w-12 mx-auto text-purple-600 mb-4" />
+              <CardTitle className="mb-2">Upload & Improve</CardTitle>
+              <CardDescription>
+                Upload existing resumes and get instant AI improvement suggestions
+              </CardDescription>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
               <Shield className="h-12 w-12 mx-auto text-green-600 mb-4" />
               <CardTitle className="mb-2">ATS-Optimized</CardTitle>
               <CardDescription>
@@ -153,18 +189,10 @@ const Index = () => {
             </Card>
             
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <Download className="h-12 w-12 mx-auto text-purple-600 mb-4" />
+              <Download className="h-12 w-12 mx-auto text-orange-600 mb-4" />
               <CardTitle className="mb-2">Instant Export</CardTitle>
               <CardDescription>
                 Download professional PDFs ready for job applications
-              </CardDescription>
-            </Card>
-            
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <FileText className="h-12 w-12 mx-auto text-orange-600 mb-4" />
-              <CardTitle className="mb-2">Pro Templates</CardTitle>
-              <CardDescription>
-                Choose from 4 expertly designed resume templates
               </CardDescription>
             </Card>
           </div>

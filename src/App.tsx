@@ -7,6 +7,7 @@ import FontLoader from "./components/FontLoader";
 import Index from "./pages/Index";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import ResumeTemplatesPage from "./pages/ResumeTemplatesPage";
+import ResumeUploadPage from "./pages/ResumeUploadPage";
 import AuthPage from "./pages/AuthPage";
 // import NotFound from "./pages/NotFound";
 import { ResumeProvider } from "./context/ResumeContext";
@@ -36,6 +37,7 @@ function App() {
                       </ProtectedRoute>
                     } />
                     <Route path="/templates" element={<ResumeTemplatesPage />} />
+                    <Route path="/upload-resume" element={<ResumeUploadPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </div>
