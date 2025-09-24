@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { generateEducationDescription } from '@/services/resumeAI';
 import { toast } from 'sonner';
+import { analytics } from '@/services/analytics';
 
 export const EducationForm = () => {
   const { education, updateEducation, nextStep, prevStep } = useResumeContext();
@@ -56,6 +57,8 @@ export const EducationForm = () => {
     }
 
     setGeneratingId(id);
+    analytics.aiFeatureUsed('education_generation', false);
+    
     try {
       const description = await generateEducationDescription(
         edu.degree,
@@ -65,12 +68,14 @@ export const EducationForm = () => {
       
       if (description) {
         handleEducationChange(id, 'description', description);
+        analytics.aiFeatureUsed('education_generation', true);
         toast.success('Education description generated!');
       } else {
         toast.error('Failed to generate description. Please try again.');
       }
     } catch (error) {
       console.error('Error generating education description:', error);
+      analytics.errorOccurred('education_generation_failed', error?.message);
       toast.error('Failed to generate description. Please try again.');
     } finally {
       setGeneratingId(null);

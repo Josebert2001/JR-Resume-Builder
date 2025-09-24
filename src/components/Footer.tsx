@@ -59,9 +59,19 @@ const Footer = () => {
       </div>
 
       {/* Footer Bar */}
-      <div className="mt-6 border-t border-gray-200 dark:border-gray-800 pt-4 text-xs text-center text-gray-500 dark:text-gray-400">
-        © {new Date().getFullYear()} <strong>ResumAI</strong> – Powered by{" "}
-        <strong>JR Digital Insights</strong>. All rights reserved.
+      <div className="mt-6 border-t border-gray-200 dark:border-gray-800 pt-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="text-xs text-gray-500 dark:text-gray-400">
+          © {new Date().getFullYear()} <strong>ResumAI</strong> – Powered by{" "}
+          <strong>JR Digital Insights</strong>. All rights reserved.
+        </div>
+        <div className="flex gap-4 text-xs">
+          <Link to="/privacy" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            Privacy Policy
+          </Link>
+          <Link to="/terms" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            Terms of Service
+          </Link>
+        </div>
       </div>
     </footer>
   );

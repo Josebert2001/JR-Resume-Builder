@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
+import { analytics } from '@/services/analytics';
 import { generateWorkDescription } from '@/services/resumeAI';
 
 export const WorkExperienceForm = () => {
@@ -78,6 +79,8 @@ export const WorkExperienceForm = () => {
     }
 
     setGeneratingId(id);
+    analytics.aiFeatureUsed('work_generation', false);
+    
     try {
       const description = await generateWorkDescription(
         exp.position,
@@ -86,12 +89,14 @@ export const WorkExperienceForm = () => {
       
       if (description) {
         handleUpdateExperience(id, 'description', description);
+        analytics.aiFeatureUsed('work_generation', true);
         toast.success('Job description generated!');
       } else {
         toast.error('Failed to generate description. Please try again.');
       }
     } catch (error) {
       console.error('Error generating work description:', error);
+      analytics.errorOccurred('work_generation_failed', error?.message);
       toast.error('Failed to generate description. Please try again.');
     } finally {
       setGeneratingId(null);

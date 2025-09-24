@@ -11,6 +11,9 @@ import { TouchRipple } from './ui/touch-ripple';
 import { analyzeResume } from '@/services/resumeAI';
 import { useResumeContext } from '@/context/ResumeContext';
 import { toast } from 'sonner';
+import { FileValidator } from '@/services/fileValidation';
+import { analytics } from '@/services/analytics';
+import { rateLimiter } from '@/services/rateLimiter';
 
 interface ImprovementSuggestion {
   type: 'critical' | 'important' | 'suggestion';
@@ -42,22 +45,42 @@ export const ResumeUpload = () => {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain'
-      ];
-      
-      if (allowedTypes.includes(file.type)) {
-        setUploadedFile(file);
-        setAnalysis(null);
-        setParsedContent('');
-      } else {
-        toast.error('Please upload a PDF, Word document, or text file.');
-      }
+    if (!file) return;
+
+    // Enhanced validation
+    const validation = FileValidator.validateFile(file);
+    
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Invalid file');
+      analytics.errorOccurred('file_validation_failed', validation.error);
+      return;
     }
+
+    // Show warnings if any
+    if (validation.warnings) {
+      validation.warnings.forEach(warning => {
+        toast.warning(warning);
+      });
+    }
+
+    // Rate limiting check
+    const userId = 'anonymous'; // Replace with actual user ID when auth is implemented
+    const rateLimitCheck = rateLimiter.isAllowed(userId, 'file_upload');
+    
+    if (!rateLimitCheck.allowed) {
+      const resetTime = rateLimitCheck.resetTime ? new Date(rateLimitCheck.resetTime).toLocaleTimeString() : 'soon';
+      toast.error(`Upload limit reached. Try again at ${resetTime}.`);
+      return;
+    }
+
+    setUploadedFile(file);
+    setAnalysis(null);
+    setParsedContent('');
+    
+    // Track analytics
+    analytics.resumeUploaded(file.type, file.size);
+    
+    toast.success(`File uploaded: ${FileValidator.getReadableFileSize(file.size)}`);
   };
 
   const parseResumeContent = async (content: string) => {
@@ -163,7 +186,19 @@ export const ResumeUpload = () => {
   const processUploadedResume = async () => {
     if (!uploadedFile) return;
 
+    // Rate limiting for AI analysis
+    const userId = 'anonymous';
+    const rateLimitCheck = rateLimiter.isAllowed(userId, 'resume_analysis');
+    
+    if (!rateLimitCheck.allowed) {
+      const resetTime = rateLimitCheck.resetTime ? new Date(rateLimitCheck.resetTime).toLocaleTimeString() : 'soon';
+      toast.error(`Analysis limit reached. Try again at ${resetTime}.`);
+      return;
+    }
+
     setIsProcessing(true);
+    analytics.aiFeatureUsed('resume_analysis', false); // Will update to true on success
+    
     try {
       // Read file content
       let content = '';
@@ -215,6 +250,7 @@ export const ResumeUpload = () => {
         extractedData
       });
       
+      analytics.aiFeatureUsed('resume_analysis', true);
       toast.success('Resume analyzed successfully!');
     } catch (error) {
       console.error('Error analyzing content:', error);

@@ -2,6 +2,35 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+// Simple rate limiting using in-memory store (use Redis in production)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function isRateLimited(userId: string, action: string): { limited: boolean; resetTime?: number } {
+  const key = `${userId}:${action}`;
+  const now = Date.now();
+  const rules: Record<string, { maxRequests: number; windowMs: number }> = {
+    ai_generation: { maxRequests: 20, windowMs: 60000 }, // 20 requests per minute
+    resume_analysis: { maxRequests: 10, windowMs: 60000 }, // 10 analyses per minute
+  };
+
+  const rule = rules[action];
+  if (!rule) return { limited: false };
+
+  const entry = rateLimitStore.get(key);
+  
+  if (!entry || now >= entry.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + rule.windowMs });
+    return { limited: false };
+  }
+
+  if (entry.count >= rule.maxRequests) {
+    return { limited: true, resetTime: entry.resetTime };
+  }
+
+  entry.count++;
+  return { limited: false };
+}
+
 const groqApiKey = Deno.env.get('GROQ_API_KEY');
 
 const corsHeaders = {
@@ -28,6 +57,29 @@ serve(async (req) => {
 
   try {
     const { action, ...payload } = await req.json();
+    
+    // Get user ID from headers or generate a session-based ID
+    const userId = req.headers.get('x-user-id') || 'anonymous';
+    
+    // Rate limiting check
+    const rateLimitAction = ['education', 'work', 'skills', 'skills_grouped', 'summary', 'orchestrate'].includes(action) 
+      ? 'ai_generation' 
+      : 'resume_analysis';
+    
+    const rateLimitCheck = isRateLimited(userId, rateLimitAction);
+    if (rateLimitCheck.limited) {
+      return new Response(
+        JSON.stringify({
+          error: 'Rate limit exceeded',
+          resetTime: rateLimitCheck.resetTime
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     console.log(`Processing action: ${action}`, payload);
 
     let prompt = '';
