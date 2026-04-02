@@ -182,7 +182,8 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
   // Experience
   if (experience.length) {
     children.push(...sectionHeader('Professional Experience'));
-    for (const exp of experience) {
+    for (let i = 0; i < experience.length; i++) {
+      const exp = experience[i];
       children.push(
         new Paragraph({
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
@@ -190,7 +191,9 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
             new TextRun({ text: exp.position, bold: true, size: 22, font: 'Arial', color: C.black }),
             new TextRun({ text: `\t${exp.startDate} – ${exp.endDate}`, size: 18, font: 'Arial', color: C.midGray }),
           ],
-          spacing: { before: 120, after: 40 },
+          // top border separates entries (skip for first, which follows the section divider)
+          border: i > 0 ? { top: { style: BorderStyle.SINGLE, size: 4, color: 'e5e7eb', space: 1 } } : undefined,
+          spacing: { before: i > 0 ? 160 : 80, after: 40 },
         }),
         new Paragraph({
           children: [
@@ -200,7 +203,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
           spacing: { after: 60 },
         }),
         ...descParagraphs(exp.description, { indent: true }),
-        emptyLine(40),
       );
     }
   }
@@ -425,7 +427,7 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
   if (skills.length) {
     sideChildren.push(sidebarHeader('Technical Skills'));
     for (const skill of skills) {
-      sideChildren.push(new Paragraph({ children: [new TextRun({ text: skill, size: 19, font: 'Arial', color: C.midGray })], spacing: { after: 60 }, bullet: undefined as any }));
+      sideChildren.push(new Paragraph({ children: [new TextRun({ text: skill, size: 19, font: 'Arial', color: C.midGray })], spacing: { after: 60 } }));
     }
   }
 
@@ -483,9 +485,9 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
   });
 
   const sBox = summaryBox();
-  const sectionChildren = [headerTable, emptyLine(120)];
-  if (sBox) sectionChildren.push(sBox, emptyLine(80) as any);
-  sectionChildren.push(bodyTable as any);
+  const sectionChildren: (Paragraph | Table)[] = [headerTable, emptyLine(120)];
+  if (sBox) sectionChildren.push(sBox, emptyLine(80));
+  sectionChildren.push(bodyTable);
 
   return new Document({
     numbering: bulletNumbering,
