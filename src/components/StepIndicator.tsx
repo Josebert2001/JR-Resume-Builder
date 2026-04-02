@@ -10,7 +10,7 @@ interface StepIndicatorProps {
 
 export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicatorProps) => {
   return (
-    <div className="w-full mb-10">
+    <div className="w-full mb-2">
       <div className="flex items-start justify-center">
         <div className="flex items-start w-full max-w-2xl">
           {Array.from({ length: totalSteps }).map((_, index) => {

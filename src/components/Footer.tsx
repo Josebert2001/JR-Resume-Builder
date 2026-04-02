@@ -1,76 +1,41 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-800 py-8 px-6 md:px-20 text-gray-700 dark:text-gray-300">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        
-        {/* Logo & Tagline */}
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
+    <footer className="bg-[#f5f5f7] dark:bg-zinc-950 border-t border-zinc-200/60 dark:border-zinc-800/60 py-8 px-4">
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <FileText className="h-4 w-4 text-white" />
             </div>
-            <span className="text-xl font-bold">ResumAI</span>
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">ResumAI</span>
           </div>
-          <p className="text-sm font-medium max-w-sm">
+          <p className="text-xs text-zinc-500 max-w-xs">
             Land interviews faster with AI-powered resumes.
           </p>
         </div>
 
-        {/* Contact Info */}
-        <div className="flex flex-col space-y-2 text-sm">
-          <h4 className="text-base font-semibold text-gray-800 dark:text-gray-100">Contact Us</h4>
-          <p>
-            Email:{" "}
-            <a
-              href="mailto:robertsunday333@gmail.com"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              robertsunday333@gmail.com
-            </a>
-          </p>
-          <p>
-            Phone:{" "}
-            <a
-              href="tel:+2347083057837"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              +234 70 830 57837
-            </a>
-          </p>
-
-          {/* Socials */}
-          <div className="flex gap-4 mt-2 text-gray-600 dark:text-gray-300">
-            <a href="#" aria-label="Facebook" className="hover:text-blue-500">
-              <Facebook size={18} />
-            </a>
-            <a href="#" aria-label="Instagram" className="hover:text-pink-500">
-              <Instagram size={18} />
-            </a>
-            <a href="#" aria-label="Twitter" className="hover:text-blue-400">
-              <Twitter size={18} />
-            </a>
-          </div>
+        <div className="flex flex-col gap-1.5 text-sm">
+          <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Contact</p>
+          <a href="mailto:robertsunday333@gmail.com" className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+            robertsunday333@gmail.com
+          </a>
+          <a href="tel:+2347083057837" className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+            +234 70 830 57837
+          </a>
         </div>
       </div>
 
-      {/* Footer Bar */}
-      <div className="mt-6 border-t border-gray-200 dark:border-gray-800 pt-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          © {new Date().getFullYear()} <strong>ResumAI</strong> – Powered by{" "}
-          <strong>JR Digital Insights</strong>. All rights reserved.
-        </div>
-        <div className="flex gap-4 text-xs">
-          <Link to="/privacy" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            Privacy Policy
-          </Link>
-          <Link to="/terms" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            Terms of Service
-          </Link>
+      <div className="max-w-5xl mx-auto mt-6 pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <p className="text-xs text-zinc-400">
+          © {new Date().getFullYear()} ResumAI · JR Digital Insights
+        </p>
+        <div className="flex gap-5 text-xs text-zinc-400">
+          <Link to="/privacy" className="hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">Privacy</Link>
+          <Link to="/terms" className="hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">Terms</Link>
         </div>
       </div>
     </footer>

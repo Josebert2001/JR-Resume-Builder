@@ -13,7 +13,7 @@ export const PageHeader = ({ title, showBackButton = true, children }: PageHeade
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-3">

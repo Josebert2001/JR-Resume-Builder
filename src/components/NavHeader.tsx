@@ -20,9 +20,9 @@ export function NavHeader() {
           key={item.href}
           to={item.href}
           className={`
-            flex items-center space-x-2 text-resume-dark dark:text-resume-light
-            hover:text-resume-primary transition-colors duration-200
-            ${mobile ? 'py-2 px-4' : 'px-3 py-2 rounded-md text-sm font-medium'}
+            flex items-center gap-2 text-zinc-600 dark:text-zinc-400
+            hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-150 font-medium
+            ${mobile ? 'py-2.5 px-4 text-base' : 'text-sm'}
           `}
           onClick={() => mobile && setIsOpen(false)}
         >
@@ -34,44 +34,47 @@ export function NavHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <FileText className="h-5 w-5 text-white" />
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl">
+      <div className="max-w-5xl mx-auto px-4 flex h-14 items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <FileText className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold text-resume-dark dark:text-resume-light">
+          <span className="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
             ResumAI
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center gap-6">
           <NavLinks />
         </nav>
 
-        {/* Theme Toggle & CTA */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
-          <div className="hidden md:flex items-center space-x-2">
-            <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+          <div className="hidden md:block">
+            <Button
+              asChild
+              className="bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 text-white rounded-xl text-sm px-4 h-9"
+            >
               <Link to="/resume-builder">Get Started</Link>
             </Button>
           </div>
 
-          {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" className="md:hidden" size="icon">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col space-y-4 mt-6">
+            <SheetContent side="right" className="w-[280px]">
+              <div className="flex flex-col gap-1 mt-8">
                 <NavLinks mobile />
-                <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                  <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={() => setIsOpen(false)}>
+                <div className="pt-4 border-t border-border mt-3">
+                  <Button
+                    asChild
+                    className="w-full bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 text-white rounded-xl"
+                    onClick={() => setIsOpen(false)}
+                  >
                     <Link to="/resume-builder">Get Started</Link>
                   </Button>
                 </div>

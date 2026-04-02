@@ -20,11 +20,13 @@ const ResumeBuilder = () => {
   const totalSteps = STEP_LABELS.length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f5f5f7] dark:bg-zinc-950">
       <PageHeader title="ResumAI Builder" />
 
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} labels={STEP_LABELS} />
+      <div className="container mx-auto px-4 py-5 max-w-5xl">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl px-6 pt-6 pb-3 mb-4 shadow-sm">
+          <StepIndicator currentStep={currentStep} totalSteps={totalSteps} labels={STEP_LABELS} />
+        </div>
 
         {currentStep === 1 && <ResumeTemplates />}
         {currentStep === 2 && <PersonalInfoForm />}
