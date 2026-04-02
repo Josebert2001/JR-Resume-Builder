@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Check } from 'lucide-react';
 
 interface StepIndicatorProps {
   currentStep: number;
@@ -9,82 +9,60 @@ interface StepIndicatorProps {
 }
 
 export const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicatorProps) => {
-  const isMobile = useIsMobile();
-
   return (
-    <div className="w-full mb-8">
-      <div className="flex items-center justify-center relative">
-        {/* Progress bar */}
-        <div className="absolute h-0.5 bg-gray-200 w-full max-w-2xl" />
-        <div 
-          className="absolute h-0.5 bg-resume-primary transition-all duration-300 w-full max-w-2xl" 
-          style={{ 
-            width: `${(currentStep / (totalSteps - 1)) * 100}%`,
-            maxWidth: '32rem'
-          }} 
-        />
-
-        {/* Step dots */}
-        <div className="relative flex justify-between w-full max-w-2xl px-2">
+    <div className="w-full mb-10">
+      <div className="flex items-start justify-center">
+        <div className="flex items-start w-full max-w-2xl">
           {Array.from({ length: totalSteps }).map((_, index) => {
-            const isCompleted = index < currentStep;
-            const isCurrent = index === currentStep;
-            
-            return (
-              <div 
-                key={index} 
-                className="flex flex-col items-center"
-              >
-                <button
-                  className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-200",
-                    isCompleted ? "bg-resume-primary border-resume-primary text-white" :
-                    isCurrent ? "border-resume-primary bg-white" :
-                    "border-gray-300 bg-white",
-                    "relative group touch-none",
-                    isMobile ? "active:scale-110" : "hover:scale-110"
-                  )}
-                  style={{
-                    transform: isCurrent ? 'scale(1.1)' : undefined
-                  }}
-                >
-                  {isCompleted ? (
-                    <svg 
-                      className="w-4 h-4" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M5 13l4 4L19 7" 
-                      />
-                    </svg>
-                  ) : (
-                    <span className={cn(
-                      "text-sm font-medium",
-                      isCurrent ? "text-resume-primary" : "text-gray-400"
-                    )}>
-                      {index + 1}
-                    </span>
-                  )}
-                </button>
+            const stepNum = index + 1;
+            const isCompleted = stepNum < currentStep;
+            const isCurrent = stepNum === currentStep;
+            const isUpcoming = stepNum > currentStep;
 
-                {/* Step labels */}
-                {labels && (
-                  <span 
+            return (
+              <React.Fragment key={index}>
+                {/* Step circle + label */}
+                <div className="flex flex-col items-center flex-1 first:items-start last:items-end">
+                  <div
                     className={cn(
-                      "absolute mt-10 text-xs font-medium text-center whitespace-nowrap transition-colors duration-200",
-                      isCurrent ? "text-resume-primary" : "text-gray-500",
-                      "max-w-[120px] overflow-hidden text-ellipsis"
+                      'w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-200 font-medium text-sm',
+                      isCompleted && 'bg-resume-primary border-resume-primary text-white',
+                      isCurrent && 'border-resume-primary bg-white dark:bg-gray-900 text-resume-primary scale-110 shadow-sm shadow-blue-200 dark:shadow-blue-900',
+                      isUpcoming && 'border-border bg-background text-muted-foreground'
                     )}
                   >
-                    {labels[index]}
-                  </span>
+                    {isCompleted ? (
+                      <Check className="w-4 h-4" strokeWidth={2.5} />
+                    ) : (
+                      <span>{stepNum}</span>
+                    )}
+                  </div>
+                  {labels && (
+                    <span
+                      className={cn(
+                        'mt-2 text-[11px] font-medium text-center leading-tight hidden sm:block',
+                        isCurrent && 'text-resume-primary',
+                        isCompleted && 'text-muted-foreground',
+                        isUpcoming && 'text-muted-foreground/60'
+                      )}
+                    >
+                      {labels[index]}
+                    </span>
+                  )}
+                </div>
+
+                {/* Connector line */}
+                {index < totalSteps - 1 && (
+                  <div className="flex-1 h-0.5 mt-4 mx-1 rounded-full overflow-hidden bg-border">
+                    <div
+                      className={cn(
+                        'h-full rounded-full transition-all duration-300',
+                        isCompleted ? 'bg-resume-primary w-full' : 'w-0'
+                      )}
+                    />
+                  </div>
                 )}
-              </div>
+              </React.Fragment>
             );
           })}
         </div>

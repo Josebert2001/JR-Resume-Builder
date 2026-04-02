@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PersonalInfoForm } from '@/components/PersonalInfoForm';
 import { EducationForm } from '@/components/EducationForm';
@@ -14,47 +13,33 @@ import { PageHeader } from '@/components/PageHeader';
 import { ResumeImprover } from '@/components/ResumeImprover';
 import { ResumeUpload } from '@/components/ResumeUpload';
 
+const STEP_LABELS = ['Template', 'Info', 'Education', 'Work', 'Skills', 'Projects', 'Preview'];
+
 const ResumeBuilder = () => {
   const { currentStep, resumeData } = useResumeContext();
-  
-  // Total number of steps in the resume building process
-  const totalSteps = 7;
-  
-  console.log("Current step:", currentStep);
+  const totalSteps = STEP_LABELS.length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <PageHeader title="ResumAI Builder" />
-      
-      <div className="container mx-auto px-4 py-8">
-        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
-        
-        {/* Step 1: Template Selection */}
-        {currentStep === 1 && <ResumeTemplates />}
-        
-        {/* Step 2: Personal Information */}
-        {currentStep === 2 && <PersonalInfoForm />}
-        
-        {/* Step 3: Education */}
-        {currentStep === 3 && <EducationForm />}
-        
-        {/* Step 4: Work Experience */}
-        {currentStep === 4 && <WorkExperienceForm />}
-        
-        {/* Step 5: Skills */}
-        {currentStep === 5 && <SkillsForm />}
 
-        {/* Step 6: Projects */}
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} labels={STEP_LABELS} />
+
+        {currentStep === 1 && <ResumeTemplates />}
+        {currentStep === 2 && <PersonalInfoForm />}
+        {currentStep === 3 && <EducationForm />}
+        {currentStep === 4 && <WorkExperienceForm />}
+        {currentStep === 5 && <SkillsForm />}
         {currentStep === 6 && <ProjectsForm />}
-        
-        {/* Step 7: Final Preview */}
+
         {currentStep === 7 && (
-          <Tabs defaultValue="preview" className="max-w-6xl mx-auto">
+          <Tabs defaultValue="preview" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="preview">Resume Preview</TabsTrigger>
-              <TabsTrigger value="templates">Change Template</TabsTrigger>
-              <TabsTrigger value="upload">Upload & Analyze</TabsTrigger>
-              <TabsTrigger value="improve">Improve Resume</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="templates">Template</TabsTrigger>
+              <TabsTrigger value="upload">Analyze</TabsTrigger>
+              <TabsTrigger value="improve">Improve</TabsTrigger>
             </TabsList>
             <TabsContent value="preview">
               <ResumePreview />
