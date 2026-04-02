@@ -547,7 +547,7 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
 
   if (skills.length) {
     children.push(minimalSection('Skills'));
-    children.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: skills.join('   •   '), size: 18, font: 'Arial', color: C.midGray })], spacing: { after: 0 } }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: skills.join(', '), size: 18, font: 'Arial', color: C.midGray })], spacing: { after: 0 } }));
   }
 
   if (linkedIn || githubUrl) {
