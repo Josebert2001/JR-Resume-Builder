@@ -780,9 +780,8 @@ export async function generateDocx(resumeData: ResumeData, template: TemplateTyp
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  const firstName = data.name.split(' ')[0] || 'Resume';
-  const lastName = data.name.split(' ').slice(1).join('-') || '';
-  link.download = `${firstName}${lastName ? '-' + lastName : ''}-Resume.docx`;
+  const safeName = data.name.trim().replace(/\s+/g, '-') || 'Resume';
+  link.download = `${safeName}-Resume.docx`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
