@@ -20,8 +20,8 @@ export function NavHeader() {
           key={item.href}
           to={item.href}
           className={`
-            flex items-center gap-2 text-zinc-600 dark:text-zinc-400
-            hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-150 font-medium
+            flex items-center gap-2 text-stone-600 dark:text-stone-400
+            hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150 font-medium
             ${mobile ? 'py-2.5 px-4 text-base' : 'text-sm'}
           `}
           onClick={() => mobile && setIsOpen(false)}
@@ -34,13 +34,13 @@ export function NavHeader() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-stone-200/60 dark:border-stone-800/40 bg-[#f7f3ed]/80 dark:bg-[#0e0b08]/80 backdrop-blur-xl">
       <div className="max-w-5xl mx-auto px-4 flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-7 h-7 bg-gradient-to-br from-[#2d6a4f] to-[#1a4a37] rounded-lg flex items-center justify-center">
             <FileText className="h-4 w-4 text-white" />
           </div>
-          <span className="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+          <span className="text-base font-bold text-stone-900 dark:text-stone-100 tracking-tight">
             ResumAI
           </span>
         </Link>
@@ -54,7 +54,7 @@ export function NavHeader() {
           <div className="hidden md:block">
             <Button
               asChild
-              className="bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 text-white rounded-xl text-sm px-4 h-9"
+              className="bg-[#1a1209] hover:bg-[#2a1f10] dark:bg-[#f7f3ed] dark:text-[#1a1209] dark:hover:bg-[#ede8e2] text-white rounded-xl text-sm px-4 h-9"
             >
               <Link to="/resume-builder">Get Started</Link>
             </Button>

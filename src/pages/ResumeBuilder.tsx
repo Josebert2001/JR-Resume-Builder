@@ -20,11 +20,11 @@ const ResumeBuilder = () => {
   const totalSteps = STEP_LABELS.length;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] dark:bg-zinc-950">
+    <div className="min-h-screen bg-[#f7f3ed] dark:bg-[#0e0b08]">
       <PageHeader title="ResumAI Builder" />
 
       <div className="container mx-auto px-4 py-5 max-w-5xl">
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl px-6 pt-6 pb-3 mb-4 shadow-sm">
+        <div className="bg-white dark:bg-[#1a1510] rounded-3xl px-6 pt-6 pb-3 mb-4 shadow-sm">
           <StepIndicator currentStep={currentStep} totalSteps={totalSteps} labels={STEP_LABELS} />
         </div>
 

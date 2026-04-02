@@ -4,11 +4,11 @@ import { FileText } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#f5f5f7] dark:bg-zinc-950 border-t border-zinc-200/60 dark:border-zinc-800/60 py-8 px-4">
+    <footer className="bg-[#f7f3ed] dark:bg-[#0e0b08] border-t border-stone-200/60 dark:border-stone-800/40 py-8 px-4">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-7 h-7 bg-gradient-to-br from-[#2d6a4f] to-[#1a4a37] rounded-lg flex items-center justify-center">
               <FileText className="h-4 w-4 text-white" />
             </div>
             <span className="font-bold text-zinc-900 dark:text-zinc-100">ResumAI</span>
