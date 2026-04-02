@@ -390,12 +390,16 @@ Score the resume compatibility, identify matched and missed keywords, and provid
 if (process.env.NODE_ENV === "production") {
   const distPath = path.join(__dirname, "../dist");
   app.use(express.static(distPath));
-  app.get("*", (_req, res) => {
+  app.get("/{*path}", (_req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
 
-app.listen(PORT, () => {
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
+app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
 
