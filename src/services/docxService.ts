@@ -14,24 +14,20 @@ import {
   VerticalAlign,
   TabStopType,
   TabStopPosition,
-  ExternalHyperlink,
 } from 'docx';
 import { ResumeData, TemplateType } from '@/context/ResumeContext';
 
-// ─── Dimensions (A4, 0.5" margins) ───────────────────────────────────────────
+// A4 page (DXA units), 0.5" margins on each side
 const PAGE_W = 11906;
 const MARGIN = 720;
-const CONTENT_W = PAGE_W - MARGIN * 2; // 10466 DXA
+const CONTENT_W = PAGE_W - MARGIN * 2; // 10466
 
-// Creative sidebar split ~38 / 62
-const CREATIVE_LEFT = Math.round(CONTENT_W * 0.38);  // 3977
-const CREATIVE_RIGHT = CONTENT_W - CREATIVE_LEFT;    // 6489
+// Column splits for multi-column templates
+const CREATIVE_LEFT = Math.round(CONTENT_W * 0.38);
+const CREATIVE_RIGHT = CONTENT_W - CREATIVE_LEFT;
+const MODERN_MAIN = Math.round(CONTENT_W * 0.65);
+const MODERN_SIDE = CONTENT_W - MODERN_MAIN;
 
-// Modern main/sidebar split ~65 / 35
-const MODERN_MAIN = Math.round(CONTENT_W * 0.65);    // 6803
-const MODERN_SIDE = CONTENT_W - MODERN_MAIN;          // 3663
-
-// ─── Colours ─────────────────────────────────────────────────────────────────
 const C = {
   black: '1a1a1a',
   darkCharcoal: '1f2937',
@@ -44,14 +40,12 @@ const C = {
   blueDark: '1e3a5f',
 } as const;
 
-// ─── Borders ─────────────────────────────────────────────────────────────────
 const noBorder = { style: BorderStyle.NONE, size: 0, color: 'auto' };
 const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
 const thinGray = { style: BorderStyle.SINGLE, size: 4, color: 'e5e7eb' };
 const boldBlack = { style: BorderStyle.SINGLE, size: 12, color: C.black };
 const thinBlue = { style: BorderStyle.SINGLE, size: 8, color: C.blue };
 
-// ─── Bullet numbering config ──────────────────────────────────────────────────
 const bulletNumbering = {
   config: [
     {
@@ -71,22 +65,17 @@ const bulletNumbering = {
   ],
 };
 
-// ─── Parse AI-generated description into lines ────────────────────────────────
 function descriptionLines(raw: string): string[] {
-  return raw
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
+  return raw.split('\n').map((l) => l.trim()).filter(Boolean);
 }
 
 function isBullet(line: string) {
   return line.startsWith('* ') || line.startsWith('- ');
 }
+
 function bulletText(line: string) {
   return line.replace(/^[\*\-]\s+/, '');
 }
-
-// ─── Shared paragraph builders ────────────────────────────────────────────────
 
 function emptyLine(spacingBefore = 0): Paragraph {
   return new Paragraph({ spacing: { before: spacingBefore } });
@@ -124,7 +113,6 @@ function descParagraphs(
   });
 }
 
-// ─── Page / section properties ────────────────────────────────────────────────
 const pageProps = {
   page: {
     size: { width: PAGE_W, height: 16838 },
@@ -132,9 +120,7 @@ const pageProps = {
   },
 };
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// PROFESSIONAL TEMPLATE
-// ═══════════════════════════════════════════════════════════════════════════════
+// Professional template: single-column, UPPERCASE section headers, tab-stop dates
 function buildProfessional(data: ReturnType<typeof formatData>): Document {
   const { name, email, phone, location, portfolio, summary, experience, education, skills, projects, certifications, linkedIn, githubUrl } = data;
 
@@ -152,13 +138,11 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
   }
 
   const children: Paragraph[] = [
-    // Name
     new Paragraph({
       alignment: AlignmentType.CENTER,
       children: [new TextRun({ text: name, bold: true, size: 52, font: 'Arial', color: C.black })],
       spacing: { after: 80 },
     }),
-    // Contact row
     new Paragraph({
       alignment: AlignmentType.CENTER,
       children: [new TextRun({ text: contactParts, size: 18, font: 'Arial', color: C.midGray })],
@@ -168,7 +152,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
     emptyLine(160),
   ];
 
-  // Summary
   if (summary) {
     children.push(
       ...sectionHeader('Professional Summary'),
@@ -179,7 +162,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
     );
   }
 
-  // Experience
   if (experience.length) {
     children.push(...sectionHeader('Professional Experience'));
     for (let i = 0; i < experience.length; i++) {
@@ -191,7 +173,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
             new TextRun({ text: exp.position, bold: true, size: 22, font: 'Arial', color: C.black }),
             new TextRun({ text: `\t${exp.startDate} – ${exp.endDate}`, size: 18, font: 'Arial', color: C.midGray }),
           ],
-          // top border separates entries (skip for first, which follows the section divider)
           border: i > 0 ? { top: { style: BorderStyle.SINGLE, size: 4, color: 'e5e7eb', space: 1 } } : undefined,
           spacing: { before: i > 0 ? 160 : 80, after: 40 },
         }),
@@ -207,7 +188,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Education
   if (education.length) {
     children.push(...sectionHeader('Education'));
     for (const edu of education) {
@@ -229,10 +209,8 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Skills
   if (skills.length) {
     children.push(...sectionHeader('Technical Skills'));
-    // Group into rows of 3
     for (let i = 0; i < skills.length; i += 3) {
       const chunk = skills.slice(i, i + 3).join('   •   ');
       children.push(
@@ -244,7 +222,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Projects
   if (projects.length) {
     children.push(...sectionHeader('Projects'));
     for (const proj of projects) {
@@ -262,7 +239,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Certifications
   if (certifications.length) {
     children.push(...sectionHeader('Certifications'));
     for (const cert of certifications) {
@@ -283,7 +259,6 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Links
   if (linkedIn || githubUrl) {
     children.push(emptyLine(120), sectionDivider());
     const linkParts: TextRun[] = [];
@@ -302,13 +277,10 @@ function buildProfessional(data: ReturnType<typeof formatData>): Document {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// MODERN TEMPLATE
-// ═══════════════════════════════════════════════════════════════════════════════
+// Modern template: header row + blue summary box + two-column body (main / sidebar)
 function buildModern(data: ReturnType<typeof formatData>): Document {
   const { name, email, phone, location, portfolio, summary, experience, education, skills, projects, certifications, linkedIn, githubUrl } = data;
 
-  // ── Header (name left, contact right) ──
   const headerTable = new Table({
     width: { size: CONTENT_W, type: WidthType.DXA },
     columnWidths: [MODERN_MAIN, MODERN_SIDE],
@@ -340,7 +312,6 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
     ],
   });
 
-  // ── Summary box ──
   function summaryBox(): Table | null {
     if (!summary) return null;
     return new Table({
@@ -365,7 +336,6 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
     });
   }
 
-  // ── Sidebar section header ──
   function sidebarHeader(title: string): Paragraph {
     return new Paragraph({
       children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 18, font: 'Arial', color: C.black, characterSpacing: 60 })],
@@ -374,7 +344,6 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
     });
   }
 
-  // ── Main section header ──
   function mainHeader(title: string): Paragraph {
     return new Paragraph({
       children: [new TextRun({ text: title, size: 28, font: 'Arial', color: C.black })],
@@ -383,7 +352,6 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
     });
   }
 
-  // ── Main column content ──
   const mainChildren: Paragraph[] = [];
 
   if (experience.length) {
@@ -421,7 +389,6 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // ── Sidebar content ──
   const sideChildren: Paragraph[] = [];
 
   if (skills.length) {
@@ -459,7 +426,6 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
     if (githubUrl) sideChildren.push(new Paragraph({ children: [new TextRun({ text: githubUrl, size: 18, font: 'Arial', color: C.midGray })], spacing: { after: 0 } }));
   }
 
-  // ── Main two-column table ──
   const bodyTable = new Table({
     width: { size: CONTENT_W, type: WidthType.DXA },
     columnWidths: [MODERN_MAIN, MODERN_SIDE],
@@ -496,22 +462,18 @@ function buildModern(data: ReturnType<typeof formatData>): Document {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// MINIMAL TEMPLATE
-// ═══════════════════════════════════════════════════════════════════════════════
+// Minimal template: fully centered, italic summary, dot-separated skills
 function buildMinimal(data: ReturnType<typeof formatData>): Document {
   const { name, email, phone, location, portfolio, summary, experience, education, skills, projects, certifications, linkedIn, githubUrl } = data;
 
   const children: Paragraph[] = [];
 
-  // Name
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER,
     children: [new TextRun({ text: name, size: 52, font: 'Arial', color: C.black })],
     spacing: { after: 80 },
   }));
 
-  // Contact
   const contactParts = [email, phone, location, portfolio].filter(Boolean).join('   •   ');
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER,
@@ -521,7 +483,6 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
   }));
   children.push(emptyLine(120));
 
-  // Summary (italicised, centered)
   if (summary) {
     children.push(new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -539,7 +500,6 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
     });
   }
 
-  // Experience
   if (experience.length) {
     children.push(minimalSection('Experience'));
     for (const exp of experience) {
@@ -553,7 +513,6 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Projects
   if (projects.length) {
     children.push(minimalSection('Projects'));
     for (const proj of projects) {
@@ -565,7 +524,6 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Education
   if (education.length) {
     children.push(minimalSection('Education'));
     for (const edu of education) {
@@ -577,7 +535,6 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Certifications
   if (certifications.length) {
     children.push(minimalSection('Certifications'));
     for (const cert of certifications) {
@@ -588,14 +545,11 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // Skills — dot-separated inline
   if (skills.length) {
     children.push(minimalSection('Skills'));
-    const skillLine = skills.join('   •   ');
-    children.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: skillLine, size: 18, font: 'Arial', color: C.midGray })], spacing: { after: 0 } }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: skills.join('   •   '), size: 18, font: 'Arial', color: C.midGray })], spacing: { after: 0 } }));
   }
 
-  // Links
   if (linkedIn || githubUrl) {
     children.push(emptyLine(160), sectionDivider(C.lightGray));
     const parts = [linkedIn, githubUrl].filter(Boolean).join('   |   ');
@@ -609,16 +563,12 @@ function buildMinimal(data: ReturnType<typeof formatData>): Document {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// CREATIVE TEMPLATE (dark sidebar + white content)
-// ═══════════════════════════════════════════════════════════════════════════════
+// Creative template: dark charcoal sidebar (left) + white content column (right)
 function buildCreative(data: ReturnType<typeof formatData>): Document {
   const { name, email, phone, location, portfolio, summary, experience, education, skills, projects, certifications, linkedIn, githubUrl } = data;
 
-  // ── Helpers for white text on dark sidebar ──
-  function darkPara(text: string, opts: { bold?: boolean; size?: number; color?: string; align?: typeof AlignmentType[keyof typeof AlignmentType]; spacingAfter?: number; spacingBefore?: number } = {}): Paragraph {
+  function darkPara(text: string, opts: { bold?: boolean; size?: number; color?: string; spacingAfter?: number; spacingBefore?: number } = {}): Paragraph {
     return new Paragraph({
-      alignment: opts.align,
       children: [new TextRun({ text, bold: opts.bold, size: opts.size ?? 19, font: 'Arial', color: opts.color ?? C.veryLightGray })],
       spacing: { before: opts.spacingBefore ?? 0, after: opts.spacingAfter ?? 40 },
     });
@@ -632,7 +582,6 @@ function buildCreative(data: ReturnType<typeof formatData>): Document {
     });
   }
 
-  // ── Left (sidebar) children ──
   const leftChildren: Paragraph[] = [
     darkPara(name, { bold: true, size: 30, color: C.white, spacingAfter: 40 }),
     ...[email, phone, location, portfolio].filter(Boolean).map((v) => darkPara(v!, { size: 17, color: 'cbd5e1', spacingAfter: 30 })),
@@ -673,7 +622,6 @@ function buildCreative(data: ReturnType<typeof formatData>): Document {
     if (githubUrl) leftChildren.push(darkPara(githubUrl, { size: 17, color: '93c5fd', spacingAfter: 0 }));
   }
 
-  // ── Right (content) children ──
   const rightChildren: Paragraph[] = [];
 
   function rightHeader(title: string): Paragraph {
@@ -685,14 +633,16 @@ function buildCreative(data: ReturnType<typeof formatData>): Document {
   }
 
   if (summary) {
-    rightChildren.push(new Paragraph({
-      children: [new TextRun({ text: 'About Me', bold: true, size: 22, font: 'Arial', color: C.blueDark })],
-      spacing: { after: 60 },
-    }));
-    rightChildren.push(new Paragraph({
-      children: [new TextRun({ text: summary, size: 19, font: 'Arial', color: C.midGray })],
-      spacing: { after: 0 },
-    }));
+    rightChildren.push(
+      new Paragraph({
+        children: [new TextRun({ text: 'About Me', bold: true, size: 22, font: 'Arial', color: C.blueDark })],
+        spacing: { after: 60 },
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: summary, size: 19, font: 'Arial', color: C.midGray })],
+        spacing: { after: 0 },
+      }),
+    );
   }
 
   if (experience.length) {
@@ -731,7 +681,6 @@ function buildCreative(data: ReturnType<typeof formatData>): Document {
     }
   }
 
-  // ── Assemble two-column table ──
   const bodyTable = new Table({
     width: { size: CONTENT_W, type: WidthType.DXA },
     columnWidths: [CREATIVE_LEFT, CREATIVE_RIGHT],
@@ -739,7 +688,6 @@ function buildCreative(data: ReturnType<typeof formatData>): Document {
     rows: [
       new TableRow({
         children: [
-          // Dark sidebar
           new TableCell({
             width: { size: CREATIVE_LEFT, type: WidthType.DXA },
             shading: { fill: C.darkCharcoal, type: ShadingType.CLEAR },
@@ -748,7 +696,6 @@ function buildCreative(data: ReturnType<typeof formatData>): Document {
             verticalAlign: VerticalAlign.TOP,
             children: leftChildren,
           }),
-          // White content
           new TableCell({
             width: { size: CREATIVE_RIGHT, type: WidthType.DXA },
             borders: noBorders,
@@ -768,7 +715,6 @@ function buildCreative(data: ReturnType<typeof formatData>): Document {
   });
 }
 
-// ─── Data formatter (normalises ResumeData → flat shape) ─────────────────────
 function formatData(resumeData: ResumeData) {
   const pi = resumeData.personalInfo ?? {};
   return {
@@ -812,7 +758,6 @@ function formatData(resumeData: ResumeData) {
   };
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
 export async function generateDocx(resumeData: ResumeData, template: TemplateType): Promise<void> {
   const data = formatData(resumeData);
 
