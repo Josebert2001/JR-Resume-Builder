@@ -315,157 +315,53 @@
   @media print {
     @page {
       size: A4;
-      margin: 15mm;
+      margin: 0;
     }
-    
+
+    /* Preserve all colors exactly as shown on screen */
     * {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
       color-adjust: exact !important;
     }
 
-    body {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      background: white !important;
-      font-size: 12pt !important;
-      line-height: 1.4 !important;
-    }
-
-    /* Hide everything by default */
+    /* Hide entire page by default */
     body * {
       visibility: hidden !important;
     }
 
-    /* Show only the resume content */
-    .resume-preview,
-    .resume-preview *,
-    [data-print="true"],
-    [data-print="true"] * {
+    /* Show only the resume content area */
+    #resume-content,
+    #resume-content * {
       visibility: visible !important;
     }
 
-    .resume-preview {
-      display: block !important;
-      position: static !important;
-      left: auto !important;
-      top: auto !important;
+    /* Position the resume to fill the page */
+    #resume-content {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
       width: 100% !important;
-      max-width: 210mm !important;
       height: auto !important;
-      margin: 0 auto !important;
+      margin: 0 !important;
       padding: 0 !important;
       box-shadow: none !important;
       border: none !important;
       border-radius: 0 !important;
-      background: white !important;
-      font-size: 12pt !important;
-      line-height: 1.4 !important;
       overflow: visible !important;
-      transform: none !important;
-      scale: 1 !important;
     }
 
-    /* Ensure proper formatting for resume content */
-    .resume-preview h1 {
-      font-size: 18pt !important;
-      margin-bottom: 8pt !important;
+    /* Prevent awkward page breaks mid-section */
+    #resume-content h2,
+    #resume-content h3 {
       page-break-after: avoid !important;
-    }
-    
-    .resume-preview h2 {
-      font-size: 14pt !important;
-      margin-top: 12pt !important;
-      margin-bottom: 6pt !important;
-      page-break-after: avoid !important;
-    }
-    
-    .resume-preview h3 {
-      font-size: 12pt !important;
-      margin-bottom: 4pt !important;
-      page-break-after: avoid !important;
-    }
-    
-    .resume-preview p {
-      margin-bottom: 6pt !important;
-      orphans: 2 !important;
-      widows: 2 !important;
-    }
-    
-    .resume-preview li {
-      break-inside: avoid;
-      page-break-inside: avoid;
-      margin-bottom: 4pt !important;
-    }
-    
-    .resume-preview .space-y-4 > * + * {
-      margin-top: 12pt !important;
-    }
-    
-    .resume-preview .space-y-2 > * + * {
-      margin-top: 6pt !important;
-    }
-    
-    .resume-preview .space-y-6 > * + * {
-      margin-top: 18pt !important;
-    }
-    
-    .resume-preview .space-y-8 > * + * {
-      margin-top: 24pt !important;
-    }
-    
-    /* Hide interactive elements */
-    button,
-    .button,
-    .no-print,
-    [data-no-print],
-    .print-hidden {
-      display: none !important;
+      break-after: avoid !important;
     }
 
-    /* Ensure text is readable for printing */
-    .resume-preview,
-    .resume-preview * {
-      color: black !important;
-      background: white !important;
-    }
-    
-    /* Preserve important accent colors */
-    .resume-preview .text-blue-600,
-    .resume-preview .text-resume-primary,
-    .resume-preview .text-blue-500 {
-      color: #2563eb !important;
-    }
-    
-    .resume-preview .text-green-500,
-    .resume-preview .text-green-600 {
-      color: #059669 !important;
-    }
-    
-    .resume-preview .text-white {
-      color: white !important;
-    }
-    
-    .resume-preview .bg-blue-50,
-    .resume-preview .bg-gray-50,
-    .resume-preview .bg-blue-100 {
-      background-color: #f8fafc !important;
-    }
-    
-    .resume-preview .bg-gray-900,
-    .resume-preview .bg-gray-800 {
-      background-color: #1f2937 !important;
-    }
-    
-    .resume-preview .bg-blue-500,
-    .resume-preview .bg-blue-600 {
-      background-color: #3b82f6 !important;
-    }
-    
-    .resume-preview .bg-green-500 {
-      background-color: #10b981 !important;
+    #resume-content li,
+    #resume-content .experience-item {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
     }
   }
 

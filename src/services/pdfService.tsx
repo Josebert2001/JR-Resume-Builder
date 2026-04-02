@@ -1,66 +1,80 @@
 import React from 'react';
+import html2canvas from 'html2canvas';
 import { pdf } from '@react-pdf/renderer';
+import { Document, Page, Image as PDFImage } from '@react-pdf/renderer';
 import { ResumeData, TemplateType } from '@/context/ResumeContext';
-import { ProfessionalPDFTemplate } from '@/components/pdf-templates/ProfessionalPDFTemplate';
-import { ModernPDFTemplate } from '@/components/pdf-templates/ModernPDFTemplate';
-import { MinimalPDFTemplate } from '@/components/pdf-templates/MinimalPDFTemplate';
-import { CreativePDFTemplate } from '@/components/pdf-templates/CreativePDFTemplate';
 
-export const generatePDF = async (resumeData: ResumeData, template: TemplateType) => {
-  // Format data for PDF templates
-  const formattedData = {
-    personalInfo: {
-      firstName: resumeData.personalInfo?.firstName || '',
-      lastName: resumeData.personalInfo?.lastName || '',
-      email: resumeData.personalInfo?.email || '',
-      phone: resumeData.personalInfo?.phone || '',
-      location: resumeData.personalInfo?.location || '',
-      summary: resumeData.personalInfo?.summary || '',
-      portfolio: resumeData.personalInfo?.portfolio || '',
-    },
-    education: resumeData.education || [],
-    experience: resumeData.workExperience?.map(exp => ({
-      position: exp.position,
-      company: exp.company,
-      location: exp.location || '',
-      startDate: exp.startDate,
-      endDate: exp.endDate || 'Present',
-      description: exp.description,
-    })) || [],
-    skills: resumeData.skills?.map(skill => skill.name) || [],
-    projects: resumeData.projects || [],
-    certifications: resumeData.certifications || [],
-    linkedIn: resumeData.linkedIn || '',
-    githubUrl: resumeData.githubUrl || '',
-  };
+// Slices a canvas into an A4-tall chunk at a given vertical offset
+function sliceCanvas(source: HTMLCanvasElement, yStart: number, sliceHeight: number): string {
+  const slice = document.createElement('canvas');
+  slice.width = source.width;
+  slice.height = sliceHeight;
+  const ctx = slice.getContext('2d')!;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, slice.width, sliceHeight);
+  ctx.drawImage(source, 0, -yStart);
+  return slice.toDataURL('image/png');
+}
 
-  // Select the appropriate PDF template
-  let PDFComponent;
-  switch (template) {
-    case 'professional':
-      PDFComponent = ProfessionalPDFTemplate;
-      break;
-    case 'modern':
-      PDFComponent = ModernPDFTemplate;
-      break;
-    case 'minimal':
-      PDFComponent = MinimalPDFTemplate;
-      break;
-    case 'creative':
-      PDFComponent = CreativePDFTemplate;
-      break;
-    default:
-      PDFComponent = ProfessionalPDFTemplate;
+export const generatePDF = async (resumeData: ResumeData, _template: TemplateType) => {
+  // Find the resume element rendered in the preview
+  const element = document.getElementById('resume-content');
+  if (!element) {
+    throw new Error('Resume preview not found. Please make sure you are on the Preview step.');
   }
 
-  // Generate PDF blob
-  const pdfBlob = await pdf(<PDFComponent data={formattedData} />).toBlob();
-  
-  // Create download link
+  // Capture the exact HTML rendering at 2× resolution
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    logging: false,
+    allowTaint: false,
+  });
+
+  // A4 dimensions in PDF points (72 pt/in)
+  const A4_W_PT = 595.28;
+  const A4_H_PT = 841.89;
+
+  // Scale canvas to A4 width, then compute proportional height in PDF points
+  const scale = A4_W_PT / canvas.width;
+  const totalPdfHeight = canvas.height * scale;
+
+  // How many canvas pixels correspond to one PDF page height
+  const canvasPageHeight = A4_H_PT / scale;
+  const numPages = Math.ceil(totalPdfHeight / A4_H_PT);
+
+  // Build one image per page by slicing the canvas
+  const pageImages: string[] = [];
+  for (let i = 0; i < numPages; i++) {
+    const yStart = Math.round(i * canvasPageHeight);
+    const sliceH = Math.min(Math.round(canvasPageHeight), canvas.height - yStart);
+    if (sliceH <= 0) break;
+    pageImages.push(sliceCanvas(canvas, yStart, sliceH));
+  }
+
+  const firstName = resumeData.personalInfo?.firstName || 'Resume';
+  const lastName = resumeData.personalInfo?.lastName || '';
+
+  const MyDocument = () => (
+    <Document>
+      {pageImages.map((imgData, i) => (
+        <Page key={i} size="A4" style={{ padding: 0, margin: 0 }}>
+          <PDFImage
+            src={imgData}
+            style={{ width: A4_W_PT, height: A4_H_PT }}
+          />
+        </Page>
+      ))}
+    </Document>
+  );
+
+  const pdfBlob = await pdf(<MyDocument />).toBlob();
+
   const url = URL.createObjectURL(pdfBlob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${formattedData.personalInfo.firstName}-${formattedData.personalInfo.lastName}-Resume.pdf`;
+  link.download = `${firstName}-${lastName}-Resume.pdf`.replace(/\s+/g, '-');
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
