@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, Loader2 } from 'lucide-react';
+import { Download, Printer, Loader2, FileText } from 'lucide-react';
 import { FormattedResume } from './FormattedResume';
 import { useResumeContext } from '@/context/ResumeContext';
 import { generatePDF } from '@/services/pdfService';
+import { generateDocx } from '@/services/docxService';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +15,7 @@ interface ResumePreviewProps {
 export function ResumePreview({ className }: ResumePreviewProps) {
   const { resumeData, template } = useResumeContext();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingWord, setIsGeneratingWord] = useState(false);
 
   const handlePrint = () => {
     window.print();
@@ -36,15 +38,45 @@ export function ResumePreview({ className }: ResumePreviewProps) {
     }
   };
 
+  const handleDownloadWord = async () => {
+    if (isGeneratingWord) return;
+    setIsGeneratingWord(true);
+    const toastId = toast.loading('Building Word document…');
+    try {
+      await generateDocx(resumeData, template);
+      toast.success('Word document downloaded!', { id: toastId });
+    } catch (error) {
+      console.error('Word generation error:', error);
+      toast.error('Could not generate Word document. Please try again.', { id: toastId });
+    } finally {
+      setIsGeneratingWord(false);
+    }
+  };
+
   return (
     <div className={className}>
       {/* Action bar — hidden when printing */}
       <div className="flex items-center justify-between mb-4 print:hidden">
         <h2 className="text-2xl font-bold">Preview</h2>
         <div className="flex gap-2">
-          <Button onClick={handlePrint} variant="outline" size="sm" className="print:hidden">
+          <Button onClick={handlePrint} variant="outline" size="sm" className="print:hidden" data-testid="button-print">
             <Printer className="w-4 h-4 mr-2" />
             Print
+          </Button>
+          <Button
+            onClick={handleDownloadWord}
+            disabled={isGeneratingWord}
+            variant="outline"
+            size="sm"
+            className="print:hidden"
+            data-testid="button-download-word"
+          >
+            {isGeneratingWord ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <FileText className="w-4 h-4 mr-2" />
+            )}
+            {isGeneratingWord ? 'Building…' : 'Download Word'}
           </Button>
           <Button
             onClick={handleDownloadPDF}
@@ -52,6 +84,7 @@ export function ResumePreview({ className }: ResumePreviewProps) {
             variant="outline"
             size="sm"
             className="print:hidden"
+            data-testid="button-download-pdf"
           >
             {isGenerating ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
