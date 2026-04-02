@@ -44,12 +44,12 @@ function isRateLimited(
 }
 
 app.post("/api/groq-generate", async (req, res) => {
-  const groqApiKey = process.env.VITE_GROQ_API_KEY;
+  const groqApiKey = process.env.GROQ_API_KEY;
 
   if (!groqApiKey) {
     return res
       .status(500)
-      .json({ error: "VITE_GROQ_API_KEY not configured on server" });
+      .json({ error: "GROQ_API_KEY not configured on server" });
   }
 
   const { action, ...payload } = req.body;
