@@ -1,17 +1,20 @@
-
-import { supabase } from "@/integrations/supabase/client";
-
-// Helper to invoke the Edge Function that proxies Groq API
+// Calls the local Express backend which proxies Groq API securely
 async function invokeGroq(action: string, payload: Record<string, unknown>) {
-  const { data, error } = await supabase.functions.invoke("groq-generate", {
-    body: { action, ...payload },
+  const response = await fetch("/api/groq-generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ action, ...payload }),
   });
 
-  if (error) {
-    console.error(`Groq function error [${action}]`, error);
-    throw error;
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: "Unknown error" }));
+    console.error(`Groq API error [${action}]`, error);
+    throw new Error(error.error || `HTTP ${response.status}`);
   }
-  return data as any;
+
+  return response.json();
 }
 
 export const generateEducationDescription = async (
