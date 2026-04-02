@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Shield, Eye, Lock, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { NavHeader } from '@/components/NavHeader';
 
 export const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <NavHeader />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-6">
           <Link to="/">

@@ -8,7 +8,8 @@ import type { TemplateType } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import Footer from '@/components/Footer';
 import { TemplatePreview } from '@/components/TemplatePreview';
-import { Info, Book, FileText } from 'lucide-react';
+import { NavHeader } from '@/components/NavHeader';
+import { Info, Book } from 'lucide-react';
 
 // Simplified templates
 const templates = [
@@ -140,40 +141,7 @@ const ResumeFormats = () => {
 const ResumeTemplatesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm py-4 border-b border-gray-200" role="banner">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <Link 
-            to="/" 
-            className="flex items-center space-x-2 sm:space-x-4 focus:outline-none focus:ring-2 focus:ring-resume-primary rounded-lg"
-            aria-label="Home"
-          >
-            <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <FileText className="h-4 w-4 md:h-6 md:w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-resume-primary to-coral-red text-transparent bg-clip-text font-heading">
-                ResumAI
-              </h1>
-              <p className="text-resume-muted text-xs md:text-sm">Create professional resumes with ease</p>
-            </div>
-          </Link>
-          <nav className="hidden md:flex items-center space-x-4" role="navigation">
-            <Link 
-              to="/" 
-              className="text-resume-muted hover:text-resume-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-resume-primary rounded px-2 py-1"
-            >
-              Home
-            </Link>
-            <Link 
-              to="/templates" 
-              className="text-resume-primary font-medium focus:outline-none focus:ring-2 focus:ring-resume-primary rounded px-2 py-1"
-              aria-current="page"
-            >
-              Templates
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <NavHeader />
 
       <main className="container mx-auto px-4 py-6 md:py-12" role="main">
         <div className="max-w-5xl mx-auto animate-fade-in">
