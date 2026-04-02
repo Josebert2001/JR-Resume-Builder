@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { GenerationResponse } from '@/services/aiService';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
@@ -134,21 +134,11 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => {
-    console.log('ResumeContext state:', {
-      currentStep,
-      storedResumeData,
-      isGenerating
-    });
-  }, [currentStep, storedResumeData, isGenerating]);
-
   const updateResumeData = (data: Partial<ResumeData>) => {
-    console.log('Updating resume data:', data);
     setStoredResumeData((prev: ResumeData) => ({ ...prev, ...data }));
   };
 
   const setTemplate = (template: TemplateType) => {
-    console.log('Setting template:', template);
     updateResumeData({ template });
   };
 
