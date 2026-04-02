@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '@/components/Footer';
 import { NavHeader } from '@/components/NavHeader';
-import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -24,7 +23,6 @@ import { Badge } from "@/components/ui/badge";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,7 +45,7 @@ const Index = () => {
               <Button 
                 size="lg"
                 className="bg-resume-primary hover:bg-resume-primary/90 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
+                onClick={() => navigate('/resume-builder')}
               >
                 Build New Resume
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -114,7 +112,7 @@ const Index = () => {
                 </p>
                 <Button 
                   className="w-full bg-resume-primary hover:bg-resume-primary/90 text-white"
-                  onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
+                  onClick={() => navigate('/resume-builder')}
                 >
                   Start Building
                 </Button>
@@ -424,7 +422,7 @@ const Index = () => {
           <Button 
             size="xl"
             className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg"
-            onClick={() => user ? navigate('/resume-builder') : navigate('/auth')}
+            onClick={() => navigate('/resume-builder')}
           >
             Start Building Now - It's Free!
             <ArrowRight className="ml-2 h-5 w-5" />
