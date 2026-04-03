@@ -81,12 +81,13 @@ export const EducationForm = () => {
   };
 
   const validateForm = (): boolean => {
-    if (education.length === 0) return true;
+    const entries = education || [];
+    if (entries.length === 0) return true;
 
     const newErrors: Record<string, EntryErrors> = {};
     let hasError = false;
 
-    education.forEach(edu => {
+    entries.forEach(edu => {
       const errors: EntryErrors = {};
       if (!edu.school.trim()) { errors.school = 'School name is required'; hasError = true; }
       if (!edu.degree.trim()) { errors.degree = 'Degree is required'; hasError = true; }
@@ -112,7 +113,7 @@ export const EducationForm = () => {
     >
       <div className="space-y-6">
         <div className="space-y-4">
-          {education.map((edu, index) => {
+          {(education || []).map((edu, index) => {
             const errors = entryErrors[edu.id] || {};
             return (
               <Card key={edu.id} className="p-4 relative">

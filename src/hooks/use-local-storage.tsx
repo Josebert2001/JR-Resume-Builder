@@ -8,7 +8,15 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
     }
     try {
       const item = window.localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
+      if (!item) return initialValue;
+      const parsed = JSON.parse(item) as T;
+      // For plain objects, merge stored value with initialValue so newly added
+      // fields get their defaults even when old localStorage data is present.
+      if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
+          && initialValue !== null && typeof initialValue === 'object' && !Array.isArray(initialValue)) {
+        return { ...initialValue, ...parsed } as T;
+      }
+      return parsed;
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error);
       return initialValue;

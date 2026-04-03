@@ -189,7 +189,7 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
         template: storedResumeData.template || 'professional',
         nextStep,
         prevStep,
-        education: storedResumeData.education,
+        education: storedResumeData.education || [],
         updateEducation,
         personalInfo,
         updatePersonalInfo,
