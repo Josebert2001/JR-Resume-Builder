@@ -13,7 +13,6 @@ import { useResumeContext } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import { FileValidator } from '@/services/fileValidation';
 import { analytics } from '@/services/analytics';
-import { rateLimiter } from '@/services/rateLimiter';
 
 interface ImprovementSuggestion {
   type: 'critical' | 'important' | 'suggestion';
@@ -61,16 +60,6 @@ export const ResumeUpload = () => {
       validation.warnings.forEach(warning => {
         toast.warning(warning);
       });
-    }
-
-    // Rate limiting check
-    const userId = 'anonymous'; // Replace with actual user ID when auth is implemented
-    const rateLimitCheck = rateLimiter.isAllowed(userId, 'file_upload');
-    
-    if (!rateLimitCheck.allowed) {
-      const resetTime = rateLimitCheck.resetTime ? new Date(rateLimitCheck.resetTime).toLocaleTimeString() : 'soon';
-      toast.error(`Upload limit reached. Try again at ${resetTime}.`);
-      return;
     }
 
     setUploadedFile(file);
@@ -186,18 +175,8 @@ export const ResumeUpload = () => {
   const processUploadedResume = async () => {
     if (!uploadedFile) return;
 
-    // Rate limiting for AI analysis
-    const userId = 'anonymous';
-    const rateLimitCheck = rateLimiter.isAllowed(userId, 'resume_analysis');
-    
-    if (!rateLimitCheck.allowed) {
-      const resetTime = rateLimitCheck.resetTime ? new Date(rateLimitCheck.resetTime).toLocaleTimeString() : 'soon';
-      toast.error(`Analysis limit reached. Try again at ${resetTime}.`);
-      return;
-    }
-
     setIsProcessing(true);
-    analytics.aiFeatureUsed('resume_analysis', false); // Will update to true on success
+    analytics.aiFeatureUsed('resume_analysis', false);
     
     try {
       // Read file content

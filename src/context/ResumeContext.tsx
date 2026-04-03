@@ -44,19 +44,11 @@ export type Skill = {
   level: number;
 };
 
-export type TemplateType = 
-  | 'professional' 
-  | 'modern' 
-  | 'minimal' 
-  | 'chronological'
-  | 'functional'
-  | 'combination'
-  | 'infographic'
-  | 'profile'
-  | 'targeted'
-  | 'mini'
-  | 'creative'
-  | 'blind';  // Add blind template type
+export type TemplateType =
+  | 'professional'
+  | 'modern'
+  | 'minimal'
+  | 'creative';
 
 export type PersonalInfo = {
   firstName: string;
