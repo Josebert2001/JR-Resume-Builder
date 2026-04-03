@@ -4,9 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Link2, SkipForward } from 'lucide-react';
+import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Link2 } from 'lucide-react';
 import { useResumeContext, Project } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -72,17 +71,12 @@ export const ProjectsForm = () => {
   };
 
   const validateForm = () => {
-    if (!resumeData.projects?.length) {
-      return false;
-    }
+    const projects = resumeData.projects || [];
+    if (projects.length === 0) return true;
 
-    const isValid = resumeData.projects.every(project => 
-      project.name.trim() && 
-      project.description.trim()
-    );
-
-    if (!isValid) {
-      toast.error('Please fill in all required fields for each project');
+    const hasBlank = projects.some(p => !p.name.trim());
+    if (hasBlank) {
+      toast.error('Please fill in a project name for every entry, or remove the blank ones');
       return false;
     }
 
@@ -92,18 +86,13 @@ export const ProjectsForm = () => {
   return (
     <FormWrapper
       title="Projects"
-      description="Add your notable projects and achievements"
+      description="Add your notable projects and achievements, or skip if not applicable"
       onNext={validateForm}
-      nextDisabled={!resumeData.projects?.length}
       showSkip={true}
       onSkip={handleSkip}
     >
-      <div className="space-y-6 px-4 sm:px-2 md:px-0">
-        <ScrollArea className={cn(
-          "rounded-lg border",
-          isMobile ? "h-[calc(100vh-300px)]" : "h-[600px]"
-        )}>
-          <div className="p-4 space-y-6">
+      <div className="space-y-6">
+        <div className="space-y-4">
             {(resumeData.projects || []).map((project, index) => (
               <Card
                 key={project.id}
@@ -170,8 +159,8 @@ export const ProjectsForm = () => {
                       id={`name-${project.id}`}
                       value={project.name}
                       onChange={(e) => handleUpdateProject(project.id, 'name', e.target.value)}
+                      placeholder="e.g., ResumAI Builder"
                       className={cn(isMobile && "h-12")}
-                      required
                     />
                   </div>
 
@@ -208,15 +197,13 @@ export const ProjectsForm = () => {
                       value={project.description}
                       onChange={(e) => handleUpdateProject(project.id, 'description', e.target.value)}
                       className="min-h-[100px]"
-                      placeholder="Describe the project, your role, and key achievements..."
-                      required
+                      placeholder="Describe the project, your role, and key achievements…"
                     />
                   </div>
                 </div>
               </Card>
             ))}
-          </div>
-        </ScrollArea>
+        </div>
 
         <TouchRipple className="rounded-md">
           <Button

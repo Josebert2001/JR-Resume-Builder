@@ -4,9 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Trash2, MoveUp, MoveDown, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { useResumeContext, WorkExperience } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -16,10 +15,16 @@ import { toast } from 'sonner';
 import { analytics } from '@/services/analytics';
 import { generateWorkDescription } from '@/services/resumeAI';
 
+interface EntryErrors {
+  position?: string;
+  company?: string;
+  startDate?: string;
+}
+
 export const WorkExperienceForm = () => {
   const { resumeData, updateResumeData } = useResumeContext();
-  const [draggingId, setDraggingId] = useState<string | null>(null);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [entryErrors, setEntryErrors] = useState<Record<string, EntryErrors>>({});
   const isMobile = useIsMobile();
 
   const handleAddExperience = () => {
@@ -32,15 +37,11 @@ export const WorkExperienceForm = () => {
       endDate: '',
       description: ''
     };
-    
     updateResumeData({
       workExperience: [...(resumeData.workExperience || []), newExperience]
     });
-
-    // Scroll to the new experience after a short delay to allow for DOM update
     setTimeout(() => {
-      const element = document.getElementById(`experience-${newExperience.id}`);
-      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`position-${newExperience.id}`)?.focus();
     }, 100);
   };
 
@@ -50,12 +51,19 @@ export const WorkExperienceForm = () => {
         exp.id === id ? { ...exp, [field]: value } : exp
       ) || []
     });
+    if (entryErrors[id]?.[field as keyof EntryErrors]) {
+      setEntryErrors(prev => ({
+        ...prev,
+        [id]: { ...prev[id], [field]: undefined }
+      }));
+    }
   };
 
   const handleRemoveExperience = (id: string) => {
     updateResumeData({
       workExperience: resumeData.workExperience?.filter(exp => exp.id !== id) || []
     });
+    setEntryErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
     toast.success('Work experience removed');
   };
 
@@ -73,20 +81,14 @@ export const WorkExperienceForm = () => {
 
   const handleGenerateDescription = async (id: string) => {
     const exp = resumeData.workExperience?.find(e => e.id === id);
-    if (!exp || !exp.position || !exp.company) {
-      toast.error('Please fill in position and company first');
+    if (!exp?.position || !exp?.company) {
+      toast.error('Please fill in job title and company first');
       return;
     }
-
     setGeneratingId(id);
     analytics.aiFeatureUsed('work_generation', false);
-    
     try {
-      const description = await generateWorkDescription(
-        exp.position,
-        exp.company
-      );
-      
+      const description = await generateWorkDescription(exp.position, exp.company);
       if (description) {
         handleUpdateExperience(id, 'description', description);
         analytics.aiFeatureUsed('work_generation', true);
@@ -94,86 +96,86 @@ export const WorkExperienceForm = () => {
       } else {
         toast.error('Failed to generate description. Please try again.');
       }
-    } catch (error) {
-      console.error('Error generating work description:', error);
-      analytics.errorOccurred('work_generation_failed', error?.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Error generating work description:', message);
+      analytics.errorOccurred('work_generation_failed', message);
       toast.error('Failed to generate description. Please try again.');
     } finally {
       setGeneratingId(null);
     }
   };
 
-  const validateForm = () => {
-    if (!resumeData.workExperience?.length) {
-      return false;
-    }
+  const validateForm = (): boolean => {
+    const experiences = resumeData.workExperience || [];
+    if (experiences.length === 0) return true;
 
-    const isValid = resumeData.workExperience.every(exp => 
-      exp.position.trim() && 
-      exp.company.trim() && 
-      exp.startDate.trim() &&
-      exp.description.trim()
-    );
+    const newErrors: Record<string, EntryErrors> = {};
+    let hasError = false;
 
-    if (!isValid) {
-      toast.error('Please fill in all required fields for each work experience');
+    experiences.forEach(exp => {
+      const errors: EntryErrors = {};
+      if (!exp.position.trim()) { errors.position = 'Job title is required'; hasError = true; }
+      if (!exp.company.trim()) { errors.company = 'Company is required'; hasError = true; }
+      if (!exp.startDate.trim()) { errors.startDate = 'Start date is required'; hasError = true; }
+      if (Object.keys(errors).length) newErrors[exp.id] = errors;
+    });
+
+    if (hasError) {
+      setEntryErrors(newErrors);
+      toast.error('Please fill in the required fields highlighted below');
       return false;
     }
 
     return true;
   };
 
+  const experiences = resumeData.workExperience || [];
+
   return (
     <FormWrapper
       title="Work Experience"
-      description="Add your relevant work history"
+      description="Add your relevant work history, or skip if not applicable"
       onNext={validateForm}
-      nextDisabled={!resumeData.workExperience?.length}
+      showSkip={true}
     >
       <div className="space-y-6">
-        <ScrollArea className={cn(
-          "rounded-lg border",
-          isMobile ? "h-[calc(100vh-280px)]" : "h-[600px]"
-        )}>
-          <div className="p-4 space-y-6">
-            {(resumeData.workExperience || []).map((experience, index) => (
+        <div className="space-y-4">
+          {experiences.map((experience, index) => {
+            const errors = entryErrors[experience.id] || {};
+            return (
               <Card
                 key={experience.id}
                 id={`experience-${experience.id}`}
-                className={cn(
-                  "p-4 relative transition-shadow",
-                  draggingId === experience.id && "shadow-lg",
-                  isMobile && "active:scale-[0.99]"
-                )}
-                draggable
-                onDragStart={() => setDraggingId(experience.id)}
-                onDragEnd={() => setDraggingId(null)}
+                className="p-4 relative"
               >
+                {/* Card header */}
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <GripVertical className="h-5 w-5 text-muted-foreground cursor-move" />
-                    <h3 className="font-medium">Experience {index + 1}</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
+                  <h3 className="font-medium text-sm text-muted-foreground">
+                    Experience {index + 1}
+                  </h3>
+                  <div className="flex items-center gap-1">
                     {index > 0 && (
                       <TouchRipple className="rounded-full">
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => handleMoveExperience(experience.id, 'up')}
-                          className={cn(isMobile && "h-10 w-10")}
+                          className="h-8 w-8"
+                          data-testid={`button-move-up-${experience.id}`}
                         >
                           <MoveUp className="h-4 w-4" />
                         </Button>
                       </TouchRipple>
                     )}
-                    {index < (resumeData.workExperience?.length || 0) - 1 && (
+                    {index < experiences.length - 1 && (
                       <TouchRipple className="rounded-full">
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => handleMoveExperience(experience.id, 'down')}
-                          className={cn(isMobile && "h-10 w-10")}
+                          className="h-8 w-8"
+                          data-testid={`button-move-down-${experience.id}`}
                         >
                           <MoveDown className="h-4 w-4" />
                         </Button>
@@ -184,10 +186,8 @@ export const WorkExperienceForm = () => {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleRemoveExperience(experience.id)}
-                        className={cn(
-                          "text-destructive hover:text-destructive/90",
-                          isMobile && "h-10 w-10"
-                        )}
+                        className="h-8 w-8 text-destructive hover:text-destructive/90"
+                        data-testid={`button-remove-experience-${experience.id}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -196,67 +196,97 @@ export const WorkExperienceForm = () => {
                 </div>
 
                 <div className="space-y-4">
+                  {/* Job title + Company */}
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor={`position-${experience.id}`}>Job Title *</Label>
+                    <div>
+                      <Label htmlFor={`position-${experience.id}`}>
+                        Job Title <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id={`position-${experience.id}`}
                         value={experience.position}
                         onChange={(e) => handleUpdateExperience(experience.id, 'position', e.target.value)}
-                        className={cn(isMobile && "h-12")}
-                        required
+                        placeholder="e.g., Software Engineer"
+                        className={cn("mt-1.5", errors.position && "border-red-400 focus-visible:ring-red-400")}
+                        data-testid={`input-position-${experience.id}`}
                       />
+                      {errors.position && (
+                        <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />{errors.position}
+                        </p>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`company-${experience.id}`}>Company *</Label>
+                    <div>
+                      <Label htmlFor={`company-${experience.id}`}>
+                        Company <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id={`company-${experience.id}`}
                         value={experience.company}
                         onChange={(e) => handleUpdateExperience(experience.id, 'company', e.target.value)}
-                        className={cn(isMobile && "h-12")}
-                        required
+                        placeholder="e.g., Acme Corp"
+                        className={cn("mt-1.5", errors.company && "border-red-400 focus-visible:ring-red-400")}
+                        data-testid={`input-company-${experience.id}`}
                       />
+                      {errors.company && (
+                        <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />{errors.company}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* Location */}
+                  <div>
                     <Label htmlFor={`location-${experience.id}`}>Location</Label>
                     <Input
                       id={`location-${experience.id}`}
                       value={experience.location}
                       onChange={(e) => handleUpdateExperience(experience.id, 'location', e.target.value)}
-                      className={cn(isMobile && "h-12")}
-                      placeholder="e.g., San Francisco, CA or Remote"
+                      placeholder="e.g., Lagos, Nigeria or Remote"
+                      className="mt-1.5"
                     />
                   </div>
 
+                  {/* Dates — use text inputs for universal mobile compat */}
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor={`startDate-${experience.id}`}>Start Date *</Label>
+                    <div>
+                      <Label htmlFor={`startDate-${experience.id}`}>
+                        Start Date <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id={`startDate-${experience.id}`}
-                        type="month"
                         value={experience.startDate}
                         onChange={(e) => handleUpdateExperience(experience.id, 'startDate', e.target.value)}
-                        className={cn(isMobile && "h-12")}
-                        required
+                        placeholder="e.g., Jan 2022"
+                        className={cn("mt-1.5", errors.startDate && "border-red-400 focus-visible:ring-red-400")}
+                        data-testid={`input-startdate-${experience.id}`}
                       />
+                      {errors.startDate && (
+                        <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />{errors.startDate}
+                        </p>
+                      )}
                     </div>
-                    <div className="space-y-2">
+                    <div>
                       <Label htmlFor={`endDate-${experience.id}`}>End Date</Label>
                       <Input
                         id={`endDate-${experience.id}`}
-                        type="month"
                         value={experience.endDate}
                         onChange={(e) => handleUpdateExperience(experience.id, 'endDate', e.target.value)}
-                        className={cn(isMobile && "h-12")}
+                        placeholder="e.g., Dec 2024 or Present"
+                        className="mt-1.5"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor={`description-${experience.id}`}>Description *</Label>
+                  {/* Description */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <Label htmlFor={`description-${experience.id}`}>
+                        Description
+                        <span className="text-stone-400 font-normal text-xs ml-1">(optional)</span>
+                      </Label>
                       <Button
                         type="button"
                         size="sm"
@@ -264,17 +294,12 @@ export const WorkExperienceForm = () => {
                         onClick={() => handleGenerateDescription(experience.id)}
                         disabled={generatingId === experience.id || !experience.position || !experience.company}
                         className="text-xs h-7 px-2"
+                        data-testid={`button-generate-description-${experience.id}`}
                       >
                         {generatingId === experience.id ? (
-                          <>
-                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                            Generating...
-                          </>
+                          <><Loader2 className="mr-1 h-3 w-3 animate-spin" />Generating...</>
                         ) : (
-                          <>
-                            <Sparkles className="mr-1 h-3 w-3" />
-                            Generate with AI
-                          </>
+                          <><Sparkles className="mr-1 h-3 w-3" />Generate with AI</>
                         )}
                       </Button>
                     </div>
@@ -282,25 +307,22 @@ export const WorkExperienceForm = () => {
                       id={`description-${experience.id}`}
                       value={experience.description}
                       onChange={(e) => handleUpdateExperience(experience.id, 'description', e.target.value)}
-                      className="min-h-[120px]"
-                      placeholder="Describe your role, responsibilities, and key achievements..."
-                      required
+                      className="min-h-[100px]"
+                      placeholder="Describe your role and key achievements…"
                     />
                   </div>
                 </div>
               </Card>
-            ))}
-          </div>
-        </ScrollArea>
+            );
+          })}
+        </div>
 
         <TouchRipple className="rounded-md">
           <Button
             onClick={handleAddExperience}
             variant="outline"
-            className={cn(
-              "w-full border-dashed",
-              isMobile && "h-12 text-base"
-            )}
+            className={cn("w-full border-dashed", isMobile && "h-12 text-base")}
+            data-testid="button-add-experience"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Work Experience

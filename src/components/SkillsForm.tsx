@@ -81,14 +81,12 @@ export const SkillsForm = () => {
   };
 
   const validateForm = () => {
-    if (!resumeData.skills?.length) {
-      return false;
-    }
+    const skills = resumeData.skills || [];
+    if (skills.length === 0) return true;
 
-    const isValid = resumeData.skills.every(skill => skill.name.trim());
-
-    if (!isValid) {
-      toast.error('Please fill in all skill names');
+    const hasBlank = skills.some(skill => !skill.name.trim());
+    if (hasBlank) {
+      toast.error('Please fill in a name for every skill, or remove the blank ones');
       return false;
     }
 
@@ -214,9 +212,9 @@ export const SkillsForm = () => {
   return (
     <FormWrapper
       title="Skills"
-      description="Add your technical and professional skills"
+      description="Add your technical and professional skills, or skip if not applicable"
       onNext={validateForm}
-      nextDisabled={!resumeData.skills?.length}
+      showSkip={true}
     >
       <div className="space-y-6">
         <div className="flex justify-end">
