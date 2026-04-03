@@ -3,6 +3,7 @@ import { useResumeContext, TemplateType } from '@/context/ResumeContext';
 import { Check, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TemplatePreview } from './TemplatePreview';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const templates = [
   {
@@ -39,14 +40,24 @@ const SCALE = 0.35;
 
 export const ResumeTemplates = () => {
   const { template, setTemplate, nextStep } = useResumeContext();
+  const isMobile = useIsMobile();
+
+  const handleSelect = (id: TemplateType) => {
+    setTemplate(id);
+    if (isMobile) {
+      nextStep();
+    }
+  };
 
   return (
-    <div className="bg-white dark:bg-[#1a1510] rounded-3xl p-6 sm:p-8">
+    <div className="bg-white dark:bg-[#1a1510] rounded-3xl p-6 sm:p-8 pb-4">
       <div className="flex items-start justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold mb-1.5">Choose your template</h2>
           <p className="text-sm text-stone-500 dark:text-stone-400">
-            Pick the layout that fits your style — all are ATS-tested and fully customizable
+            {isMobile
+              ? 'Tap a template to select it and continue'
+              : 'Pick the layout that fits your style — all are ATS-tested and fully customizable'}
           </p>
         </div>
         {template && (
@@ -64,7 +75,8 @@ export const ResumeTemplates = () => {
           return (
             <button
               key={t.id}
-              onClick={() => setTemplate(t.id)}
+              onClick={() => handleSelect(t.id)}
+              data-testid={`button-template-${t.id}`}
               className={cn(
                 'group relative rounded-2xl overflow-hidden text-left transition-all duration-200 bg-white',
                 isSelected
@@ -148,22 +160,25 @@ export const ResumeTemplates = () => {
         })}
       </div>
 
-      {/* Continue button */}
-      <button
-        onClick={() => template && nextStep()}
-        disabled={!template}
-        className={cn(
-          'w-full h-11 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200',
-          template
-            ? 'bg-[#1a1209] hover:bg-[#2a1f10] dark:bg-[#f7f3ed] dark:text-[#1a1209] text-white cursor-pointer'
-            : 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
-        )}
-      >
-        {template
-          ? `Continue with ${templates.find((t) => t.id === template)?.name}`
-          : 'Select a template to continue'}
-        {template && <ArrowRight className="h-4 w-4" />}
-      </button>
+      {/* Continue button — desktop only (mobile auto-advances on template tap) */}
+      {!isMobile && (
+        <button
+          onClick={() => template && nextStep()}
+          disabled={!template}
+          data-testid="button-continue-template"
+          className={cn(
+            'w-full h-11 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200',
+            template
+              ? 'bg-[#1a1209] hover:bg-[#2a1f10] dark:bg-[#f7f3ed] dark:text-[#1a1209] text-white cursor-pointer'
+              : 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
+          )}
+        >
+          {template
+            ? `Continue with ${templates.find((t) => t.id === template)?.name}`
+            : 'Select a template to continue'}
+          {template && <ArrowRight className="h-4 w-4" />}
+        </button>
+      )}
     </div>
   );
 };
