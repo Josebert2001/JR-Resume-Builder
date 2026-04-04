@@ -154,7 +154,7 @@ const Index = () => {
             </div>
             <h3 className="text-2xl font-bold mb-2">Let AI write your resume in seconds</h3>
             <p className="text-stone-400 text-sm leading-relaxed mb-6">
-              Powered by Llama 3.3 70B, ResumeForge AI generates polished bullet points, skill suggestions, and professional summaries — tailored to your exact role.
+              Powered by Llama 3.3 70B, Talory generates polished bullet points, skill suggestions, and professional summaries — tailored to your exact role.
             </p>
             <div className="bg-[#0f0b06] rounded-2xl p-4 font-mono text-sm space-y-2">
               <div className="text-[#5aad8a]">✓ "Led migration of legacy system, reducing ops cost by 35%"</div>
@@ -243,7 +243,7 @@ const Index = () => {
         {/* ── Testimonials Bento ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { name: 'Sarah J.', role: 'Software Engineer', init: 'S', bg: 'bg-[#2d6a4f]', text: '"ResumeForge AI helped me create a professional resume in minutes. I got 3 interview calls within a week!"' },
+            { name: 'Sarah J.', role: 'Software Engineer', init: 'S', bg: 'bg-[#2d6a4f]', text: '"Talory helped me create a professional resume in minutes. I got 3 interview calls within a week!"' },
             { name: 'Michael C.', role: 'Marketing Manager', init: 'M', bg: 'bg-[#c05621]', text: '"The AI suggestions were spot-on. My resume now passes ATS systems and looks incredibly professional."' },
             { name: 'Amanda R.', role: 'UX Designer', init: 'A', bg: 'bg-[#1a1209]', text: '"Finally a resume builder that understands what employers want. The templates are beautiful and modern."' },
           ].map(({ name, role, init, bg, text }) => (

@@ -41,7 +41,7 @@ export function NavHeader() {
             <FileText className="h-4 w-4 text-white" />
           </div>
           <span className="text-base font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-            ResumeForge AI
+            Talory
           </span>
         </Link>
 
