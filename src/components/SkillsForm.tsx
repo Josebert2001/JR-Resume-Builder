@@ -46,23 +46,45 @@ const TABS: { key: Category; label: string }[] = [
   { key: 'languages', label: 'Languages' },
 ];
 
+type AiChipsByCategory = {
+  technical: SkillWithReason[];
+  soft: SkillWithReason[];
+  tools: SkillWithReason[];
+};
+
+function getAiChipsForCategory(
+  category: Category,
+  aiByCategory: AiChipsByCategory
+): SkillWithReason[] {
+  if (category === 'all') {
+    return [
+      ...aiByCategory.technical,
+      ...aiByCategory.soft,
+      ...aiByCategory.tools,
+    ];
+  }
+  if (category === 'languages') return [];
+  return aiByCategory[category] ?? [];
+}
+
 function getVisibleChipNames(
   category: Category,
-  aiChipNames: string[],
+  aiChipsForCategory: SkillWithReason[],
   addedNames: Set<string>
 ): string[] {
-  let pool: string[];
+  let staticPool: string[];
   if (category === 'all') {
-    pool = [
+    staticPool = [
       ...SUGGESTIONS.technical,
       ...SUGGESTIONS.soft,
       ...SUGGESTIONS.tools,
       ...SUGGESTIONS.languages,
     ];
   } else {
-    pool = SUGGESTIONS[category];
+    staticPool = SUGGESTIONS[category] ?? [];
   }
-  const merged = [...new Set([...aiChipNames, ...pool])];
+  const aiNames = aiChipsForCategory.map(c => c.name);
+  const merged = [...new Set([...aiNames, ...staticPool])];
   return merged.filter(s => !addedNames.has(s.toLowerCase()));
 }
 
@@ -74,12 +96,16 @@ export const SkillsForm = () => {
   const [activeTab, setActiveTab] = useState<Category>('all');
   const [customInput, setCustomInput] = useState('');
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const [aiChips, setAiChips] = useState<SkillWithReason[]>([]);
+  const [aiByCategory, setAiByCategory] = useState<AiChipsByCategory>({
+    technical: [],
+    soft: [],
+    tools: [],
+  });
   const [aiTip, setAiTip] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const aiChipNames = aiChips.map(c => c.name);
-  const aiReasonMap = new Map(aiChips.map(c => [c.name.toLowerCase(), c.reason]));
+  const aiChipsForTab = getAiChipsForCategory(activeTab, aiByCategory);
+  const aiReasonMap = new Map(aiChipsForTab.map(c => [c.name.toLowerCase(), c.reason]));
 
   const addSkill = (name: string) => {
     const trimmed = name.trim();
@@ -142,21 +168,24 @@ export const SkillsForm = () => {
         certs
       );
 
-      const all: SkillWithReason[] = [
-        ...suggestions.technical,
-        ...suggestions.soft,
-        ...suggestions.tools,
-      ].filter(s => !current.has(s.name.toLowerCase()));
+      const filtered: AiChipsByCategory = {
+        technical: suggestions.technical.filter(s => !current.has(s.name.toLowerCase())),
+        soft: suggestions.soft.filter(s => !current.has(s.name.toLowerCase())),
+        tools: suggestions.tools.filter(s => !current.has(s.name.toLowerCase())),
+      };
 
-      if (all.length === 0) {
+      const totalNew =
+        filtered.technical.length + filtered.soft.length + filtered.tools.length;
+
+      if (totalNew === 0) {
         toast.info('No new suggestions found. Try filling in more experience details first.');
         return;
       }
 
-      setAiChips(all);
+      setAiByCategory(filtered);
       if (suggestions.tip) setAiTip(suggestions.tip);
       setActiveTab('all');
-      toast.success(`${all.length} personalised skill suggestions ready — tap any to add`);
+      toast.success(`${totalNew} personalised skill suggestions ready — tap any to add`);
     } catch (err) {
       console.error(err);
       toast.error('Could not get AI suggestions. Please try again.');
@@ -165,7 +194,7 @@ export const SkillsForm = () => {
     }
   };
 
-  const visibleChips = getVisibleChipNames(activeTab, aiChipNames, addedNames);
+  const visibleChips = getVisibleChipNames(activeTab, aiChipsForTab, addedNames);
   const skillCount = skills.length;
   const counterMsg =
     skillCount === 0
@@ -244,11 +273,20 @@ export const SkillsForm = () => {
           )}
         </button>
 
-        {/* ─── AI tip card ─── */}
+        {/* ─── AI tip card (dismissible) ─── */}
         {aiTip && (
           <div className="flex items-start gap-2 bg-[#e8f5ee] border border-[#b6d9c4] rounded-2xl p-3">
             <Sparkles className="text-[#2d6a4f] shrink-0 mt-0.5" size={14} />
-            <p className="text-xs text-[#3d5544] leading-relaxed">{aiTip}</p>
+            <p className="text-xs text-[#3d5544] leading-relaxed flex-1">{aiTip}</p>
+            <button
+              type="button"
+              onClick={() => setAiTip('')}
+              aria-label="Dismiss tip"
+              data-testid="button-dismiss-ai-tip"
+              className="text-[#6a9e82] hover:text-[#2d6a4f] transition-colors shrink-0 mt-0.5"
+            >
+              <X size={14} />
+            </button>
           </div>
         )}
 
@@ -284,7 +322,7 @@ export const SkillsForm = () => {
             )}
             {visibleChips.map(chip => {
               const reason = aiReasonMap.get(chip.toLowerCase());
-              const isAi = reason !== undefined || aiChipNames.some(n => n.toLowerCase() === chip.toLowerCase());
+              const isAi = reason !== undefined;
               return (
                 <button
                   key={chip}
@@ -295,7 +333,7 @@ export const SkillsForm = () => {
                     'flex items-start gap-1.5 text-xs font-medium transition-all active:scale-95 text-left',
                     isAi
                       ? 'bg-[#fff3ec] border border-[#f0b48a] text-[#c05621] rounded-xl px-3 py-2 flex-col'
-                      : 'bg-white border border-[#d6cfc5] text-[#3d2e1a] rounded-full px-3 py-1.5 items-center'
+                      : 'bg-white border border-[#d6cfc5] text-[#3d2e1a] rounded-full px-3 py-1.5 flex-row items-center'
                   )}
                 >
                   <div className="flex items-center gap-1.5">
