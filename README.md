@@ -122,7 +122,7 @@ src/
 
 ### Environment Variables
 ```bash
-VITE_GROQ_API_KEY=your_groq_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
 ### Supabase Setup

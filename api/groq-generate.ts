@@ -25,9 +25,9 @@ export default async function handler(req: Req, res: Res) {
     return send(res, 405, { error: "Method not allowed" });
   }
 
-  const groqApiKey = process.env.VITE_GROQ_API_KEY;
+  const groqApiKey = process.env.GROQ_API_KEY;
   if (!groqApiKey) {
-    return send(res, 500, { error: "VITE_GROQ_API_KEY not configured on server" });
+    return send(res, 500, { error: "GROQ_API_KEY not configured on server" });
   }
 
   const body = req.body ?? {};
