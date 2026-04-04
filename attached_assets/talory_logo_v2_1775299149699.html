@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talory — Logo v2</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #111111; padding: 48px 24px; }
+  .grid { display: flex; flex-direction: column; gap: 48px; align-items: center; }
+  .row { display: flex; gap: 32px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .card { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: #555; text-transform: uppercase; }
+  .bg-black { background: #0A0A0A; border-radius: 20px; padding: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #1E1E1E; }
+  .bg-white { background: #F8F8F8; border-radius: 20px; padding: 28px; display: flex; align-items: center; justify-content: center; }
+  .bg-green { background: #00FF7F; border-radius: 20px; padding: 28px; display: flex; align-items: center; justify-content: center; }
+  .wide { width: 100%; max-width: 560px; padding: 32px 40px; }
+  .divider { width: 100%; max-width: 560px; height: 1px; background: #1E1E1E; }
+</style>
+</head>
+<body>
+<div class="grid">
+
+  <!-- Icon variants row -->
+  <div class="row">
+
+    <div class="card">
+      <div class="label">Icon — dark</div>
+      <div class="bg-black">
+        <svg width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <!-- Square base -->
+          <rect x="4" y="4" width="80" height="80" rx="20" fill="#0A0A0A" stroke="#1E1E1E" stroke-width="1"/>
+          <!-- Career path: ascending staircase line -->
+          <polyline points="16,68 16,52 30,52 30,38 46,38 46,24 72,24" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <!-- Arrow tip at the end -->
+          <polyline points="64,16 72,24 64,32" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <!-- Step dots -->
+          <rect x="26" y="48" width="8" height="8" rx="2" fill="#00FF7F" opacity="0.25"/>
+          <rect x="42" y="34" width="8" height="8" rx="2" fill="#00FF7F" opacity="0.25"/>
+          <!-- Start dot -->
+          <rect x="12" y="64" width="8" height="8" rx="2" fill="#00FF7F"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Icon — light</div>
+      <div class="bg-white">
+        <svg width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="80" height="80" rx="20" fill="#0A0A0A"/>
+          <polyline points="16,68 16,52 30,52 30,38 46,38 46,24 72,24" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <polyline points="64,16 72,24 64,32" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <rect x="26" y="48" width="8" height="8" rx="2" fill="#00FF7F" opacity="0.25"/>
+          <rect x="42" y="34" width="8" height="8" rx="2" fill="#00FF7F" opacity="0.25"/>
+          <rect x="12" y="64" width="8" height="8" rx="2" fill="#00FF7F"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Icon — green bg</div>
+      <div class="bg-green">
+        <svg width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="80" height="80" rx="20" fill="#0A0A0A"/>
+          <polyline points="16,68 16,52 30,52 30,38 46,38 46,24 72,24" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <polyline points="64,16 72,24 64,32" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <rect x="26" y="48" width="8" height="8" rx="2" fill="#00FF7F" opacity="0.3"/>
+          <rect x="42" y="34" width="8" height="8" rx="2" fill="#00FF7F" opacity="0.3"/>
+          <rect x="12" y="64" width="8" height="8" rx="2" fill="#00FF7F"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Favicon 32px</div>
+      <div class="bg-black">
+        <svg width="32" height="32" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="80" height="80" rx="20" fill="#0A0A0A"/>
+          <polyline points="16,68 16,52 30,52 30,38 46,38 46,24 72,24" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <polyline points="64,16 72,24 64,32" fill="none" stroke="#00FF7F" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/>
+          <rect x="12" y="64" width="8" height="8" rx="2" fill="#00FF7F"/>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Wordmark dark bg -->
+  <div class="card" style="width:100%;max-width:560px">
+    <div class="label">Wordmark — dark</div>
+    <div class="bg-black wide">
+      <svg width="100%" viewBox="0 0 460 72" xmlns="http://www.w3.org/2000/svg">
+        <!-- Icon -->
+        <rect x="0" y="4" width="64" height="64" rx="14" fill="#0A0A0A" stroke="#1E1E1E" stroke-width="1"/>
+        <polyline points="10,56 10,44 22,44 22,32 36,32 36,20 56,20" fill="none" stroke="#00FF7F" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter"/>
+        <polyline points="50,13 56,20 50,27" fill="none" stroke="#00FF7F" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter"/>
+        <rect x="7" y="52" width="6" height="6" rx="1.5" fill="#00FF7F"/>
+        <!-- Wordmark -->
+        <text x="80" y="38" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" dominant-baseline="central" letter-spacing="-1">TAL</text>
+        <text x="160" y="38" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="34" fill="#00FF7F" dominant-baseline="central" letter-spacing="-1">ORY</text>
+        <!-- Tagline -->
+        <text x="248" y="38" font-family="system-ui, sans-serif" font-weight="400" font-size="11" fill="#444" dominant-baseline="central" letter-spacing="0">— AI resume builder</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Wordmark white bg -->
+  <div class="card" style="width:100%;max-width:560px">
+    <div class="label">Wordmark — light</div>
+    <div class="bg-white wide">
+      <svg width="100%" viewBox="0 0 460 72" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="4" width="64" height="64" rx="14" fill="#0A0A0A"/>
+        <polyline points="10,56 10,44 22,44 22,32 36,32 36,20 56,20" fill="none" stroke="#00FF7F" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter"/>
+        <polyline points="50,13 56,20 50,27" fill="none" stroke="#00FF7F" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter"/>
+        <rect x="7" y="52" width="6" height="6" rx="1.5" fill="#00FF7F"/>
+        <text x="80" y="38" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="34" fill="#0A0A0A" dominant-baseline="central" letter-spacing="-1">TAL</text>
+        <text x="160" y="38" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="34" fill="#0A9A4A" dominant-baseline="central" letter-spacing="-1">ORY</text>
+        <text x="248" y="38" font-family="system-ui, sans-serif" font-weight="400" font-size="11" fill="#AAAAAA" dominant-baseline="central" letter-spacing="0">— AI resume builder</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Wordmark green bg -->
+  <div class="card" style="width:100%;max-width:560px">
+    <div class="label">Wordmark — electric green</div>
+    <div class="bg-green wide">
+      <svg width="100%" viewBox="0 0 460 72" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="4" width="64" height="64" rx="14" fill="#0A0A0A"/>
+        <polyline points="10,56 10,44 22,44 22,32 36,32 36,20 56,20" fill="none" stroke="#00FF7F" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter"/>
+        <polyline points="50,13 56,20 50,27" fill="none" stroke="#00FF7F" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter"/>
+        <rect x="7" y="52" width="6" height="6" rx="1.5" fill="#00FF7F"/>
+        <text x="80" y="38" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="34" fill="#0A0A0A" dominant-baseline="central" letter-spacing="-1">TAL</text>
+        <text x="160" y="38" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="34" fill="#0A0A0A" dominant-baseline="central" letter-spacing="-1">ORY</text>
+        <text x="248" y="38" font-family="system-ui, sans-serif" font-weight="400" font-size="11" fill="#1A4A2A" dominant-baseline="central" letter-spacing="0">— AI resume builder</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Lettermark only -->
+  <div class="row">
+    <div class="card">
+      <div class="label">Lettermark — dark</div>
+      <div class="bg-black">
+        <svg width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="80" height="80" rx="20" fill="#0A0A0A" stroke="#1E1E1E" stroke-width="1"/>
+          <!-- Bold T lettermark with green accent bar -->
+          <text x="44" y="52" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="46" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">T</text>
+          <!-- Green underline accent -->
+          <rect x="22" y="66" width="44" height="5" rx="2.5" fill="#00FF7F"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Lettermark — light</div>
+      <div class="bg-white">
+        <svg width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="80" height="80" rx="20" fill="#0A0A0A"/>
+          <text x="44" y="52" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="46" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">T</text>
+          <rect x="22" y="66" width="44" height="5" rx="2.5" fill="#00FF7F"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Lettermark — green</div>
+      <div class="bg-green">
+        <svg width="88" height="88" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="80" height="80" rx="20" fill="#0A0A0A"/>
+          <text x="44" y="52" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="46" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">T</text>
+          <rect x="22" y="66" width="44" height="5" rx="2.5" fill="#00FF7F"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
