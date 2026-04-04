@@ -69,12 +69,23 @@ export const PersonalInfoForm = () => {
     const workExperience = resumeData.workExperience || [];
     const skills = (resumeData.skills || []).map((s) => s.name);
     const role = workExperience[0]?.position ?? '';
-    const experienceText = workExperience
-      .map((w) => `${w.position} at ${w.company}: ${w.description || ''}`.trim())
+    const name = [personalInfo.firstName, personalInfo.lastName].filter(Boolean).join(' ');
+    const location = personalInfo.location ?? '';
+
+    // Build rich experience text so the AI has full context
+    const experienceLines = workExperience.map(
+      (w) => `${w.position} at ${w.company}: ${w.description || ''}`.trim()
+    );
+    const experienceText = [
+      name && `Candidate: ${name}`,
+      location && `Location: ${location}`,
+      experienceLines.length > 0 ? `Work Experience:\n${experienceLines.join('\n')}` : '',
+    ]
+      .filter(Boolean)
       .join('\n');
 
     try {
-      const summary = await generateProfessionalSummary(role, '', experienceText, skills);
+      const summary = await generateProfessionalSummary(role, location, experienceText, skills);
       if (summary) {
         updatePersonalInfo({ summary });
         toast.success('Summary generated — feel free to edit it.');
@@ -212,36 +223,34 @@ export const PersonalInfoForm = () => {
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <div className="flex items-center justify-between mb-1.5">
-            <Label htmlFor="summary" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Professional Summary <span className="text-stone-400 font-normal text-xs">(optional)</span>
-            </Label>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              data-testid="button-generate-summary"
-              disabled={!canGenerate || isGeneratingSummary}
-              onClick={handleGenerateSummary}
-              className="h-7 gap-1.5 text-xs border-[#c3ddd2] text-[#2d6a4f] hover:bg-[#f0f7f4] dark:border-[#2d5040] dark:text-[#5aad8a] dark:hover:bg-[#1e3528] disabled:opacity-50"
-            >
-              {isGeneratingSummary ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Sparkles className="h-3 w-3" />
-              )}
-              {isGeneratingSummary ? 'Generating…' : 'Generate with AI'}
-            </Button>
-          </div>
+          <Label htmlFor="summary" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Professional Summary <span className="text-stone-400 font-normal text-xs">(optional)</span>
+          </Label>
           <Textarea
             id="summary"
             data-testid="textarea-summary"
-            placeholder="A brief professional summary that highlights your experience, skills, and goals. Click 'Generate with AI' to create one automatically."
+            placeholder="A brief professional summary that highlights your experience, skills, and goals. Click 'Generate with AI' below to create one automatically."
             value={personalInfo.summary || ''}
             onChange={(e) => updatePersonalInfo({ summary: e.target.value })}
             rows={4}
-            className="w-full resize-none"
+            className="mt-1.5 w-full resize-none"
           />
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            data-testid="button-generate-summary"
+            disabled={!canGenerate || isGeneratingSummary}
+            onClick={handleGenerateSummary}
+            className="mt-2 h-7 gap-1.5 text-xs border-[#c3ddd2] text-[#2d6a4f] hover:bg-[#f0f7f4] dark:border-[#2d5040] dark:text-[#5aad8a] dark:hover:bg-[#1e3528] disabled:opacity-50"
+          >
+            {isGeneratingSummary ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Sparkles className="h-3 w-3" />
+            )}
+            {isGeneratingSummary ? 'Generating…' : 'Generate with AI'}
+          </Button>
         </motion.div>
       </div>
 
