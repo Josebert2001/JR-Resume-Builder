@@ -2,10 +2,13 @@
 import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useResumeContext } from '@/context/ResumeContext';
-import { ArrowRight, AlertCircle } from 'lucide-react';
+import { ArrowRight, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { generateProfessionalSummary } from '@/services/resumeAI';
+import { toast } from 'sonner';
 
 const formVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -30,8 +33,9 @@ interface FieldErrors {
 }
 
 export const PersonalInfoForm = () => {
-  const { personalInfo, updatePersonalInfo, nextStep } = useResumeContext();
+  const { personalInfo, updatePersonalInfo, nextStep, resumeData } = useResumeContext();
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
   const validate = (): boolean => {
     const newErrors: FieldErrors = {};
@@ -55,6 +59,35 @@ export const PersonalInfoForm = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
+  const canGenerate =
+    !!(personalInfo.firstName?.trim() || personalInfo.lastName?.trim() || personalInfo.email?.trim());
+
+  const handleGenerateSummary = async () => {
+    if (isGeneratingSummary) return;
+    setIsGeneratingSummary(true);
+
+    const workExperience = resumeData.workExperience || [];
+    const skills = (resumeData.skills || []).map((s) => s.name);
+    const role = workExperience[0]?.position ?? '';
+    const experienceText = workExperience
+      .map((w) => `${w.position} at ${w.company}: ${w.description || ''}`.trim())
+      .join('\n');
+
+    try {
+      const summary = await generateProfessionalSummary(role, '', experienceText, skills);
+      if (summary) {
+        updatePersonalInfo({ summary });
+        toast.success('Summary generated — feel free to edit it.');
+      } else {
+        toast.error('AI returned an empty summary. Please try again.');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not generate summary. Please try again.');
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
   return (
     <motion.form
       initial="hidden"
@@ -72,6 +105,7 @@ export const PersonalInfoForm = () => {
             </Label>
             <Input
               id="firstName"
+              data-testid="input-firstName"
               placeholder="Enter your first name"
               value={personalInfo.firstName}
               onChange={(e) => { updatePersonalInfo({ firstName: e.target.value }); clearError('firstName'); }}
@@ -89,6 +123,7 @@ export const PersonalInfoForm = () => {
             </Label>
             <Input
               id="lastName"
+              data-testid="input-lastName"
               placeholder="Enter your last name"
               value={personalInfo.lastName}
               onChange={(e) => { updatePersonalInfo({ lastName: e.target.value }); clearError('lastName'); }}
@@ -108,6 +143,7 @@ export const PersonalInfoForm = () => {
           </Label>
           <Input
             id="email"
+            data-testid="input-email"
             type="email"
             placeholder="your.email@example.com"
             value={personalInfo.email}
@@ -127,6 +163,7 @@ export const PersonalInfoForm = () => {
           </Label>
           <Input
             id="phone"
+            data-testid="input-phone"
             type="tel"
             placeholder="Your phone number"
             value={personalInfo.phone}
@@ -146,6 +183,7 @@ export const PersonalInfoForm = () => {
           </Label>
           <Input
             id="location"
+            data-testid="input-location"
             placeholder="City, Country"
             value={personalInfo.location || ''}
             onChange={(e) => { updatePersonalInfo({ location: e.target.value }); clearError('location'); }}
@@ -164,11 +202,45 @@ export const PersonalInfoForm = () => {
           </Label>
           <Input
             id="portfolio"
+            data-testid="input-portfolio"
             type="url"
             placeholder="https://your-portfolio.com"
             value={personalInfo.portfolio || ''}
             onChange={(e) => updatePersonalInfo({ portfolio: e.target.value })}
             className="mt-1.5 w-full"
+          />
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <div className="flex items-center justify-between mb-1.5">
+            <Label htmlFor="summary" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Professional Summary <span className="text-stone-400 font-normal text-xs">(optional)</span>
+            </Label>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              data-testid="button-generate-summary"
+              disabled={!canGenerate || isGeneratingSummary}
+              onClick={handleGenerateSummary}
+              className="h-7 gap-1.5 text-xs border-[#c3ddd2] text-[#2d6a4f] hover:bg-[#f0f7f4] dark:border-[#2d5040] dark:text-[#5aad8a] dark:hover:bg-[#1e3528] disabled:opacity-50"
+            >
+              {isGeneratingSummary ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
+              {isGeneratingSummary ? 'Generating…' : 'Generate with AI'}
+            </Button>
+          </div>
+          <Textarea
+            id="summary"
+            data-testid="textarea-summary"
+            placeholder="A brief professional summary that highlights your experience, skills, and goals. Click 'Generate with AI' to create one automatically."
+            value={personalInfo.summary || ''}
+            onChange={(e) => updatePersonalInfo({ summary: e.target.value })}
+            rows={4}
+            className="w-full resize-none"
           />
         </motion.div>
       </div>
