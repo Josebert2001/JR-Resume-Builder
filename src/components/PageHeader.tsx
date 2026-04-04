@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from './ui/button';
-import { ArrowLeft, FileText } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { TaloryIcon } from '@/components/TaloryLogo';
 
 interface PageHeaderProps {
   title: string;
@@ -29,9 +30,7 @@ export const PageHeader = ({ title, showBackButton = true, children }: PageHeade
               </Button>
             )}
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 bg-[#2d6a4f] rounded-lg flex items-center justify-center">
-                <FileText className="h-4 w-4 text-white" />
-              </div>
+              <TaloryIcon size={28} />
               <span className="font-semibold text-base">{title}</span>
             </div>
           </div>

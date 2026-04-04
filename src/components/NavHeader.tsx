@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { Menu, FileText, Upload, Layout } from 'lucide-react';
+import { Menu, Upload, Layout } from 'lucide-react';
+import { TaloryIcon } from '@/components/TaloryLogo';
 
 const navigationItems = [
   { label: 'Templates', href: '/templates', icon: Layout },
@@ -37,9 +38,7 @@ export function NavHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-stone-200/60 dark:border-stone-800/40 bg-[#f7f3ed]/80 dark:bg-[#0e0b08]/80 backdrop-blur-xl">
       <div className="max-w-5xl mx-auto px-4 flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-[#2d6a4f] rounded-lg flex items-center justify-center">
-            <FileText className="h-4 w-4 text-white" />
-          </div>
+          <TaloryIcon size={28} />
           <span className="text-base font-bold text-stone-900 dark:text-stone-100 tracking-tight">
             Talory
           </span>
