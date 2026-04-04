@@ -29,7 +29,7 @@ export const PageHeader = ({ title, showBackButton = true, children }: PageHeade
               </Button>
             )}
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-7 h-7 bg-[#2d6a4f] rounded-lg flex items-center justify-center">
                 <FileText className="h-4 w-4 text-white" />
               </div>
               <span className="font-semibold text-base">{title}</span>

@@ -159,7 +159,7 @@ export const ProjectsForm = () => {
                       id={`name-${project.id}`}
                       value={project.name}
                       onChange={(e) => handleUpdateProject(project.id, 'name', e.target.value)}
-                      placeholder="e.g., ResumAI Builder"
+                      placeholder="e.g., ResumeForge AI Builder"
                       className={cn(isMobile && "h-12")}
                     />
                   </div>

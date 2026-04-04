@@ -8,10 +8,10 @@ const Footer = () => {
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-[#2d6a4f] to-[#1a4a37] rounded-lg flex items-center justify-center">
+            <div className="w-7 h-7 bg-[#2d6a4f] rounded-lg flex items-center justify-center">
               <FileText className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-zinc-900 dark:text-zinc-100">ResumAI</span>
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">ResumeForge AI</span>
           </div>
           <p className="text-xs text-zinc-500 max-w-xs">
             Land interviews faster with AI-powered resumes.
@@ -31,7 +31,7 @@ const Footer = () => {
 
       <div className="max-w-5xl mx-auto mt-6 pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-col sm:flex-row justify-between items-center gap-3">
         <p className="text-xs text-zinc-400">
-          © {new Date().getFullYear()} ResumAI · JR Digital Insights
+          © {new Date().getFullYear()} ResumeForge AI · JR Digital Insights
         </p>
         <div className="flex gap-5 text-xs text-zinc-400">
           <Link to="/privacy" className="hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">Privacy</Link>

@@ -182,14 +182,14 @@ ${skills?.map((skill: any) => skill.name).join(', ') || ''}`;
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-blue-600" />
+            <Sparkles className="h-5 w-5 text-[#2d6a4f]" />
             AI Resume Improvement
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
             <div className="mb-6">
-              <Sparkles className="h-16 w-16 mx-auto text-blue-600 mb-4" />
+              <Sparkles className="h-16 w-16 mx-auto text-[#2d6a4f] mb-4" />
               <h3 className="text-xl font-semibold mb-2">
                 Get AI-Powered Resume Suggestions
               </h3>
@@ -204,7 +204,7 @@ ${skills?.map((skill: any) => skill.name).join(', ') || ''}`;
                 disabled={isAnalyzing}
                 size="lg"
                 className={cn(
-                  "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3",
+                  "bg-[#2d6a4f] hover:bg-[#255c43] text-white px-8 py-3",
                   isMobile && "w-full"
                 )}
               >
@@ -235,7 +235,7 @@ ${skills?.map((skill: any) => skill.name).join(', ') || ''}`;
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">{analysis.score}%</div>
+                  <div className="text-4xl font-bold text-[#2d6a4f] mb-2">{analysis.score}%</div>
                   <Progress value={analysis.score} className="mb-4" />
                   <p className="text-sm text-gray-600">
                     {analysis.score >= 80 ? 'Excellent resume!' : 

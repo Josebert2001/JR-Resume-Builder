@@ -261,7 +261,7 @@ export const PersonalInfoForm = () => {
         <Button
           type="submit"
           data-testid="button-personal-info-next"
-          className="w-full sm:w-auto bg-gradient-to-r from-resume-primary to-resume-secondary hover:opacity-90 text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-300 shadow-md"
+          className="w-full sm:w-auto bg-[#2d6a4f] hover:bg-[#255c43] text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-300 shadow-md"
         >
           Next Step
           <ArrowRight size={16} className="ml-2" />

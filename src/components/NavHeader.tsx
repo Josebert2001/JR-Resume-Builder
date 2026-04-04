@@ -37,11 +37,11 @@ export function NavHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-stone-200/60 dark:border-stone-800/40 bg-[#f7f3ed]/80 dark:bg-[#0e0b08]/80 backdrop-blur-xl">
       <div className="max-w-5xl mx-auto px-4 flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-gradient-to-br from-[#2d6a4f] to-[#1a4a37] rounded-lg flex items-center justify-center">
+          <div className="w-7 h-7 bg-[#2d6a4f] rounded-lg flex items-center justify-center">
             <FileText className="h-4 w-4 text-white" />
           </div>
           <span className="text-base font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-            ResumAI
+            ResumeForge AI
           </span>
         </Link>
 

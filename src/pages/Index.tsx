@@ -22,7 +22,7 @@ const ResumeMockup = () => (
     <div className="absolute inset-0 translate-x-3 translate-y-3 bg-white/10 rounded-2xl rotate-2" />
     <div className="relative bg-white rounded-2xl shadow-xl p-5">
       <div className="flex items-start gap-3 mb-4 pb-3.5 border-b border-stone-100">
-        <div className="w-10 h-10 bg-gradient-to-br from-[#2d6a4f] to-[#1a4a37] rounded-full flex-shrink-0" />
+        <div className="w-10 h-10 bg-[#2d6a4f] rounded-full flex-shrink-0" />
         <div className="space-y-1.5 flex-1">
           <div className="h-3 w-24 bg-stone-800 rounded-full" />
           <div className="h-2.5 w-16 bg-[#2d6a4f]/50 rounded-full" />
@@ -82,7 +82,7 @@ const Index = () => {
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight mb-4">
               Land your dream job with an{' '}
-              <span className="bg-gradient-to-r from-amber-700 to-orange-500 bg-clip-text text-transparent">
+              <span className="text-[#c05621]">
                 AI-crafted resume
               </span>
             </h1>
@@ -119,7 +119,7 @@ const Index = () => {
           </div>
 
           {/* Mockup tile — deep forest */}
-          <div className="bg-gradient-to-br from-[#1c3728] to-[#0f2118] rounded-3xl p-8 flex items-center justify-center min-h-[280px]">
+          <div className="bg-[#1c3728] rounded-3xl p-8 flex items-center justify-center min-h-[280px]">
             <div className="w-full max-w-[210px]">
               <ResumeMockup />
             </div>
@@ -154,7 +154,7 @@ const Index = () => {
             </div>
             <h3 className="text-2xl font-bold mb-2">Let AI write your resume in seconds</h3>
             <p className="text-stone-400 text-sm leading-relaxed mb-6">
-              Powered by Llama 3.3 70B, ResumAI generates polished bullet points, skill suggestions, and professional summaries — tailored to your exact role.
+              Powered by Llama 3.3 70B, ResumeForge AI generates polished bullet points, skill suggestions, and professional summaries — tailored to your exact role.
             </p>
             <div className="bg-[#0f0b06] rounded-2xl p-4 font-mono text-sm space-y-2">
               <div className="text-[#5aad8a]">✓ "Led migration of legacy system, reducing ops cost by 35%"</div>
@@ -243,7 +243,7 @@ const Index = () => {
         {/* ── Testimonials Bento ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { name: 'Sarah J.', role: 'Software Engineer', init: 'S', bg: 'bg-[#2d6a4f]', text: '"ResumAI helped me create a professional resume in minutes. I got 3 interview calls within a week!"' },
+            { name: 'Sarah J.', role: 'Software Engineer', init: 'S', bg: 'bg-[#2d6a4f]', text: '"ResumeForge AI helped me create a professional resume in minutes. I got 3 interview calls within a week!"' },
             { name: 'Michael C.', role: 'Marketing Manager', init: 'M', bg: 'bg-[#c05621]', text: '"The AI suggestions were spot-on. My resume now passes ATS systems and looks incredibly professional."' },
             { name: 'Amanda R.', role: 'UX Designer', init: 'A', bg: 'bg-[#1a1209]', text: '"Finally a resume builder that understands what employers want. The templates are beautiful and modern."' },
           ].map(({ name, role, init, bg, text }) => (
