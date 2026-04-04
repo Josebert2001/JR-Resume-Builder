@@ -1,0 +1,61 @@
+The Skills section of Talory (an AI resume builder for college students) 
+is currently just a blank input field. Users don't understand what to do. 
+Redesign this section to be completely self-explanatory for a first-time 
+user who has never written a resume before.
+
+The redesigned Skills section must include:
+
+1. CLEAR HEADER
+   Title: "Your Skills"
+   Subtitle: "Tell us what you're good at — we'll place them perfectly 
+   on your resume."
+
+2. EXPLAINER CARD
+   A highlighted info box that answers: "What are skills on a resume?"
+   Content: "Skills are the things you know how to do — like using 
+   Microsoft Word, coding, or communicating well. Recruiters scan 
+   these first before reading anything else."
+
+3. EXAMPLES BOX
+   Show 3 rows with labeled categories:
+   - Technical skills: Python, Excel, HTML/CSS, AutoCAD
+   - Soft skills: Communication, Teamwork, Leadership
+   - Tools: Canva, Figma, Google Workspace, Slack
+
+4. CATEGORY FILTER TABS
+   Tabs the user can tap to browse suggestions by:
+   All | Technical | Soft Skills | Tools | Languages
+
+5. TAPPABLE SUGGESTION CHIPS
+   Pre-built skill chips the user can tap to instantly add.
+   Each chip shows a + icon. When tapped it turns filled/selected.
+   Suggestions should change based on the active category tab.
+
+6. ADDED SKILLS LIST
+   Shows all selected/added skills as removable tags.
+   Each tag has an × to remove.
+   Show a counter: "6 skills added · aim for 5–10"
+
+7. CUSTOM INPUT
+   A text input + Add button for skills not in the suggestions.
+   Placeholder: "Type a skill, e.g. Public Speaking"
+   Hint below: "Can't find your skill? Just type it and tap Add."
+
+8. AI SUGGEST BUTTON
+   A button labeled "✦ Suggest Skills with AI"
+   When tapped, AI reads the user's field of study and previously 
+   entered experience/projects, then suggests the top 8 most relevant 
+   skills for their resume automatically.
+
+9. BOTTOM ACTIONS
+   Primary CTA: "Next Step →" (disabled until at least 1 skill added)
+   Secondary: "Skip — I'll add skills later" (plain text link style)
+
+DESIGN RULES:
+- Match existing Talory design: #2D6A4F green, off-white background, 
+  rounded cards, DM Sans font
+- Mobile-first, fits 390px screen width
+- Every element must explain itself — no user should need to guess
+- Warm, encouraging tone throughout — not corporate or cold
+- The section should feel like a smart friend helping them build 
+  their resume, not a form to fill out

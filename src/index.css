@@ -365,6 +365,10 @@
     }
   }
 
+  /* Hide scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
   /* Mobile-specific improvements */
   @media (max-width: 768px) {
     .mobile-scrollable {
