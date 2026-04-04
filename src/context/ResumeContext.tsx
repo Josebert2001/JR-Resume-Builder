@@ -94,6 +94,8 @@ type ResumeContextType = {
   prevStep: () => void;
   education: Education[];
   updateEducation: (education: Education[]) => void;
+  certifications: Certification[];
+  updateCertifications: (certifications: Certification[]) => void;
   personalInfo: PersonalInfo;
   updatePersonalInfo: (info: Partial<PersonalInfo>) => void;
 };
@@ -146,6 +148,10 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     updateResumeData({ education });
   };
 
+  const updateCertifications = (certifications: Certification[]) => {
+    updateResumeData({ certifications });
+  };
+
   const updatePersonalInfo = (info: Partial<PersonalInfo>) => {
     setStoredResumeData((prev: ResumeData) => ({
       ...prev,
@@ -191,6 +197,8 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
         prevStep,
         education: storedResumeData.education || [],
         updateEducation,
+        certifications: storedResumeData.certifications || [],
+        updateCertifications,
         personalInfo,
         updatePersonalInfo,
       }}

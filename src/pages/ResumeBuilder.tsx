@@ -9,11 +9,12 @@ import { SkillsForm } from '@/components/SkillsForm';
 import { ResumeTemplates } from '@/components/ResumeTemplates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectsForm } from '@/components/ProjectsForm';
+import { CertificationsForm } from '@/components/CertificationsForm';
 import { PageHeader } from '@/components/PageHeader';
 import { ResumeImprover } from '@/components/ResumeImprover';
 import { ResumeUpload } from '@/components/ResumeUpload';
 
-const STEP_LABELS = ['Template', 'Info', 'Education', 'Work', 'Skills', 'Projects', 'Preview'];
+const STEP_LABELS = ['Template', 'Info', 'Education', 'Work', 'Skills', 'Projects', 'Certifications', 'Preview'];
 
 const ResumeBuilder = () => {
   const { currentStep, resumeData } = useResumeContext();
@@ -34,8 +35,9 @@ const ResumeBuilder = () => {
         {currentStep === 4 && <WorkExperienceForm />}
         {currentStep === 5 && <SkillsForm />}
         {currentStep === 6 && <ProjectsForm />}
+        {currentStep === 7 && <CertificationsForm />}
 
-        {currentStep === 7 && (
+        {currentStep === 8 && (
           <Tabs defaultValue="preview" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="preview">Preview</TabsTrigger>
