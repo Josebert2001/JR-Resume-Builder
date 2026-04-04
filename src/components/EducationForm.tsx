@@ -8,7 +8,7 @@ import { Plus, Trash2, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { useResumeContext } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { generateEducationDescription } from '@/services/resumeAI';
+import { enhanceEducationEntry } from '@/services/resumeAI';
 import { toast } from 'sonner';
 import { analytics } from '@/services/analytics';
 import { FormWrapper } from './FormWrapper';
@@ -21,10 +21,11 @@ interface EntryErrors {
 }
 
 export const EducationForm = () => {
-  const { education, updateEducation } = useResumeContext();
+  const { education, updateEducation, resumeData } = useResumeContext();
   const isMobile = useIsMobile();
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [entryErrors, setEntryErrors] = useState<Record<string, EntryErrors>>({});
+  const [tips, setTips] = useState<Record<string, string>>({});
 
   const handleAddEducation = () => {
     updateEducation([
@@ -44,6 +45,7 @@ export const EducationForm = () => {
   const handleRemoveEducation = (id: string) => {
     updateEducation(education.filter(edu => edu.id !== id));
     setEntryErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
+    setTips(prev => { const next = { ...prev }; delete next[id]; return next; });
   };
 
   const handleEducationChange = (id: string, field: string, value: string) => {
@@ -53,7 +55,7 @@ export const EducationForm = () => {
     }
   };
 
-  const handleGenerateDescription = async (id: string) => {
+  const handleEnhanceWithAI = async (id: string) => {
     const edu = education.find(e => e.id === id);
     if (!edu?.school || !edu?.degree || !edu?.fieldOfStudy) {
       toast.error('Please fill in school, degree, and field of study first');
@@ -62,19 +64,63 @@ export const EducationForm = () => {
     setGeneratingId(id);
     analytics.aiFeatureUsed('education_generation', false);
     try {
-      const description = await generateEducationDescription(edu.degree, edu.fieldOfStudy, edu.school);
-      if (description) {
-        handleEducationChange(id, 'description', description);
+      const careerGoal =
+        resumeData.workExperience?.[0]?.position ||
+        resumeData.personalInfo?.summary?.slice(0, 60) ||
+        '';
+
+      const { entry, tip } = await enhanceEducationEntry(
+        edu.school,
+        edu.degree,
+        edu.fieldOfStudy,
+        edu.fieldOfStudy,
+        edu.graduationDate || '',
+        edu.gpa || '',
+        '5.0',
+        edu.description || '',
+        edu.description || '',
+        careerGoal
+      );
+
+      // Build a clean readable description from the AI output
+      const lines: string[] = [];
+
+      if (entry.relevant_courses.length > 0) {
+        lines.push(`Relevant Coursework: ${entry.relevant_courses.join(' · ')}`);
+      }
+      if (entry.honors.length > 0) {
+        lines.push(`Honors: ${entry.honors.join(' · ')}`);
+      }
+      if (entry.achievements.length > 0) {
+        lines.push('');
+        lines.push('Achievements:');
+        entry.achievements.forEach(a => lines.push(`• ${a}`));
+      }
+      if (entry.extracurriculars.length > 0) {
+        lines.push('');
+        lines.push('Activities:');
+        entry.extracurriculars.forEach(a => lines.push(`• ${a}`));
+      }
+
+      const formatted = lines.join('\n').trim();
+
+      if (formatted) {
+        handleEducationChange(id, 'description', formatted);
+        // Apply GPA if AI confirmed it's strong
+        if (entry.gpa && entry.gpa !== 'null') {
+          handleEducationChange(id, 'gpa', entry.gpa.split('/')[0] || edu.gpa);
+        }
+        if (tip) setTips(prev => ({ ...prev, [id]: tip }));
         analytics.aiFeatureUsed('education_generation', true);
-        toast.success('Education description generated!');
+        toast.success('Education entry enhanced with AI!');
       } else {
-        toast.error('Failed to generate description. Please try again.');
+        toast.error('AI could not enhance this entry. Please add more details and try again.');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Error generating education description:', message);
+      console.error('Error enhancing education entry:', message);
       analytics.errorOccurred('education_generation_failed', message);
-      toast.error('Failed to generate description. Please try again.');
+      toast.error('Failed to enhance entry. Please try again.');
     } finally {
       setGeneratingId(null);
     }
@@ -115,6 +161,7 @@ export const EducationForm = () => {
         <div className="space-y-4">
           {(education || []).map((edu, index) => {
             const errors = entryErrors[edu.id] || {};
+            const tip = tips[edu.id];
             return (
               <Card key={edu.id} className="p-4 relative">
                 <div className="flex items-center justify-between mb-4">
@@ -199,42 +246,11 @@ export const EducationForm = () => {
                         id={`graduationDate-${edu.id}`}
                         value={edu.graduationDate}
                         onChange={(e) => handleEducationChange(edu.id, 'graduationDate', e.target.value)}
-                        placeholder="e.g. May 2023 or 2023"
+                        placeholder="e.g. May 2026 or 2026"
                         className="mt-1.5"
                         data-testid={`input-graddate-${edu.id}`}
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <Label htmlFor={`description-${edu.id}`}>
-                        Description
-                        <span className="text-stone-400 font-normal text-xs ml-1">(optional)</span>
-                      </Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleGenerateDescription(edu.id)}
-                        disabled={generatingId === edu.id || !edu.school || !edu.degree || !edu.fieldOfStudy}
-                        className="text-xs h-7 px-2"
-                        data-testid={`button-generate-education-${edu.id}`}
-                      >
-                        {generatingId === edu.id ? (
-                          <><Loader2 className="mr-1 h-3 w-3 animate-spin" />Generating...</>
-                        ) : (
-                          <><Sparkles className="mr-1 h-3 w-3" />Generate with AI</>
-                        )}
-                      </Button>
-                    </div>
-                    <Textarea
-                      id={`description-${edu.id}`}
-                      value={edu.description}
-                      onChange={(e) => handleEducationChange(edu.id, 'description', e.target.value)}
-                      className="min-h-[80px]"
-                      placeholder="Relevant coursework, achievements, activities…"
-                    />
                   </div>
 
                   <div>
@@ -246,9 +262,51 @@ export const EducationForm = () => {
                       id={`gpa-${edu.id}`}
                       value={edu.gpa}
                       onChange={(e) => handleEducationChange(edu.id, 'gpa', e.target.value)}
-                      placeholder="e.g. 3.8"
+                      placeholder="e.g. 4.2"
                       className={cn("mt-1.5", isMobile && "h-11")}
                     />
+                  </div>
+
+                  <div>
+                    <div className="flex items-start justify-between mb-1.5 gap-2">
+                      <div>
+                        <Label htmlFor={`description-${edu.id}`}>
+                          Courses, Honours & Activities
+                          <span className="text-stone-400 font-normal text-xs ml-1">(optional)</span>
+                        </Label>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Mention any courses, awards, or roles — AI will restructure them professionally.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEnhanceWithAI(edu.id)}
+                        disabled={generatingId === edu.id || !edu.school || !edu.degree || !edu.fieldOfStudy}
+                        className="text-xs h-7 px-2 shrink-0"
+                        data-testid={`button-enhance-education-${edu.id}`}
+                      >
+                        {generatingId === edu.id ? (
+                          <><Loader2 className="mr-1 h-3 w-3 animate-spin" />Enhancing…</>
+                        ) : (
+                          <><Sparkles className="mr-1 h-3 w-3" />Enhance with AI</>
+                        )}
+                      </Button>
+                    </div>
+                    <Textarea
+                      id={`description-${edu.id}`}
+                      value={edu.description}
+                      onChange={(e) => handleEducationChange(edu.id, 'description', e.target.value)}
+                      className="min-h-[90px]"
+                      placeholder="e.g. Network Security, Database Systems, Operating Systems · Dean's List 2023 · VP of Computer Science Students' Association…"
+                    />
+                    {tip && (
+                      <div className="mt-2 flex items-start gap-2 bg-[#e8f5ee] border border-[#b6d9c4] rounded-xl p-3">
+                        <Sparkles className="text-[#2d6a4f] shrink-0 mt-0.5" size={13} />
+                        <p className="text-xs text-[#3d5544] leading-relaxed">{tip}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>

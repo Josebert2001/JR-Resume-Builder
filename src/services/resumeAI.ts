@@ -151,6 +151,209 @@ export const suggestSkillsWithReasons = async (
   }
 };
 
+// ─── Summary V2 — 3 coached versions ────────────────────────────────────────
+
+export type SummaryVersion = { text: string; best_for: string };
+
+export type SummaryVariants = {
+  summaries: {
+    skills_led: SummaryVersion;
+    goal_led: SummaryVersion;
+    story_led: SummaryVersion;
+  };
+  recommended: "skills_led" | "goal_led" | "story_led";
+  reason: string;
+  tip: string;
+};
+
+export const generateSummaryV2 = async (
+  fullName: string,
+  fieldOfStudy: string,
+  degree: string,
+  academicLevel: string,
+  careerGoal: string,
+  topSkills: string,
+  bestExperience: string,
+  bestProject: string,
+  certifications: string,
+  personalityKeywords?: string
+): Promise<SummaryVariants> => {
+  const empty: SummaryVariants = {
+    summaries: {
+      skills_led: { text: "", best_for: "" },
+      goal_led: { text: "", best_for: "" },
+      story_led: { text: "", best_for: "" },
+    },
+    recommended: "skills_led",
+    reason: "",
+    tip: "",
+  };
+  try {
+    const result = await invokeGroq("summary_v2", {
+      fullName, fieldOfStudy, degree, academicLevel, careerGoal,
+      topSkills, bestExperience, bestProject, certifications,
+      personalityKeywords: personalityKeywords ?? "",
+    });
+    const ss = result?.summaries as Record<string, unknown> | undefined;
+    const parseVersion = (v: unknown): SummaryVersion => {
+      if (typeof v === "object" && v !== null) {
+        const o = v as Record<string, unknown>;
+        return { text: String(o.text ?? ""), best_for: String(o.best_for ?? "") };
+      }
+      return { text: "", best_for: "" };
+    };
+    return {
+      summaries: {
+        skills_led: parseVersion(ss?.skills_led),
+        goal_led: parseVersion(ss?.goal_led),
+        story_led: parseVersion(ss?.story_led),
+      },
+      recommended: (["skills_led", "goal_led", "story_led"].includes(String(result?.recommended))
+        ? result.recommended
+        : "skills_led") as SummaryVariants["recommended"],
+      reason: String(result?.reason ?? ""),
+      tip: String(result?.tip ?? ""),
+    };
+  } catch (error) {
+    console.error("Error generating summary v2:", error);
+    return empty;
+  }
+};
+
+// ─── Education V2 — rich enhancement ────────────────────────────────────────
+
+export type EnhancedEducationEntry = {
+  degree_line: string;
+  institution: string;
+  duration: string;
+  gpa: string | null;
+  honors: string[];
+  relevant_courses: string[];
+  achievements: string[];
+  extracurriculars: string[];
+};
+
+export const enhanceEducationEntry = async (
+  institution: string,
+  degreeType: string,
+  fieldOfStudy: string,
+  major: string,
+  endYear: string,
+  gpa: string,
+  gpaScale: string,
+  relevantCourses: string,
+  achievements: string,
+  careerGoal: string,
+  minor?: string,
+  startYear?: string,
+  honors?: string,
+  extracurriculars?: string
+): Promise<{ entry: EnhancedEducationEntry; tip: string }> => {
+  const empty = {
+    entry: {
+      degree_line: "", institution: "", duration: "", gpa: null,
+      honors: [], relevant_courses: [], achievements: [], extracurriculars: [],
+    },
+    tip: "",
+  };
+  try {
+    const result = await invokeGroq("education_v2", {
+      institution, degreeType, fieldOfStudy, major,
+      minor: minor ?? "", startYear: startYear ?? "", endYear,
+      gpa, gpaScale, honors: honors ?? "", relevantCourses, achievements,
+      extracurriculars: extracurriculars ?? "", careerGoal,
+    });
+    const e = result?.education_entry as Record<string, unknown> | undefined;
+    if (!e) return empty;
+    return {
+      entry: {
+        degree_line: String(e.degree_line ?? ""),
+        institution: String(e.institution ?? ""),
+        duration: String(e.duration ?? ""),
+        gpa: e.gpa !== null && e.gpa !== undefined ? String(e.gpa) : null,
+        honors: Array.isArray(e.honors) ? (e.honors as unknown[]).map(String) : [],
+        relevant_courses: Array.isArray(e.relevant_courses) ? (e.relevant_courses as unknown[]).map(String) : [],
+        achievements: Array.isArray(e.achievements) ? (e.achievements as unknown[]).map(String) : [],
+        extracurriculars: Array.isArray(e.extracurriculars) ? (e.extracurriculars as unknown[]).map(String) : [],
+      },
+      tip: String(result?.tip ?? ""),
+    };
+  } catch (error) {
+    console.error("Error enhancing education entry:", error);
+    return empty;
+  }
+};
+
+// ─── Certifications V2 — AI analysis with hidden skills ──────────────────────
+
+export type AICertEntry = {
+  rank: number;
+  formatted_name: string;
+  value_statement: string;
+  hidden_skills: string[];
+  relevance: "high" | "medium" | "low";
+  include_on_resume: boolean;
+};
+
+export type MissingCert = {
+  name: string;
+  issuer: string;
+  why: string;
+  priority: "high" | "medium";
+};
+
+export type CertAnalysis = {
+  certifications: AICertEntry[];
+  missing_certifications: MissingCert[];
+  tip: string;
+};
+
+export const analyzeCertifications = async (
+  certificationsList: string,
+  fieldOfStudy: string,
+  careerGoal: string,
+  existingSkills: string
+): Promise<CertAnalysis> => {
+  const empty: CertAnalysis = { certifications: [], missing_certifications: [], tip: "" };
+  try {
+    const result = await invokeGroq("certifications_v2", {
+      certificationsList, fieldOfStudy, careerGoal, existingSkills,
+    });
+    const parseCert = (c: unknown): AICertEntry | null => {
+      if (typeof c !== "object" || c === null) return null;
+      const obj = c as Record<string, unknown>;
+      return {
+        rank: Number(obj.rank) || 0,
+        formatted_name: String(obj.formatted_name ?? ""),
+        value_statement: String(obj.value_statement ?? ""),
+        hidden_skills: Array.isArray(obj.hidden_skills) ? (obj.hidden_skills as unknown[]).map(String) : [],
+        relevance: (["high", "medium", "low"].includes(String(obj.relevance)) ? obj.relevance : "medium") as AICertEntry["relevance"],
+        include_on_resume: obj.include_on_resume !== false,
+      };
+    };
+    const parseMissing = (c: unknown): MissingCert | null => {
+      if (typeof c !== "object" || c === null) return null;
+      const obj = c as Record<string, unknown>;
+      return {
+        name: String(obj.name ?? ""),
+        issuer: String(obj.issuer ?? ""),
+        why: String(obj.why ?? ""),
+        priority: (["high", "medium"].includes(String(obj.priority)) ? obj.priority : "medium") as MissingCert["priority"],
+      };
+    };
+    return {
+      certifications: (Array.isArray(result?.certifications) ? result.certifications : [])
+        .map(parseCert).filter((c): c is AICertEntry => c !== null),
+      missing_certifications: (Array.isArray(result?.missing_certifications) ? result.missing_certifications : [])
+        .map(parseMissing).filter((c): c is MissingCert => c !== null),
+      tip: String(result?.tip ?? ""),
+    };
+  } catch (error) {
+    console.error("Error analyzing certifications:", error);
+    return empty;
+  }
+};
+
 export const suggestSkills = async (
   position: string,
   experience: string[]

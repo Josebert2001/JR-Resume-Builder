@@ -81,7 +81,7 @@ app.post("/api/groq-generate", async (req, res) => {
     });
   }
 
-  const { prompt, responseFormat } = buildPrompt(action, payload);
+  const { prompt, responseFormat, maxTokens } = buildPrompt(action, payload);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -101,7 +101,7 @@ app.post("/api/groq-generate", async (req, res) => {
           { role: "user", content: prompt },
         ],
         temperature: 0.7,
-        max_tokens: 1000,
+        max_tokens: maxTokens ?? 1000,
       }),
     });
 
