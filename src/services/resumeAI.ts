@@ -45,6 +45,112 @@ export const generateWorkDescription = async (
   }
 };
 
+// Rich work experience bullet generator (new)
+export const generateWorkBullets = async (
+  position: string,
+  company: string,
+  duration: string,
+  rawDescription: string,
+  fieldOfStudy: string,
+  careerGoal: string
+): Promise<{ bullets: string[]; tip: string }> => {
+  try {
+    const result = await invokeGroq("work_bullets", {
+      position,
+      company,
+      duration,
+      rawDescription,
+      fieldOfStudy,
+      careerGoal,
+    });
+    return {
+      bullets: (result?.bullets as string[]) || [],
+      tip: (result?.tip as string) || "",
+    };
+  } catch (error) {
+    console.error("Error generating work bullets:", error);
+    return { bullets: [], tip: "" };
+  }
+};
+
+// Rich project description generator (new)
+export const generateProjectBullets = async (
+  projectName: string,
+  techStack: string,
+  rawDescription: string,
+  motivation: string,
+  fieldOfStudy: string,
+  careerGoal: string
+): Promise<{ oneLiner: string; bullets: string[]; tip: string }> => {
+  try {
+    const result = await invokeGroq("project_bullets", {
+      projectName,
+      techStack,
+      rawDescription,
+      motivation,
+      fieldOfStudy,
+      careerGoal,
+    });
+    return {
+      oneLiner: (result?.one_liner as string) || "",
+      bullets: (result?.bullets as string[]) || [],
+      tip: (result?.tip as string) || "",
+    };
+  } catch (error) {
+    console.error("Error generating project bullets:", error);
+    return { oneLiner: "", bullets: [], tip: "" };
+  }
+};
+
+export type SkillWithReason = { name: string; reason: string };
+
+// Rich skills suggester with reasons per skill and tools category (new)
+export const suggestSkillsWithReasons = async (
+  fieldOfStudy: string,
+  degree: string,
+  careerGoal: string,
+  workExperience: string,
+  projects: string,
+  certifications: string
+): Promise<{
+  technical: SkillWithReason[];
+  soft: SkillWithReason[];
+  tools: SkillWithReason[];
+  tip: string;
+}> => {
+  try {
+    const result = await invokeGroq("skills_v2", {
+      fieldOfStudy,
+      degree,
+      careerGoal,
+      workExperience,
+      projects,
+      certifications,
+    });
+    const ss = result?.suggested_skills as Record<string, unknown> | undefined;
+    const toArr = (arr: unknown): SkillWithReason[] =>
+      Array.isArray(arr)
+        ? arr.map((s: unknown) =>
+            typeof s === "object" && s !== null && "name" in s
+              ? {
+                  name: String((s as Record<string, unknown>).name),
+                  reason: String((s as Record<string, unknown>).reason ?? ""),
+                }
+              : { name: String(s), reason: "" }
+          )
+        : [];
+    return {
+      technical: toArr(ss?.technical),
+      soft: toArr(ss?.soft),
+      tools: toArr(ss?.tools),
+      tip: (result?.tip as string) || "",
+    };
+  } catch (error) {
+    console.error("Error suggesting skills with reasons:", error);
+    return { technical: [], soft: [], tools: [], tip: "" };
+  }
+};
+
 export const suggestSkills = async (
   position: string,
   experience: string[]
@@ -87,7 +193,7 @@ export const analyzeResume = async (
   }
 };
 
-// New: Professional Summary
+// Professional Summary
 export const generateProfessionalSummary = async (
   role: string,
   industry: string,
@@ -103,7 +209,7 @@ export const generateProfessionalSummary = async (
   }
 };
 
-// New: Grouped Skills
+// Grouped Skills (legacy — kept for backward compat)
 export const suggestGroupedSkills = async (
   role: string,
   experience: string[],
@@ -121,7 +227,7 @@ export const suggestGroupedSkills = async (
   }
 };
 
-// New: ATS Optimization (detailed)
+// ATS Optimization (detailed)
 export const optimizeResumeATS = async (
   resumeText: string,
   jobDescription: string
@@ -143,7 +249,7 @@ export const optimizeResumeATS = async (
   }
 };
 
-// New: Career Assistant Q&A
+// Career Assistant Q&A
 export const careerAssistant = async (
   question: string,
   industry?: string,
@@ -158,7 +264,7 @@ export const careerAssistant = async (
   }
 };
 
-// New: Orchestrate full resume pieces
+// Orchestrate full resume pieces
 export const orchestrateResume = async (
   payload: Record<string, unknown>
 ): Promise<{

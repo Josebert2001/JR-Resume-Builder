@@ -5,7 +5,7 @@ import { Plus, X, Sparkles, Loader2, ChevronRight, BookOpen, Lightbulb } from 'l
 import { useResumeContext } from '@/context/ResumeContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { suggestGroupedSkills } from '@/services/resumeAI';
+import { suggestSkillsWithReasons, SkillWithReason } from '@/services/resumeAI';
 
 type Category = 'all' | 'technical' | 'soft' | 'tools' | 'languages';
 
@@ -46,7 +46,11 @@ const TABS: { key: Category; label: string }[] = [
   { key: 'languages', label: 'Languages' },
 ];
 
-function getVisibleChips(category: Category, aiChips: string[], addedNames: Set<string>): string[] {
+function getVisibleChipNames(
+  category: Category,
+  aiChipNames: string[],
+  addedNames: Set<string>
+): string[] {
   let pool: string[];
   if (category === 'all') {
     pool = [
@@ -58,20 +62,24 @@ function getVisibleChips(category: Category, aiChips: string[], addedNames: Set<
   } else {
     pool = SUGGESTIONS[category];
   }
-  const merged = [...new Set([...aiChips, ...pool])];
+  const merged = [...new Set([...aiChipNames, ...pool])];
   return merged.filter(s => !addedNames.has(s.toLowerCase()));
 }
 
 export const SkillsForm = () => {
-  const { resumeData, updateResumeData, nextStep, prevStep } = useResumeContext();
+  const { resumeData, updateResumeData, nextStep } = useResumeContext();
   const skills = resumeData.skills || [];
   const addedNames = new Set(skills.map(s => s.name.toLowerCase()));
 
   const [activeTab, setActiveTab] = useState<Category>('all');
   const [customInput, setCustomInput] = useState('');
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const [aiChips, setAiChips] = useState<string[]>([]);
+  const [aiChips, setAiChips] = useState<SkillWithReason[]>([]);
+  const [aiTip, setAiTip] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const aiChipNames = aiChips.map(c => c.name);
+  const aiReasonMap = new Map(aiChips.map(c => [c.name.toLowerCase(), c.reason]));
 
   const addSkill = (name: string) => {
     const trimmed = name.trim();
@@ -103,35 +111,52 @@ export const SkillsForm = () => {
   const handleSuggestWithAI = async () => {
     setIsSuggesting(true);
     try {
-      const targetRole =
+      const fieldOfStudy = resumeData.education?.[0]?.fieldOfStudy || '';
+      const degree = resumeData.education?.[0]?.degree || '';
+      const careerGoal =
         resumeData.workExperience?.[0]?.position ||
-        resumeData.personalInfo?.summary?.slice(0, 40) ||
-        'Student';
+        resumeData.personalInfo?.summary?.slice(0, 60) ||
+        'entry-level professional';
 
-      const context: string[] = [];
-      resumeData.workExperience?.forEach(e =>
-        context.push(`${e.position} at ${e.company}: ${e.description || ''}`)
-      );
-      resumeData.education?.forEach(e =>
-        context.push(`${e.degree} in ${e.fieldOfStudy} from ${e.school}`)
-      );
-      resumeData.projects?.forEach(p =>
-        context.push(`Project: ${p.name} — ${p.description || ''} (${p.technologies || ''})`)
+      const workExp =
+        resumeData.workExperience
+          ?.map(e => `${e.position} at ${e.company}: ${e.description || ''}`)
+          .join('; ') || '';
+
+      const projs =
+        resumeData.projects
+          ?.map(p => `${p.name}: ${p.description || ''} (${p.technologies || ''})`)
+          .join('; ') || '';
+
+      const certs =
+        resumeData.certifications?.map(c => c.name).join(', ') || '';
+
+      const current = new Set(skills.map(s => s.name.toLowerCase()));
+
+      const suggestions = await suggestSkillsWithReasons(
+        fieldOfStudy,
+        degree,
+        careerGoal,
+        workExp,
+        projs,
+        certs
       );
 
-      const current = skills.map(s => s.name);
-      const suggestions = await suggestGroupedSkills(targetRole, context, current);
-      const combined = [...suggestions.technical, ...suggestions.soft].filter(
-        s => !addedNames.has(s.toLowerCase())
-      );
+      const all: SkillWithReason[] = [
+        ...suggestions.technical,
+        ...suggestions.soft,
+        ...suggestions.tools,
+      ].filter(s => !current.has(s.name.toLowerCase()));
 
-      if (combined.length === 0) {
+      if (all.length === 0) {
         toast.info('No new suggestions found. Try filling in more experience details first.');
         return;
       }
-      setAiChips(combined);
+
+      setAiChips(all);
+      if (suggestions.tip) setAiTip(suggestions.tip);
       setActiveTab('all');
-      toast.success(`${combined.length} AI-suggested skills ready — tap any to add`);
+      toast.success(`${all.length} personalised skill suggestions ready — tap any to add`);
     } catch (err) {
       console.error(err);
       toast.error('Could not get AI suggestions. Please try again.');
@@ -140,7 +165,7 @@ export const SkillsForm = () => {
     }
   };
 
-  const visibleChips = getVisibleChips(activeTab, aiChips, addedNames);
+  const visibleChips = getVisibleChipNames(activeTab, aiChipNames, addedNames);
   const skillCount = skills.length;
   const counterMsg =
     skillCount === 0
@@ -219,6 +244,14 @@ export const SkillsForm = () => {
           )}
         </button>
 
+        {/* ─── AI tip card ─── */}
+        {aiTip && (
+          <div className="flex items-start gap-2 bg-[#e8f5ee] border border-[#b6d9c4] rounded-2xl p-3">
+            <Sparkles className="text-[#2d6a4f] shrink-0 mt-0.5" size={14} />
+            <p className="text-xs text-[#3d5544] leading-relaxed">{aiTip}</p>
+          </div>
+        )}
+
         {/* ─── Category tabs ─── */}
         <div>
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -250,7 +283,8 @@ export const SkillsForm = () => {
               </p>
             )}
             {visibleChips.map(chip => {
-              const isAi = aiChips.includes(chip);
+              const reason = aiReasonMap.get(chip.toLowerCase());
+              const isAi = reason !== undefined || aiChipNames.some(n => n.toLowerCase() === chip.toLowerCase());
               return (
                 <button
                   key={chip}
@@ -258,15 +292,22 @@ export const SkillsForm = () => {
                   onClick={() => addSkill(chip)}
                   data-testid={`chip-skill-${chip.replace(/\s+/g, '-').toLowerCase()}`}
                   className={cn(
-                    'flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1.5 transition-all active:scale-95',
+                    'flex items-start gap-1.5 text-xs font-medium transition-all active:scale-95 text-left',
                     isAi
-                      ? 'bg-[#fff3ec] border border-[#f0b48a] text-[#c05621]'
-                      : 'bg-white border border-[#d6cfc5] text-[#3d2e1a]'
+                      ? 'bg-[#fff3ec] border border-[#f0b48a] text-[#c05621] rounded-xl px-3 py-2 flex-col'
+                      : 'bg-white border border-[#d6cfc5] text-[#3d2e1a] rounded-full px-3 py-1.5 items-center'
                   )}
                 >
-                  <Plus size={12} />
-                  {chip}
-                  {isAi && <span className="text-[9px] font-bold uppercase tracking-wide text-[#c05621] ml-0.5">AI</span>}
+                  <div className="flex items-center gap-1.5">
+                    <Plus size={12} className="shrink-0" />
+                    <span>{chip}</span>
+                    {isAi && (
+                      <span className="text-[9px] font-bold uppercase tracking-wide text-[#c05621] ml-0.5">AI</span>
+                    )}
+                  </div>
+                  {reason && (
+                    <span className="text-[10px] text-[#8a7560] leading-tight font-normal pl-4">{reason}</span>
+                  )}
                 </button>
               );
             })}

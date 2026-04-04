@@ -13,7 +13,7 @@ import { TouchRipple } from './ui/touch-ripple';
 import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
 import { analytics } from '@/services/analytics';
-import { generateWorkDescription } from '@/services/resumeAI';
+import { generateWorkBullets } from '@/services/resumeAI';
 
 interface EntryErrors {
   position?: string;
@@ -25,6 +25,7 @@ export const WorkExperienceForm = () => {
   const { resumeData, updateResumeData } = useResumeContext();
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [entryErrors, setEntryErrors] = useState<Record<string, EntryErrors>>({});
+  const [tips, setTips] = useState<Record<string, string>>({});
   const isMobile = useIsMobile();
 
   const handleAddExperience = () => {
@@ -64,6 +65,7 @@ export const WorkExperienceForm = () => {
       workExperience: resumeData.workExperience?.filter(exp => exp.id !== id) || []
     });
     setEntryErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
+    setTips(prev => { const next = { ...prev }; delete next[id]; return next; });
     toast.success('Work experience removed');
   };
 
@@ -88,19 +90,38 @@ export const WorkExperienceForm = () => {
     setGeneratingId(id);
     analytics.aiFeatureUsed('work_generation', false);
     try {
-      const description = await generateWorkDescription(exp.position, exp.company);
-      if (description) {
-        handleUpdateExperience(id, 'description', description);
+      const fieldOfStudy = resumeData.education?.[0]?.fieldOfStudy || '';
+      const careerGoal =
+        exp.position ||
+        resumeData.personalInfo?.summary?.slice(0, 60) ||
+        'professional role';
+      const duration = [exp.startDate, exp.endDate || 'Present']
+        .filter(Boolean)
+        .join(' – ');
+
+      const { bullets, tip } = await generateWorkBullets(
+        exp.position,
+        exp.company,
+        duration,
+        exp.description || '',
+        fieldOfStudy,
+        careerGoal
+      );
+
+      if (bullets.length > 0) {
+        const formatted = bullets.map(b => `• ${b}`).join('\n');
+        handleUpdateExperience(id, 'description', formatted);
+        if (tip) setTips(prev => ({ ...prev, [id]: tip }));
         analytics.aiFeatureUsed('work_generation', true);
-        toast.success('Job description generated!');
+        toast.success('Resume bullets generated!');
       } else {
-        toast.error('Failed to generate description. Please try again.');
+        toast.error('Failed to generate bullets. Please try again.');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       console.error('Error generating work description:', message);
       analytics.errorOccurred('work_generation_failed', message);
-      toast.error('Failed to generate description. Please try again.');
+      toast.error('Failed to generate bullets. Please try again.');
     } finally {
       setGeneratingId(null);
     }
@@ -143,6 +164,7 @@ export const WorkExperienceForm = () => {
         <div className="space-y-4">
           {experiences.map((experience, index) => {
             const errors = entryErrors[experience.id] || {};
+            const tip = tips[experience.id];
             return (
               <Card
                 key={experience.id}
@@ -283,21 +305,26 @@ export const WorkExperienceForm = () => {
                   {/* Description */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <Label htmlFor={`description-${experience.id}`}>
-                        Description
-                        <span className="text-stone-400 font-normal text-xs ml-1">(optional)</span>
-                      </Label>
+                      <div>
+                        <Label htmlFor={`description-${experience.id}`}>
+                          What did you do?
+                          <span className="text-stone-400 font-normal text-xs ml-1">(optional)</span>
+                        </Label>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Describe in your own words — AI will turn it into professional bullets.
+                        </p>
+                      </div>
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
                         onClick={() => handleGenerateDescription(experience.id)}
                         disabled={generatingId === experience.id || !experience.position || !experience.company}
-                        className="text-xs h-7 px-2"
+                        className="text-xs h-7 px-2 shrink-0 ml-3"
                         data-testid={`button-generate-description-${experience.id}`}
                       >
                         {generatingId === experience.id ? (
-                          <><Loader2 className="mr-1 h-3 w-3 animate-spin" />Generating...</>
+                          <><Loader2 className="mr-1 h-3 w-3 animate-spin" />Generating…</>
                         ) : (
                           <><Sparkles className="mr-1 h-3 w-3" />Generate with AI</>
                         )}
@@ -308,8 +335,14 @@ export const WorkExperienceForm = () => {
                       value={experience.description}
                       onChange={(e) => handleUpdateExperience(experience.id, 'description', e.target.value)}
                       className="min-h-[100px]"
-                      placeholder="Describe your role and key achievements…"
+                      placeholder="e.g., I helped fix computers and answered customer questions at the shop…"
                     />
+                    {tip && (
+                      <div className="mt-2 flex items-start gap-2 bg-[#e8f5ee] border border-[#b6d9c4] rounded-xl p-3">
+                        <Sparkles className="text-[#2d6a4f] shrink-0 mt-0.5" size={13} />
+                        <p className="text-xs text-[#3d5544] leading-relaxed">{tip}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>
