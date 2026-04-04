@@ -178,12 +178,14 @@ export const SkillsForm = () => {
         filtered.technical.length + filtered.soft.length + filtered.tools.length;
 
       if (totalNew === 0) {
+        setAiByCategory({ technical: [], soft: [], tools: [] });
+        setAiTip('');
         toast.info('No new suggestions found. Try filling in more experience details first.');
         return;
       }
 
       setAiByCategory(filtered);
-      if (suggestions.tip) setAiTip(suggestions.tip);
+      setAiTip(suggestions.tip || '');
       setActiveTab('all');
       toast.success(`${totalNew} personalised skill suggestions ready — tap any to add`);
     } catch (err) {
