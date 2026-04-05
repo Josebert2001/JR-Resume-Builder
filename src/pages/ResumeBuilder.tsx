@@ -60,13 +60,13 @@ const ResumeBuilder = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="overflow-x-auto mb-8 -mx-1 px-1">
               <TabsList className="inline-flex min-w-max gap-1 p-1 h-auto">
-                <TabsTrigger value="auto-build" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-auto-build">Auto-Build</TabsTrigger>
                 <TabsTrigger value="preview" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-preview">Preview</TabsTrigger>
                 <TabsTrigger value="score" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-score">Score</TabsTrigger>
                 <TabsTrigger value="job-match" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-job-match">Job Match</TabsTrigger>
                 <TabsTrigger value="share" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-share">Share</TabsTrigger>
                 <TabsTrigger value="templates" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-template">Template</TabsTrigger>
                 <TabsTrigger value="analyze" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-analyze">Analyze</TabsTrigger>
+                <TabsTrigger value="auto-build" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-auto-build">Auto-Build</TabsTrigger>
               </TabsList>
             </div>
 

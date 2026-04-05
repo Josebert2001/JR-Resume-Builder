@@ -73,6 +73,7 @@ export async function buildFullResume(
   options: {
     includeNysc?: boolean;
     jobDescription?: string;
+    jobTitle?: string;
   } = {}
 ): Promise<OrchestratorResult> {
   const pi = resumeData.personalInfo;
@@ -86,7 +87,7 @@ export async function buildFullResume(
   const certifications: Certification[] = resumeData.certifications || [];
   const existingSkills: Skill[] = resumeData.skills || [];
   const hasExperience = workExp.length > 0;
-  const { jobDescription = '' } = options;
+  const { jobDescription = '', jobTitle = '' } = options;
 
   const appliedSections: string[] = [];
 
@@ -101,7 +102,13 @@ export async function buildFullResume(
   const projectsText = projects.map((p: Project) =>
     `${p.name}: ${p.description}${p.technologies ? ` [${p.technologies}]` : ''}`
   ).join('\n');
-  const jdContext = jobDescription ? `\n\nTarget Job Description:\n${jobDescription.slice(0, 800)}` : '';
+  const jdContext = [
+    jobTitle ? `Target Job Title: ${jobTitle}` : '',
+    jobDescription ? `Target Job Description:\n${jobDescription.slice(0, 600)}` : '',
+  ].filter(Boolean).join('\n');
+  const jdContextBlock = jdContext ? `\n\n${jdContext}` : '';
+
+  onProgress({ step: 2, message: 'Enhancing each section with AI...', percent: 15 });
 
   // ─── WAVE 1: Section processors (all parallel) ──────────────────────────────
   const [
@@ -123,7 +130,7 @@ export async function buildFullResume(
           gpaScale: '5.0',
           relevantCourses: '',
           achievements: edu.description || '',
-          careerGoal: careerGoal + jdContext,
+          careerGoal: careerGoal + jdContextBlock,
         }),
         null,
         `education_v2 [${edu.school}]`
@@ -137,7 +144,7 @@ export async function buildFullResume(
           duration: `${w.startDate} – ${w.endDate || 'Present'}`,
           rawDescription: w.description,
           fieldOfStudy,
-          careerGoal: careerGoal + jdContext,
+          careerGoal: careerGoal + jdContextBlock,
         }),
         null,
         `work_bullets [${w.company}]`
@@ -151,7 +158,7 @@ export async function buildFullResume(
           rawDescription: p.description,
           motivation: '',
           fieldOfStudy,
-          careerGoal: careerGoal + jdContext,
+          careerGoal: careerGoal + jdContextBlock,
         }),
         null,
         `project_bullets [${p.name}]`
@@ -171,7 +178,7 @@ export async function buildFullResume(
       () => invokeGroqAction('skills_v2', {
         fieldOfStudy,
         degree,
-        careerGoal: careerGoal + jdContext,
+        careerGoal: careerGoal + jdContextBlock,
         workExperience: workExpText,
         projects: projectsText,
         certifications: certsText,
@@ -181,7 +188,7 @@ export async function buildFullResume(
     ),
   ]);
 
-  onProgress({ step: 2, message: 'Rewriting your experience with AI...', percent: 30 });
+  onProgress({ step: 3, message: 'Writing your summary & scoring resume...', percent: 45 });
 
   // ─── WAVE 2: Enhancement layer (parallel) ──────────────────────────────────
   const rawSuggestedSkills = skillsResult?.suggested_skills as Record<string, unknown> | undefined;
@@ -200,7 +207,7 @@ export async function buildFullResume(
         fieldOfStudy,
         degree,
         academicLevel: 'undergraduate',
-        careerGoal: careerGoal + jdContext,
+        careerGoal: careerGoal + jdContextBlock,
         topSkills: topSkillsList,
         bestExperience: bestWorkEntry
           ? `${bestWorkEntry.position} at ${bestWorkEntry.company}: ${bestWorkEntry.description?.slice(0, 120)}`
@@ -287,8 +294,6 @@ export async function buildFullResume(
   const scoreResult = wave2Results[1] as Record<string, unknown> | null;
   const nyscResult = nyscResultIndex >= 0 ? wave2Results[nyscResultIndex] as Record<string, unknown> | null : null;
 
-  onProgress({ step: 3, message: 'Tailoring your skills for your target role...', percent: 55 });
-
   // ─── WAVE 3: Master Assembler ───────────────────────────────────────────────
   const workOutputForAssembler = workResults
     .filter(w => w.result !== null)
@@ -298,6 +303,8 @@ export async function buildFullResume(
     .filter(p => p.result !== null)
     .map(p => ({ id: p.id, bullets: (p.result as Record<string, unknown>)?.bullets ?? [] }));
 
+  onProgress({ step: 4, message: 'Assembling your final resume...', percent: 62 });
+
   const assemblerResult = await safeCall(
     () => invokeGroqAction('master_assembler', {
       summaryOutput: summaryResult,
@@ -306,7 +313,7 @@ export async function buildFullResume(
       projectsOutput: projOutputForAssembler,
       skillsOutput: skillsResult,
       certsOutput: certsResult,
-      careerGoal: careerGoal + jdContext,
+      careerGoal: careerGoal + jdContextBlock,
       hasExperience,
       targetMarket: 'Nigeria',
     }),
@@ -314,7 +321,7 @@ export async function buildFullResume(
     'master_assembler'
   ) as MasterAssemblerResult | null;
 
-  onProgress({ step: 4, message: 'Assembling your final resume...', percent: 72 });
+  onProgress({ step: 5, message: 'Running quality checks...', percent: 82 });
 
   // ─── WAVE 4: Shareable copy ─────────────────────────────────────────────────
   await safeCall(
@@ -329,8 +336,6 @@ export async function buildFullResume(
     null,
     'shareable_link'
   );
-
-  onProgress({ step: 5, message: 'Running quality checks...', percent: 90 });
 
   // ─── Build Partial<ResumeData> updates ─────────────────────────────────────
   const updates: Partial<ResumeData> = {};

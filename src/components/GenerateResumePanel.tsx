@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils';
 
 const PROGRESS_STEPS = [
   'Reading your profile...',
-  'Rewriting your experience with AI...',
-  'Tailoring your skills for your target role...',
+  'Enhancing each section with AI...',
+  'Writing your summary & scoring resume...',
   'Assembling your final resume...',
   'Running quality checks...',
   'Your resume is ready!',
