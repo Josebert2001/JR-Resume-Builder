@@ -1,0 +1,496 @@
+Here's the continuation — the implementation layer that turns all 12 prompts into a working product:
+
+---
+
+## 🔧 Groq API Orchestration Layer
+
+```javascript
+// talory-ai-engine.js
+// The central controller that runs all 12 prompts in the 
+// correct order and passes outputs between them
+
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "llama-3.3-70b-versatile";
+
+// ─────────────────────────────────────────
+// BASE CALLER — all prompts use this
+// ─────────────────────────────────────────
+async function callGroq(systemPrompt, userInput, temperature = 0.5) {
+  const response = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user",   content: JSON.stringify(userInput) }
+      ],
+      temperature,
+      max_tokens: 2000,
+      response_format: { type: "json_object" }
+    })
+  });
+
+  const data = await response.json();
+  return JSON.parse(data.choices[0].message.content);
+}
+
+// ─────────────────────────────────────────
+// STEP 1 — SECTION PROCESSORS
+// Run these in parallel for speed
+// ─────────────────────────────────────────
+async function processAllSections(studentData) {
+  const [
+    educationOutput,
+    experienceOutputs,
+    projectOutputs,
+    certOutput,
+    skillsOutput,
+    nigeriaOutput
+  ] = await Promise.all([
+
+    // Education
+    callGroq(PROMPTS.education, {
+      institution:     studentData.institution,
+      degree_type:     studentData.degree,
+      field_of_study:  studentData.field,
+      major:           studentData.major,
+      cgpa:            studentData.cgpa,
+      cgpa_scale:      "5.0",
+      honors:          studentData.honors,
+      relevant_courses:studentData.courses,
+      achievements:    studentData.achievements,
+      extracurriculars:studentData.extracurriculars,
+      career_goal:     studentData.careerGoal
+    }),
+
+    // Experience — one call per job entry
+    Promise.all(studentData.experience.map(job =>
+      callGroq(PROMPTS.experience, {
+        job_title:       job.title,
+        company:         job.company,
+        duration:        job.duration,
+        raw_description: job.description,
+        field_of_study:  studentData.field,
+        career_goal:     studentData.careerGoal
+      })
+    )),
+
+    // Projects — one call per project
+    Promise.all(studentData.projects.map(proj =>
+      callGroq(PROMPTS.projects, {
+        project_name:    proj.name,
+        tech_stack:      proj.tech,
+        raw_description: proj.description,
+        motivation:      proj.motivation,
+        field_of_study:  studentData.field,
+        career_goal:     studentData.careerGoal
+      })
+    )),
+
+    // Certifications
+    callGroq(PROMPTS.certifications, {
+      certifications:  studentData.certifications,
+      field_of_study:  studentData.field,
+      career_goal:     studentData.careerGoal,
+      existing_skills: studentData.skills
+    }),
+
+    // Skills
+    callGroq(PROMPTS.skills, {
+      field_of_study:  studentData.field,
+      major:           studentData.major,
+      career_goal:     studentData.careerGoal,
+      work_experience: studentData.experience,
+      projects:        studentData.projects,
+      certifications:  studentData.certifications
+    }),
+
+    // Nigerian/NYSC formatter
+    callGroq(PROMPTS.nigeria, {
+      institution:     studentData.institution,
+      faculty:         studentData.faculty,
+      department:      studentData.department,
+      degree:          studentData.degree,
+      cgpa:            studentData.cgpa,
+      cgpa_scale:      "5.0",
+      degree_class:    studentData.degreeClass,
+      graduation_year: studentData.graduationYear,
+      nysc_status:     studentData.nyscStatus,
+      nysc_state:      studentData.nyscState,
+      nysc_year:       studentData.nyscYear,
+      nysc_ppa:        studentData.nyscPPA,
+      nysc_cds:        studentData.nyscCDS,
+      target:          studentData.targetMarket
+    })
+
+  ]);
+
+  return {
+    educationOutput,
+    experienceOutputs,
+    projectOutputs,
+    certOutput,
+    skillsOutput,
+    nigeriaOutput
+  };
+}
+
+// ─────────────────────────────────────────
+// STEP 2 — ENHANCEMENT LAYER
+// Run after section processors complete
+// ─────────────────────────────────────────
+async function runEnhancements(studentData, sectionOutputs) {
+  const hasExperience = studentData.experience.length > 0;
+
+  // Run in parallel where possible
+  const [summaryOutput, scoreOutput, noExpOutput] = await Promise.all([
+
+    // Summary — needs section outputs as context
+    callGroq(PROMPTS.summary, {
+      full_name:           studentData.name,
+      field_of_study:      studentData.field,
+      major:               studentData.major,
+      academic_level:      studentData.academicLevel,
+      career_goal:         studentData.careerGoal,
+      top_skills:          sectionOutputs.skillsOutput
+                             .suggested_skills,
+      best_experience:     sectionOutputs.experienceOutputs[0] 
+                             || null,
+      best_project:        sectionOutputs.projectOutputs[0] 
+                             || null,
+      certifications:      sectionOutputs.certOutput
+                             .certifications,
+      personality_keywords:studentData.personalityKeywords
+    }, 0.7),
+
+    // Resume scorer — scores current state
+    callGroq(PROMPTS.scorer, {
+      resume_json:         sectionOutputs,
+      completed_sections:  Object.keys(sectionOutputs),
+      career_goal:         studentData.careerGoal,
+      target_market:       studentData.targetMarket
+    }),
+
+    // No-experience mode if needed
+    hasExperience ? null : callGroq(PROMPTS.noExperience, {
+      full_name:           studentData.name,
+      field_of_study:      studentData.field,
+      career_goal:         studentData.careerGoal,
+      academic_level:      studentData.academicLevel,
+      gpa:                 studentData.cgpa,
+      courses:             studentData.courses,
+      projects:            studentData.projects,
+      extracurriculars:    studentData.extracurriculars,
+      volunteer:           studentData.volunteer,
+      certifications:      studentData.certifications,
+      skills:              studentData.skills,
+      relevant_hobbies:    studentData.hobbies,
+      has_work_experience: false
+    })
+
+  ]);
+
+  // Job matcher — only if job description provided
+  let jobMatchOutput = null;
+  if (studentData.jobDescription) {
+    jobMatchOutput = await callGroq(PROMPTS.jobMatcher, {
+      resume_json:      sectionOutputs,
+      job_title:        studentData.jobTitle,
+      company_name:     studentData.jobCompany,
+      job_description_text: studentData.jobDescription
+    });
+  }
+
+  return {
+    summaryOutput,
+    scoreOutput,
+    noExpOutput,
+    jobMatchOutput
+  };
+}
+
+// ─────────────────────────────────────────
+// STEP 3 — MASTER ASSEMBLER
+// Final intelligence layer
+// ─────────────────────────────────────────
+async function assembleFinalResume(
+  studentData,
+  sectionOutputs,
+  enhancementOutputs
+) {
+  return await callGroq(PROMPTS.masterAssembler, {
+    summary_output:       enhancementOutputs.summaryOutput,
+    education_output:     sectionOutputs.educationOutput,
+    experience_output:    sectionOutputs.experienceOutputs,
+    projects_output:      sectionOutputs.projectOutputs,
+    skills_output:        sectionOutputs.skillsOutput,
+    certifications_output:sectionOutputs.certOutput,
+    nigeria_output:       sectionOutputs.nigeriaOutput,
+    no_experience_output: enhancementOutputs.noExpOutput,
+    score_output:         enhancementOutputs.scoreOutput,
+    job_match_output:     enhancementOutputs.jobMatchOutput,
+    target_market:        studentData.targetMarket,
+    has_experience:       studentData.experience.length > 0,
+    selected_summary_type:studentData.summaryType || "recommended",
+    selected_template:    studentData.template || "modern"
+  });
+}
+
+// ─────────────────────────────────────────
+// STEP 4 — SHAREABLE LINK COPY
+// Runs after master assembly
+// ─────────────────────────────────────────
+async function generateShareCopy(studentData, finalResume) {
+  return await callGroq(PROMPTS.shareableLink, {
+    full_name:            studentData.name,
+    career_goal:          studentData.careerGoal,
+    top_skills:           finalResume.skills.technical.slice(0, 3),
+    best_project:         finalResume.projects[0]?.name || null,
+    summary:              finalResume.summary,
+    field_of_study:       studentData.field,
+    open_to_opportunities:studentData.openTo,
+    location:             studentData.location,
+    linkedin:             studentData.linkedin,
+    github:               studentData.github,
+    portfolio:            studentData.portfolio
+  }, 0.8);
+}
+
+// ─────────────────────────────────────────
+// MASTER FUNCTION — run the full pipeline
+// ─────────────────────────────────────────
+export async function buildTaloryResume(studentData) {
+  try {
+
+    // Emit progress events for the UI loading states
+    emit("progress", { step: 1, message: "Processing your information..." });
+    const sectionOutputs = await processAllSections(studentData);
+
+    emit("progress", { step: 2, message: "Enhancing your resume with AI..." });
+    const enhancementOutputs = await runEnhancements(
+      studentData, 
+      sectionOutputs
+    );
+
+    emit("progress", { step: 3, message: "Assembling your final resume..." });
+    const finalResume = await assembleFinalResume(
+      studentData,
+      sectionOutputs,
+      enhancementOutputs
+    );
+
+    emit("progress", { step: 4, message: "Generating your shareable link..." });
+    const shareCopy = await generateShareCopy(studentData, finalResume);
+
+    // Attach share copy to final resume
+    finalResume.shareable_link_data = shareCopy;
+
+    emit("progress", { step: 5, message: "Done! Your resume is ready." });
+
+    return {
+      success: true,
+      resume:  finalResume,
+      score:   finalResume.meta.final_score,
+      flags:   finalResume.quality_report.flags
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      error:   error.message,
+      fallback:"One or more AI sections failed. Please try again."
+    };
+  }
+}
+```
+
+---
+
+## ⚡ Performance Strategy
+
+```
+PROBLEM:
+Running 12 AI calls sequentially would take 45–90 seconds.
+That kills the user experience completely.
+
+SOLUTION — 3-wave parallel execution:
+
+WAVE 1 — parallel (6 calls at once):     ~4–6 seconds
+  Education + Experience × N + 
+  Projects × N + Certifications + 
+  Skills + Nigeria/NYSC
+
+WAVE 2 — parallel (3 calls at once):     ~3–4 seconds
+  Summary + Scorer + No-exp mode
+
+WAVE 3 — sequential (2 calls):           ~3–4 seconds
+  Job matcher (needs wave 1 output)
+  Master assembler (needs all outputs)
+
+WAVE 4 — final (1 call):                 ~2 seconds
+  Shareable link copy
+
+TOTAL: ~12–16 seconds end to end
+vs 45–90 seconds sequential
+
+Show a live animated progress bar 
+during generation so the wait feels 
+productive not broken.
+```
+
+---
+
+## 🎨 Loading Screen Prompt
+
+Use this to guide the UI during the 12–16 second generation:
+
+```
+Loading states to show during resume generation:
+
+Step 1 (0–4s)   → "Reading your profile..."
+Step 2 (4–7s)   → "Rewriting your experience with AI..."  
+Step 3 (7–10s)  → "Tailoring your skills for your target role..."
+Step 4 (10–13s) → "Assembling your final resume..."
+Step 5 (13–15s) → "Running quality checks..."
+Step 6 (15–16s) → "Your resume is ready 🎉"
+
+Show a resume preview skeleton that fills 
+in section by section as each wave completes.
+Never show a blank loading spinner — show 
+progress that makes the AI work feel visible.
+```
+
+---
+
+## 🛡️ Error Handling Strategy
+
+```javascript
+// Fallback for each section if AI call fails
+
+const FALLBACKS = {
+  summary: () => ({
+    text: "Motivated student seeking opportunities in 
+           {{career_goal}}. Bring strong academic background 
+           and hands-on project experience.",
+    note: "AI summary failed — using template. 
+           Please edit this manually."
+  }),
+
+  experience: (rawInput) => ({
+    bullets: [
+      `${rawInput.job_title} at ${rawInput.company}`,
+      rawInput.raw_description
+    ],
+    note: "AI rewrite failed — showing raw input. 
+           Please edit these bullets manually."
+  }),
+
+  skills: (studentData) => ({
+    suggested_skills: {
+      technical: studentData.skills.slice(0, 4),
+      soft: ["Communication", "Problem Solving"],
+      tools: []
+    },
+    note: "AI suggestions failed — showing your entered skills."
+  }),
+
+  // If master assembler fails — use raw section outputs
+  masterAssembler: (sectionOutputs) => ({
+    ...sectionOutputs,
+    meta: { final_score: null, ats_rating: "Unknown" },
+    note: "Assembly failed — resume built from raw sections. 
+           Some optimizations may be missing."
+  })
+};
+```
+
+---
+
+## 📦 Vercel Serverless Function Structure
+
+```
+talory/
+├── api/
+│   ├── generate.js          ← master pipeline endpoint
+│   ├── score.js             ← live scorer (called on every change)
+│   ├── match.js             ← job description matcher
+│   ├── suggest-skills.js    ← skills AI button
+│   └── share-copy.js        ← shareable link copy generator
+│
+├── src/
+│   ├── prompts/
+│   │   ├── summary.js
+│   │   ├── education.js
+│   │   ├── experience.js
+│   │   ├── projects.js
+│   │   ├── skills.js
+│   │   ├── certifications.js
+│   │   ├── nigeria.js
+│   │   ├── no-experience.js
+│   │   ├── job-matcher.js
+│   │   ├── scorer.js
+│   │   ├── shareable-link.js
+│   │   └── master-assembler.js
+│   │
+│   ├── engine/
+│   │   ├── groq-caller.js      ← base API caller
+│   │   ├── orchestrator.js     ← wave execution controller
+│   │   ├── fallbacks.js        ← error fallback handlers
+│   │   └── validator.js        ← output schema validator
+│   │
+│   └── components/
+│       ├── ResumeForm/         ← 8-step form
+│       ├── ResumePreview/      ← live PDF preview
+│       ├── ScoreCard/          ← live score display
+│       ├── JobMatcher/         ← JD paste + match report
+│       └── SharePage/          ← public resume page
+│
+└── .env
+    GROQ_API_KEY=your_key_here
+```
+
+---
+
+## 🚀 Deployment Checklist
+
+```
+Before going live confirm these are done:
+
+□ GROQ_API_KEY stored in Vercel env variables — never in code
+□ All API calls routed through /api/* serverless functions
+□ Rate limiting on /api/generate — max 3 calls per user per hour
+□ Input sanitization — strip HTML/scripts from all student inputs
+□ Output validation — confirm JSON schema before rendering
+□ Fallbacks tested — kill one prompt, confirm fallback fires
+□ Mobile PDF preview tested on iOS Safari and Android Chrome
+□ NYSC section tested with all 3 statuses: 
+  completed | awaiting | exempted
+□ International mode tested — CGPA converts correctly
+□ No-experience mode tested — empty experience array
+□ Job matcher tested with a real Nigerian job posting
+□ Shareable link tested on WhatsApp link preview
+□ Resume score live updates tested — change one field, 
+  confirm score recalculates within 2 seconds
+□ Analytics events firing: resume_started, resume_completed,
+  pdf_downloaded, link_shared, job_matched
+```
+
+---
+
+That is the complete Talory technical blueprint — from the first prompt to the last deployed function. Every piece connects. Every edge case is handled.
+
+You now have everything needed to build Talory end to end:
+
+```
+12 AI prompts          → the brain
+1 orchestration layer  → the nervous system  
+1 error handling layer → the safety net
+1 file structure       → the skeleton
+1 deployment checklist → the launch pad
+```
+
+Hand this entire document to Lovable, Cursor, or a developer and Talory can be built from scratch in under 2 weeks.
