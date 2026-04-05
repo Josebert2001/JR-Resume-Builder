@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Share2, Loader2, Sparkles, Copy, CheckCircle2, MessageCircle, Linkedin, Mail, Globe, Tag } from 'lucide-react';
-import { useResumeContext } from '@/context/ResumeContext';
+import { useResumeContext, type Skill, type Certification } from '@/context/ResumeContext';
 import { generateShareableCopy, type ShareableCopyResult } from '@/services/resumeAI';
 import { toast } from 'sonner';
 
@@ -55,9 +55,9 @@ export const ShareableResumePanel = () => {
     try {
       const pi = resumeData.personalInfo;
       const fullName = [pi?.firstName, pi?.lastName].filter(Boolean).join(' ');
-      const topSkills = (resumeData.skills || []).slice(0, 5).map((s: any) => s.name).join(', ');
+      const topSkills = (resumeData.skills || []).slice(0, 5).map((s: Skill) => s.name).join(', ');
       const fieldOfStudy = resumeData.education?.[0]?.fieldOfStudy || '';
-      const certNames = (resumeData.certifications || []).map((c: any) => c.name).join(', ');
+      const certNames = (resumeData.certifications || []).map((c: Certification) => c.name).join(', ');
       const bestAchievement = certNames || (resumeData.projects?.[0]?.name ? `Built ${resumeData.projects[0].name}` : '');
 
       const res = await generateShareableCopy({

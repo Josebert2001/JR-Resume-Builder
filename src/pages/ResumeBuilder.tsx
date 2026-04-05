@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectsForm } from '@/components/ProjectsForm';
 import { CertificationsForm } from '@/components/CertificationsForm';
 import { PageHeader } from '@/components/PageHeader';
-import { ResumeImprover } from '@/components/ResumeImprover';
 import { ResumeUpload } from '@/components/ResumeUpload';
 import { ResumeScorePanel } from '@/components/ResumeScorePanel';
 import { JobMatchPanel } from '@/components/JobMatchPanel';
@@ -87,7 +86,7 @@ const ResumeBuilder = () => {
               <ResumeTemplates />
             </TabsContent>
             <TabsContent value="analyze">
-              <ResumeImprover resumeData={resumeData} />
+              <ResumeUpload />
             </TabsContent>
           </Tabs>
           </>
