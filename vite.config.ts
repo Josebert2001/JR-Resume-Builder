@@ -22,10 +22,14 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
+          // Only split truly isolated heavy libraries that are loaded lazily.
+          // DO NOT split React or any React-dependent UI libraries (Radix, etc.)
+          // into separate chunks — doing so causes createContext initialization
+          // order errors when chunks load before React is ready.
           if (id.includes("@react-pdf/renderer") || id.includes("@react-pdf")) {
             return "vendor-pdf";
           }
@@ -34,25 +38,6 @@ export default defineConfig({
           }
           if (id.includes("html2canvas")) {
             return "vendor-canvas";
-          }
-          if (id.includes("node_modules/lucide-react")) {
-            return "vendor-icons";
-          }
-          if (
-            id.includes("node_modules/react/") ||
-            id.includes("node_modules/react-dom/") ||
-            id.includes("node_modules/react-router-dom/")
-          ) {
-            return "vendor-react";
-          }
-          if (id.includes("node_modules/@radix-ui/")) {
-            return "vendor-radix";
-          }
-          if (id.includes("node_modules/@tanstack/")) {
-            return "vendor-query";
-          }
-          if (id.includes("node_modules/")) {
-            return "vendor-misc";
           }
         },
       },
