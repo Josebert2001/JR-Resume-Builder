@@ -1,4 +1,6 @@
 import React from 'react';
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from 'lucide-react';
 import { PersonalInfoForm } from '@/components/PersonalInfoForm';
 import { EducationForm } from '@/components/EducationForm';
 import { ResumePreview } from '@/components/ResumePreview';
@@ -20,7 +22,7 @@ import { ShareableResumePanel } from '@/components/ShareableLink';
 const STEP_LABELS = ['Template', 'Info', 'Education', 'Work', 'Skills', 'Projects', 'Certifications', 'Preview'];
 
 const ResumeBuilder = () => {
-  const { currentStep, resumeData } = useResumeContext();
+  const { currentStep, resumeData, prevStep } = useResumeContext();
   const totalSteps = STEP_LABELS.length;
 
   return (
@@ -41,6 +43,19 @@ const ResumeBuilder = () => {
         {currentStep === 7 && <CertificationsForm />}
 
         {currentStep === 8 && (
+          <>
+          <div className="mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={prevStep}
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 px-2"
+              data-testid="button-back-to-builder"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <Tabs defaultValue="preview" className="w-full">
             <div className="overflow-x-auto mb-8 -mx-1 px-1">
               <TabsList className="inline-flex min-w-max gap-1 p-1 h-auto">
@@ -75,6 +90,7 @@ const ResumeBuilder = () => {
               <ResumeImprover resumeData={resumeData} />
             </TabsContent>
           </Tabs>
+          </>
         )}
       </div>
     </div>

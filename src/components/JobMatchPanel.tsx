@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { Sparkles, Loader2, CheckCircle2, XCircle, Target, AlertTriangle } from 'lucide-react';
-import { useResumeContext } from '@/context/ResumeContext';
+import { useResumeContext, type ResumeData, type WorkExperience, type Project, type Skill, type Education, type Certification } from '@/context/ResumeContext';
 import { matchJobDescription, type JobMatchResult, type MissingKeyword, type SectionFix } from '@/services/resumeAI';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -33,25 +33,25 @@ function importanceColor(importance: string) {
   return 'bg-gray-50 text-gray-600 border-gray-200';
 }
 
-function buildResumeText(resumeData: any): string {
+function buildResumeText(resumeData: ResumeData): string {
   const pi = resumeData.personalInfo;
   const parts: string[] = [];
   if (pi?.summary) parts.push(`Summary: ${pi.summary}`);
   const exp = (resumeData.workExperience || [])
-    .map((w: any) => `${w.position} at ${w.company} (${w.startDate}–${w.endDate || 'Present'}): ${w.description}`)
+    .map((w: WorkExperience) => `${w.position} at ${w.company} (${w.startDate}–${w.endDate || 'Present'}): ${w.description}`)
     .join('\n');
   if (exp) parts.push(`Experience:\n${exp}`);
   const proj = (resumeData.projects || [])
-    .map((p: any) => `${p.name}: ${p.description}${p.technologies ? ` [${p.technologies}]` : ''}`)
+    .map((p: Project) => `${p.name}: ${p.description}${p.technologies ? ` [${p.technologies}]` : ''}`)
     .join('\n');
   if (proj) parts.push(`Projects:\n${proj}`);
-  const skills = (resumeData.skills || []).map((s: any) => s.name).join(', ');
+  const skills = (resumeData.skills || []).map((s: Skill) => s.name).join(', ');
   if (skills) parts.push(`Skills: ${skills}`);
   const edu = (resumeData.education || [])
-    .map((e: any) => `${e.degree} in ${e.fieldOfStudy} — ${e.school}`)
+    .map((e: Education) => `${e.degree} in ${e.fieldOfStudy} — ${e.school}`)
     .join('\n');
   if (edu) parts.push(`Education:\n${edu}`);
-  const certs = (resumeData.certifications || []).map((c: any) => `${c.name} — ${c.issuer}`).join(', ');
+  const certs = (resumeData.certifications || []).map((c: Certification) => `${c.name} — ${c.issuer}`).join(', ');
   if (certs) parts.push(`Certifications: ${certs}`);
   return parts.join('\n\n');
 }

@@ -6,11 +6,25 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Sparkles, Loader2, CheckCircle2, Copy } from 'lucide-react';
-import { formatNigerianEducation, type NigerianNyscResult } from '@/services/resumeAI';
+import { formatNigerianEducation, type NigerianNyscResult, type NyscVersion } from '@/services/resumeAI';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const NYSC_STATUSES = ['Awaiting', 'Serving', 'Completed', 'Exempted'] as const;
+
+function extractGpa(line: string | undefined): string | undefined {
+  if (!line) return undefined;
+  const match = line.match(/(\d+\.\d+(?:\/\d+\.\d+)?)/);
+  return match ? match[1] : undefined;
+}
+
+function versionToDescription(version: NyscVersion): string {
+  const lines: string[] = [];
+  if (version.nysc_line) lines.push(version.nysc_line);
+  if (version.service_line) lines.push(version.service_line);
+  (version.bullets || []).forEach(b => lines.push(`• ${b}`));
+  return lines.join('\n');
+}
 
 interface Props {
   institution: string;
@@ -20,6 +34,7 @@ interface Props {
   cgpa?: string;
   degreeClass?: string;
   careerGoal?: string;
+  onApply?: (description: string, gpa?: string) => void;
 }
 
 export const NigerianNyscPanel = ({
@@ -30,6 +45,7 @@ export const NigerianNyscPanel = ({
   cgpa = '',
   degreeClass = '',
   careerGoal = '',
+  onApply,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [nyscStatus, setNyscStatus] = useState('');
@@ -73,8 +89,32 @@ export const NigerianNyscPanel = ({
     });
   };
 
-  const allResultLines = (version: any) =>
+  const allResultLines = (version: NyscVersion) =>
     [version.degree_line, version.cgpa_line || version.gpa_line, version.nysc_line || version.service_line, ...(version.bullets || [])].filter(Boolean).join('\n');
+
+  const handleApplyLocal = () => {
+    if (!result) return;
+    const description = versionToDescription(result.local_version);
+    const gpa = extractGpa(result.local_version.cgpa_line);
+    if (onApply) {
+      onApply(description, gpa);
+      toast.success('Local version applied to your education entry!');
+    } else {
+      toast.info('Applied! Update your education entries with this format.');
+    }
+  };
+
+  const handleApplyInternational = () => {
+    if (!result) return;
+    const description = versionToDescription(result.international_version);
+    const gpa = extractGpa(result.international_version.gpa_line);
+    if (onApply) {
+      onApply(description, gpa);
+      toast.success('International version applied to your education entry!');
+    } else {
+      toast.info('Applied! Update your education entries with this format.');
+    }
+  };
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -217,7 +257,7 @@ export const NigerianNyscPanel = ({
                   size="sm"
                   variant="outline"
                   className="w-full text-xs h-7 border-green-300 text-green-700"
-                  onClick={() => toast.info('Applied! Update your education entries with this format.')}
+                  onClick={handleApplyLocal}
                   data-testid="button-apply-local"
                 >
                   Apply Local Version
@@ -249,7 +289,7 @@ export const NigerianNyscPanel = ({
                   size="sm"
                   variant="outline"
                   className="w-full text-xs h-7 border-blue-300 text-blue-700"
-                  onClick={() => toast.info('Applied! Update your education entries with this format.')}
+                  onClick={handleApplyInternational}
                   data-testid="button-apply-international"
                 >
                   Apply International Version

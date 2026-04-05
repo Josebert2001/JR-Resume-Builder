@@ -320,6 +320,10 @@ export const EducationForm = () => {
                     graduationYear={edu.graduationDate || ''}
                     cgpa={edu.gpa || ''}
                     careerGoal={resumeData.personalInfo?.summary?.slice(0, 80) || ''}
+                    onApply={(description, gpa) => {
+                      handleEducationChange(edu.id, 'description', description);
+                      if (gpa) handleEducationChange(edu.id, 'gpa', gpa);
+                    }}
                   />
                 </div>
               </Card>

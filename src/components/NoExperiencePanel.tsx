@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, CheckCircle2, ChevronDown, ChevronUp, Lightbulb, LayoutList, Calendar } from 'lucide-react';
-import { useResumeContext } from '@/context/ResumeContext';
+import { useResumeContext, type Education, type Project, type Skill, type Certification } from '@/context/ResumeContext';
 import { buildNoExperienceResume, type NoExperienceResult } from '@/services/resumeAI';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -20,13 +20,13 @@ export const NoExperienceBanner = () => {
     try {
       const pi = resumeData.personalInfo;
       const education = (resumeData.education || [])
-        .map((e: any) => `${e.degree} in ${e.fieldOfStudy} — ${e.school}`)
+        .map((e: Education) => `${e.degree} in ${e.fieldOfStudy} — ${e.school}`)
         .join(', ');
       const projects = (resumeData.projects || [])
-        .map((p: any) => `${p.name}: ${p.description}${p.technologies ? ` [${p.technologies}]` : ''}`)
+        .map((p: Project) => `${p.name}: ${p.description}${p.technologies ? ` [${p.technologies}]` : ''}`)
         .join('\n');
-      const skills = (resumeData.skills || []).map((s: any) => s.name).join(', ');
-      const certs = (resumeData.certifications || []).map((c: any) => c.name).join(', ');
+      const skills = (resumeData.skills || []).map((s: Skill) => s.name).join(', ');
+      const certs = (resumeData.certifications || []).map((c: Certification) => c.name).join(', ');
 
       const res = await buildNoExperienceResume({
         fullName: [pi?.firstName, pi?.lastName].filter(Boolean).join(' ') || 'Student',
@@ -60,19 +60,20 @@ export const NoExperienceBanner = () => {
 
   const handleApplySkills = () => {
     if (!result?.tiered_skills) return;
-    const allSkills = [
+    const primaryCount = result.tiered_skills.primary.length;
+    const allSkills: Skill[] = [
       ...result.tiered_skills.primary,
       ...result.tiered_skills.supporting,
-    ].map((name, i) => ({ id: `noskill-${i}`, name, level: i < result.tiered_skills.primary.length ? 'Advanced' : 'Intermediate' }));
+    ].map((name, i) => ({ id: `noskill-${i}`, name, level: i < primaryCount ? 4 : 3 }));
     updateResumeData({ skills: allSkills });
     toast.success('Skills updated!');
   };
 
   const handleApplyProject = (p: { project_name: string; role_title: string; bullets: string[] }) => {
-    const existing = resumeData.projects || [];
-    const match = existing.find((pr: any) => pr.name?.toLowerCase() === p.project_name?.toLowerCase());
+    const existing: Project[] = resumeData.projects || [];
+    const match = existing.find((pr: Project) => pr.name?.toLowerCase() === p.project_name?.toLowerCase());
     if (match) {
-      const updated = existing.map((pr: any) =>
+      const updated = existing.map((pr: Project) =>
         pr.name?.toLowerCase() === p.project_name?.toLowerCase()
           ? { ...pr, description: p.bullets.map((b: string) => `• ${b}`).join('\n') }
           : pr
