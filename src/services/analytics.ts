@@ -1,6 +1,6 @@
 interface AnalyticsEvent {
   event: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, string | number | boolean | null | undefined>;
   userId?: string;
 }
 
@@ -16,7 +16,7 @@ class AnalyticsService {
     this.userId = userId;
   }
 
-  track(event: string, properties?: Record<string, any>) {
+  track(event: string, properties?: Record<string, string | number | boolean | null | undefined>) {
     if (!this.isEnabled) return;
 
     const eventData: AnalyticsEvent = {
@@ -30,9 +30,8 @@ class AnalyticsService {
       userId: this.userId || undefined,
     };
 
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📊 Analytics Event:', eventData);
+    if (import.meta.env.DEV) {
+      console.log('Analytics Event:', eventData);
     }
 
     // Store in localStorage for later batch sending

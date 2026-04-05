@@ -21,4 +21,41 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("@react-pdf/renderer") || id.includes("@react-pdf")) {
+            return "vendor-pdf";
+          }
+          if (id.includes("node_modules/docx")) {
+            return "vendor-docx";
+          }
+          if (id.includes("html2canvas")) {
+            return "vendor-canvas";
+          }
+          if (id.includes("node_modules/lucide-react")) {
+            return "vendor-icons";
+          }
+          if (
+            id.includes("node_modules/react/") ||
+            id.includes("node_modules/react-dom/") ||
+            id.includes("node_modules/react-router-dom/")
+          ) {
+            return "vendor-react";
+          }
+          if (id.includes("node_modules/@radix-ui/")) {
+            return "vendor-radix";
+          }
+          if (id.includes("node_modules/@tanstack/")) {
+            return "vendor-query";
+          }
+          if (id.includes("node_modules/")) {
+            return "vendor-misc";
+          }
+        },
+      },
+    },
+  },
 });

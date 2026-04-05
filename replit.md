@@ -74,6 +74,15 @@
 - **PDF**: `src/services/pdfService.ts` (html2canvas + jsPDF)
 - **Word (.docx)**: `src/services/docxService.ts` (docx library)
 
+## Production Build Notes
+- Code splitting in `vite.config.ts` via `manualChunks` — separates vendor-pdf, vendor-docx, vendor-canvas, vendor-icons, vendor-react, vendor-radix, vendor-query, vendor-misc
+- ResumeBuilder chunk: was 2,380 kB → now 165 kB after splitting (93% reduction)
+- Rate limit store has 5-minute interval cleanup to prevent memory leak
+- TypeScript: 0 errors (`npx tsc --noEmit` clean)
+- `analytics.ts` uses `import.meta.env.DEV` (not `process.env.NODE_ENV`)
+- WorkExperienceForm validates end date is after start date
+- CORS is open to all origins (acceptable for current scale; restrict to app domain before high traffic)
+
 ## Important Notes
 - Date inputs always use `type="text"` (iOS compatibility)
 - Resume template components must NOT be modified

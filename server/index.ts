@@ -15,6 +15,14 @@ app.use(express.json({ limit: "10mb" }));
 
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
+// Prune expired entries every 5 minutes to prevent memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitStore.entries()) {
+    if (now >= entry.resetTime) rateLimitStore.delete(key);
+  }
+}, 5 * 60 * 1000);
+
 function isRateLimited(
   userId: string,
   action: string

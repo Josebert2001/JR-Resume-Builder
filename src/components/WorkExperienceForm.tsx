@@ -20,6 +20,7 @@ interface EntryErrors {
   position?: string;
   company?: string;
   startDate?: string;
+  endDate?: string;
 }
 
 export const WorkExperienceForm = () => {
@@ -135,11 +136,25 @@ export const WorkExperienceForm = () => {
     const newErrors: Record<string, EntryErrors> = {};
     let hasError = false;
 
+    const parseDate = (s: string) => {
+      const cleaned = s.trim().replace(/[–—]/g, '-');
+      const d = new Date(cleaned);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
     experiences.forEach(exp => {
       const errors: EntryErrors = {};
       if (!exp.position.trim()) { errors.position = 'Job title is required'; hasError = true; }
       if (!exp.company.trim()) { errors.company = 'Company is required'; hasError = true; }
       if (!exp.startDate.trim()) { errors.startDate = 'Start date is required'; hasError = true; }
+      if (exp.endDate?.trim() && exp.startDate?.trim()) {
+        const start = parseDate(exp.startDate);
+        const end = parseDate(exp.endDate);
+        if (start && end && end < start) {
+          errors.endDate = 'End date must be after start date';
+          hasError = true;
+        }
+      }
       if (Object.keys(errors).length) newErrors[exp.id] = errors;
     });
 
@@ -298,8 +313,13 @@ export const WorkExperienceForm = () => {
                         value={experience.endDate}
                         onChange={(e) => handleUpdateExperience(experience.id, 'endDate', e.target.value)}
                         placeholder="e.g., Dec 2024 or Present"
-                        className="mt-1.5"
+                        className={cn("mt-1.5", entryErrors[experience.id]?.endDate && "border-red-400 focus-visible:ring-red-400")}
                       />
+                      {entryErrors[experience.id]?.endDate && (
+                        <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />{entryErrors[experience.id]?.endDate}
+                        </p>
+                      )}
                     </div>
                   </div>
 
