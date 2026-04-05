@@ -56,13 +56,23 @@ async function safeCall<T>(
   }
 }
 
+function extractSkillNames(arr: unknown): string[] {
+  if (!Array.isArray(arr)) return [];
+  return arr.map((s: unknown) => {
+    if (typeof s === 'string') return s;
+    if (typeof s === 'object' && s !== null && 'name' in s) {
+      return String((s as Record<string, unknown>).name);
+    }
+    return String(s);
+  }).filter(Boolean);
+}
+
 export async function buildFullResume(
   resumeData: ResumeData,
   onProgress: (p: OrchestratorProgress) => void,
   options: {
     includeNysc?: boolean;
     jobDescription?: string;
-    jobTitle?: string;
   } = {}
 ): Promise<OrchestratorResult> {
   const pi = resumeData.personalInfo;
@@ -76,12 +86,13 @@ export async function buildFullResume(
   const certifications: Certification[] = resumeData.certifications || [];
   const existingSkills: Skill[] = resumeData.skills || [];
   const hasExperience = workExp.length > 0;
+  const { jobDescription = '' } = options;
 
   const appliedSections: string[] = [];
 
   onProgress({ step: 1, message: 'Reading your profile...', percent: 5 });
 
-  // ─── WAVE 1: Section processors (parallel) ─────────────────────────────────
+  // ─── Derived text strings for prompt context ────────────────────────────────
   const certsText = certifications.map((c: Certification) => `${c.name} — ${c.issuer}`).join(', ');
   const skillsText = existingSkills.map((s: Skill) => s.name).join(', ');
   const workExpText = workExp.map((w: WorkExperience) =>
@@ -90,7 +101,9 @@ export async function buildFullResume(
   const projectsText = projects.map((p: Project) =>
     `${p.name}: ${p.description}${p.technologies ? ` [${p.technologies}]` : ''}`
   ).join('\n');
+  const jdContext = jobDescription ? `\n\nTarget Job Description:\n${jobDescription.slice(0, 800)}` : '';
 
+  // ─── WAVE 1: Section processors (all parallel) ──────────────────────────────
   const [
     eduResults,
     workResults,
@@ -98,7 +111,6 @@ export async function buildFullResume(
     certsResult,
     skillsResult,
   ] = await Promise.all([
-    // education_v2 per entry
     Promise.all(education.map((edu: Education) =>
       safeCall(
         () => invokeGroqAction('education_v2', {
@@ -111,13 +123,12 @@ export async function buildFullResume(
           gpaScale: '5.0',
           relevantCourses: '',
           achievements: edu.description || '',
-          careerGoal,
+          careerGoal: careerGoal + jdContext,
         }),
         null,
         `education_v2 [${edu.school}]`
       ).then(r => ({ id: edu.id, result: r }))
     )),
-    // work_bullets per entry
     Promise.all(workExp.map((w: WorkExperience) =>
       safeCall(
         () => invokeGroqAction('work_bullets', {
@@ -126,13 +137,12 @@ export async function buildFullResume(
           duration: `${w.startDate} – ${w.endDate || 'Present'}`,
           rawDescription: w.description,
           fieldOfStudy,
-          careerGoal,
+          careerGoal: careerGoal + jdContext,
         }),
         null,
         `work_bullets [${w.company}]`
       ).then(r => ({ id: w.id, result: r }))
     )),
-    // project_bullets per entry
     Promise.all(projects.map((p: Project) =>
       safeCall(
         () => invokeGroqAction('project_bullets', {
@@ -141,13 +151,12 @@ export async function buildFullResume(
           rawDescription: p.description,
           motivation: '',
           fieldOfStudy,
-          careerGoal,
+          careerGoal: careerGoal + jdContext,
         }),
         null,
         `project_bullets [${p.name}]`
       ).then(r => ({ id: p.id, result: r }))
     )),
-    // certifications_v2
     safeCall(
       () => invokeGroqAction('certifications_v2', {
         certificationsList: certsText,
@@ -158,12 +167,11 @@ export async function buildFullResume(
       null,
       'certifications_v2'
     ),
-    // skills_v2
     safeCall(
       () => invokeGroqAction('skills_v2', {
         fieldOfStudy,
         degree,
-        careerGoal,
+        careerGoal: careerGoal + jdContext,
         workExperience: workExpText,
         projects: projectsText,
         certifications: certsText,
@@ -176,22 +184,23 @@ export async function buildFullResume(
   onProgress({ step: 2, message: 'Rewriting your experience with AI...', percent: 30 });
 
   // ─── WAVE 2: Enhancement layer (parallel) ──────────────────────────────────
+  const rawSuggestedSkills = skillsResult?.suggested_skills as Record<string, unknown> | undefined;
+  const techSkillNames = extractSkillNames(rawSuggestedSkills?.technical);
+  const softSkillNames = extractSkillNames(rawSuggestedSkills?.soft);
+  const toolSkillNames = extractSkillNames(rawSuggestedSkills?.tools);
+  const topSkillsList = [...techSkillNames, ...toolSkillNames].slice(0, 6).join(', ') || skillsText;
+
   const bestWorkEntry = workExp[0];
   const bestProjEntry = projects[0];
-  const suggestedSkills = (skillsResult?.suggested_skills as Record<string, unknown[]> | undefined);
-  const topSkillsList = [
-    ...((suggestedSkills?.technical as string[]) || existingSkills.slice(0, 4).map(s => s.name)),
-  ].slice(0, 6).join(', ');
 
   const wave2Calls: Promise<unknown>[] = [
-    // summary_v2
     safeCall(
       () => invokeGroqAction('summary_v2', {
         fullName,
         fieldOfStudy,
         degree,
         academicLevel: 'undergraduate',
-        careerGoal,
+        careerGoal: careerGoal + jdContext,
         topSkills: topSkillsList,
         bestExperience: bestWorkEntry
           ? `${bestWorkEntry.position} at ${bestWorkEntry.company}: ${bestWorkEntry.description?.slice(0, 120)}`
@@ -205,7 +214,6 @@ export async function buildFullResume(
       null,
       'summary_v2'
     ),
-    // resume_score
     safeCall(
       () => invokeGroqAction('resume_score', {
         fullName,
@@ -245,7 +253,9 @@ export async function buildFullResume(
     );
   }
 
+  let nyscResultIndex = -1;
   if (options.includeNysc && education.length > 0) {
+    nyscResultIndex = wave2Calls.length;
     const edu0 = education[0];
     wave2Calls.push(
       safeCall(
@@ -275,6 +285,7 @@ export async function buildFullResume(
   const wave2Results = await Promise.all(wave2Calls);
   const summaryResult = wave2Results[0] as Record<string, unknown> | null;
   const scoreResult = wave2Results[1] as Record<string, unknown> | null;
+  const nyscResult = nyscResultIndex >= 0 ? wave2Results[nyscResultIndex] as Record<string, unknown> | null : null;
 
   onProgress({ step: 3, message: 'Tailoring your skills for your target role...', percent: 55 });
 
@@ -295,7 +306,7 @@ export async function buildFullResume(
       projectsOutput: projOutputForAssembler,
       skillsOutput: skillsResult,
       certsOutput: certsResult,
-      careerGoal,
+      careerGoal: careerGoal + jdContext,
       hasExperience,
       targetMarket: 'Nigeria',
     }),
@@ -306,7 +317,7 @@ export async function buildFullResume(
   onProgress({ step: 4, message: 'Assembling your final resume...', percent: 72 });
 
   // ─── WAVE 4: Shareable copy ─────────────────────────────────────────────────
-  const shareResult = await safeCall(
+  await safeCall(
     () => invokeGroqAction('shareable_link', {
       fullName,
       careerGoal,
@@ -324,7 +335,7 @@ export async function buildFullResume(
   // ─── Build Partial<ResumeData> updates ─────────────────────────────────────
   const updates: Partial<ResumeData> = {};
 
-  // Summary: prefer master assembler's recommended_summary, fall back to summary_v2
+  // ── Summary ─────────────────────────────────────────────────────────────────
   const recommendedKey = (summaryResult?.recommended as string) || 'skills_led';
   const summaries = summaryResult?.summaries as Record<string, unknown> | undefined;
   const chosenSummary =
@@ -332,11 +343,54 @@ export async function buildFullResume(
     ((summaries?.[recommendedKey] as Record<string, unknown>)?.text as string) ||
     '';
   if (chosenSummary) {
-    updates.personalInfo = { ...(resumeData.personalInfo || { firstName: '', lastName: '', email: '', phone: '' }), summary: chosenSummary };
+    updates.personalInfo = {
+      ...(resumeData.personalInfo || { firstName: '', lastName: '', email: '', phone: '' }),
+      summary: chosenSummary,
+    };
     appliedSections.push('Professional Summary');
   }
 
-  // Work experience: apply master assembler bullets or raw wave1 bullets
+  // ── Education ───────────────────────────────────────────────────────────────
+  if (education.length > 0) {
+    const updatedEducation = education.map((edu: Education) => {
+      const eduAIResult = eduResults.find(r => r.id === edu.id);
+      if (!eduAIResult?.result) return edu;
+      const entry = (eduAIResult.result as Record<string, unknown>)?.education_entry as Record<string, unknown> | undefined;
+      if (!entry) return edu;
+      const bullets: string[] = [
+        ...((entry.achievements as string[]) || []),
+        ...((entry.honors as string[]) || []),
+        ...((entry.extracurriculars as string[]) || []),
+      ].filter(Boolean);
+      if (bullets.length === 0) return edu;
+      return { ...edu, description: bullets.join('\n') };
+    });
+
+    // Apply NYSC formatting to first education entry if requested
+    if (nyscResult && education.length > 0) {
+      const localVer = (nyscResult.local_version || nyscResult.international_version) as Record<string, unknown> | undefined;
+      if (localVer) {
+        const nyscBullets = Array.isArray(localVer.bullets) ? (localVer.bullets as string[]) : [];
+        const nyscLines = [
+          localVer.degree_line ? String(localVer.degree_line) : '',
+          localVer.nysc_line ? String(localVer.nysc_line) : '',
+          localVer.service_line ? String(localVer.service_line) : '',
+          localVer.cgpa_line ? String(localVer.cgpa_line) : '',
+          ...nyscBullets,
+        ].filter(Boolean);
+        if (nyscLines.length > 0) {
+          updatedEducation[0] = { ...updatedEducation[0], description: nyscLines.join('\n') };
+        }
+      }
+    }
+
+    if (JSON.stringify(updatedEducation) !== JSON.stringify(education)) {
+      updates.education = updatedEducation;
+      appliedSections.push('Education');
+    }
+  }
+
+  // ── Work experience ─────────────────────────────────────────────────────────
   if (workExp.length > 0) {
     const updatedWork = workExp.map((w: WorkExperience) => {
       const assembled = assemblerResult?.work_bullets?.find(wb => wb.id === w.id);
@@ -354,7 +408,7 @@ export async function buildFullResume(
     }
   }
 
-  // Projects: apply master assembler bullets or raw wave1 bullets
+  // ── Projects ────────────────────────────────────────────────────────────────
   if (projects.length > 0) {
     const updatedProjects = projects.map((p: Project) => {
       const assembled = assemblerResult?.project_bullets?.find(pb => pb.id === p.id);
@@ -375,14 +429,14 @@ export async function buildFullResume(
     }
   }
 
-  // Skills: use master assembler merged skills or raw skills_v2
+  // ── Skills ──────────────────────────────────────────────────────────────────
   const assembledSkills = assemblerResult?.skills;
-  const rawSuggestedSkills = skillsResult?.suggested_skills as Record<string, unknown> | undefined;
   const allSkillNames: string[] = [
-    ...((assembledSkills?.technical || (rawSuggestedSkills?.technical as string[])) || []),
-    ...((assembledSkills?.soft || (rawSuggestedSkills?.soft as string[])) || []),
-    ...((assembledSkills?.tools || (rawSuggestedSkills?.tools as string[])) || []),
-  ];
+    ...((assembledSkills?.technical) || techSkillNames),
+    ...((assembledSkills?.soft) || softSkillNames),
+    ...((assembledSkills?.tools) || toolSkillNames),
+  ].filter(Boolean);
+
   if (allSkillNames.length > 0) {
     const newSkills: Skill[] = allSkillNames.slice(0, 20).map((name, i) => ({
       id: `ai-skill-${i}`,
@@ -391,6 +445,33 @@ export async function buildFullResume(
     }));
     updates.skills = newSkills;
     appliedSections.push('Skills');
+  }
+
+  // ── Certifications ──────────────────────────────────────────────────────────
+  if (certifications.length > 0 && certsResult) {
+    type NormCert = { rank: number; formatted_name: string; value_statement: string; include_on_resume: boolean };
+    const aiCerts = (certsResult.certifications as NormCert[] | undefined) || [];
+    if (aiCerts.length > 0) {
+      const updatedCerts = certifications
+        .map((c: Certification) => {
+          const match = aiCerts.find(ac =>
+            ac.formatted_name.toLowerCase().includes(c.name.toLowerCase().slice(0, 6)) ||
+            c.name.toLowerCase().includes(ac.formatted_name.toLowerCase().slice(0, 6))
+          );
+          if (!match || !match.include_on_resume) return c;
+          return {
+            ...c,
+            name: match.formatted_name || c.name,
+            description: match.value_statement || c.description,
+          };
+        })
+        .filter((_, i) => !aiCerts[i] || aiCerts[i].include_on_resume !== false);
+
+      if (JSON.stringify(updatedCerts) !== JSON.stringify(certifications)) {
+        updates.certifications = updatedCerts;
+        appliedSections.push('Certifications');
+      }
+    }
   }
 
   onProgress({ step: 6, message: 'Your resume is ready!', percent: 100 });
