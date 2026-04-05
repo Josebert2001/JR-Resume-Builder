@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from 'lucide-react';
 import { PersonalInfoForm } from '@/components/PersonalInfoForm';
@@ -17,12 +17,14 @@ import { ResumeUpload } from '@/components/ResumeUpload';
 import { ResumeScorePanel } from '@/components/ResumeScorePanel';
 import { JobMatchPanel } from '@/components/JobMatchPanel';
 import { ShareableResumePanel } from '@/components/ShareableLink';
+import { GenerateResumePanel } from '@/components/GenerateResumePanel';
 
 const STEP_LABELS = ['Template', 'Info', 'Education', 'Work', 'Skills', 'Projects', 'Certifications', 'Preview'];
 
 const ResumeBuilder = () => {
   const { currentStep, resumeData, prevStep } = useResumeContext();
   const totalSteps = STEP_LABELS.length;
+  const [activeTab, setActiveTab] = useState('preview');
 
   return (
     <div className="min-h-screen bg-[#f7f3ed] dark:bg-[#0e0b08]">
@@ -55,9 +57,10 @@ const ResumeBuilder = () => {
               Back
             </Button>
           </div>
-          <Tabs defaultValue="preview" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="overflow-x-auto mb-8 -mx-1 px-1">
               <TabsList className="inline-flex min-w-max gap-1 p-1 h-auto">
+                <TabsTrigger value="auto-build" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-auto-build">Auto-Build</TabsTrigger>
                 <TabsTrigger value="preview" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-preview">Preview</TabsTrigger>
                 <TabsTrigger value="score" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-score">Score</TabsTrigger>
                 <TabsTrigger value="job-match" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-job-match">Job Match</TabsTrigger>
@@ -67,6 +70,9 @@ const ResumeBuilder = () => {
               </TabsList>
             </div>
 
+            <TabsContent value="auto-build">
+              <GenerateResumePanel onViewResume={() => setActiveTab('preview')} />
+            </TabsContent>
             <TabsContent value="preview">
               <ResumePreview />
             </TabsContent>

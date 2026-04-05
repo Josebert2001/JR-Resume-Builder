@@ -660,6 +660,44 @@ Return ONLY valid JSON with this exact shape:
         maxTokens: 1200,
       };
 
+    case "master_assembler":
+      return {
+        prompt: `You are a senior resume editor and career strategist. You have received AI-processed outputs from multiple resume sections. Your job is to synthesize them into a single, coherent, and consistent final resume package.
+
+SECTION OUTPUTS PROVIDED:
+Summary options: ${JSON.stringify(payload.summaryOutput ?? {})}
+Education entries: ${JSON.stringify(payload.educationOutput ?? [])}
+Work experience bullets: ${JSON.stringify(payload.workOutput ?? [])}
+Project bullets: ${JSON.stringify(payload.projectsOutput ?? [])}
+Skills: ${JSON.stringify(payload.skillsOutput ?? {})}
+Certifications: ${JSON.stringify(payload.certsOutput ?? {})}
+
+CANDIDATE CONTEXT:
+Career goal: ${payload.careerGoal ?? ""}
+Has work experience: ${payload.hasExperience ?? false}
+Target market: ${payload.targetMarket ?? "Nigeria"}
+
+INSTRUCTIONS:
+1. Choose the single best summary from the options provided (prefer the recommended one). Write it clean — no headers, no labels.
+2. For work experience: ensure all bullets use strong action verbs and are consistent in tense and tone. Return bullets by entry ID.
+3. For projects: ensure all bullets highlight technical impact and are consistent in style. Return bullets by entry ID.
+4. For skills: merge and deduplicate technical, soft, and tools lists. Remove generic/weak skills. Prioritise role-relevant skills.
+5. Identify any tone/terminology inconsistencies across sections and note the biggest one as consistency_tip.
+6. Rate the overall ATS-friendliness of the assembled resume.
+
+Return ONLY valid JSON with this exact shape:
+{
+  "recommended_summary": "The single best summary paragraph",
+  "work_bullets": [{ "id": "work-entry-id", "bullets": ["• Action verb + result..."] }],
+  "project_bullets": [{ "id": "project-entry-id", "bullets": ["• Action verb + impact..."] }],
+  "skills": { "technical": ["skill1", "skill2"], "soft": ["skill1"], "tools": ["tool1"] },
+  "consistency_tip": "One specific tip to unify tone, or null if everything is consistent",
+  "ats_rating": "Excellent | Good | Fair | Poor"
+}`,
+        responseFormat: "json",
+        maxTokens: 2000,
+      };
+
     default:
       return { prompt: "", responseFormat: "text" };
   }
@@ -933,6 +971,31 @@ export function normalizeResult(
       og_description: String(raw?.og_description ?? ""),
     };
   }
+  if (action === "master_assembler") {
+    const normBulletEntry = (e: unknown) => {
+      if (typeof e !== "object" || e === null) return null;
+      const o = e as Record<string, unknown>;
+      return {
+        id: String(o.id ?? ""),
+        bullets: Array.isArray(o.bullets) ? (o.bullets as unknown[]).map(String) : [],
+      };
+    };
+    const sk = raw?.skills as Record<string, unknown> | undefined;
+    return {
+      recommended_summary: String(raw?.recommended_summary ?? ""),
+      work_bullets: Array.isArray(raw?.work_bullets) ? (raw.work_bullets as unknown[]).map(normBulletEntry).filter(Boolean) : [],
+      project_bullets: Array.isArray(raw?.project_bullets) ? (raw.project_bullets as unknown[]).map(normBulletEntry).filter(Boolean) : [],
+      skills: {
+        technical: Array.isArray(sk?.technical) ? (sk!.technical as unknown[]).map(String) : [],
+        soft: Array.isArray(sk?.soft) ? (sk!.soft as unknown[]).map(String) : [],
+        tools: Array.isArray(sk?.tools) ? (sk!.tools as unknown[]).map(String) : [],
+      },
+      consistency_tip: raw?.consistency_tip ? String(raw.consistency_tip) : null,
+      ats_rating: (["Excellent", "Good", "Fair", "Poor"].includes(String(raw?.ats_rating))
+        ? String(raw.ats_rating)
+        : "Fair") as "Excellent" | "Good" | "Fair" | "Poor",
+    };
+  }
   return raw;
 }
 
@@ -1001,6 +1064,8 @@ export function emptyFallback(action: string): Record<string, unknown> {
       };
     case "shareable_link":
       return { page_headline: "", whatsapp_message: "", linkedin_caption: "", email_signature: "", availability_badge: "Open to opportunities", og_description: "" };
+    case "master_assembler":
+      return { recommended_summary: "", work_bullets: [], project_bullets: [], skills: { technical: [], soft: [], tools: [] }, consistency_tip: null, ats_rating: "Fair" };
     default:
       return { text: "" };
   }
@@ -1027,4 +1092,5 @@ export const VALID_ACTIONS = [
   "no_experience",
   "nigeria_nysc",
   "shareable_link",
+  "master_assembler",
 ] as const;

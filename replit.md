@@ -31,6 +31,7 @@
 ## Step 8 Preview Tabs
 | Tab | Component | Description |
 |-----|-----------|-------------|
+| Auto-Build | `GenerateResumePanel` | One-click 4-wave AI pipeline: enhances all sections simultaneously |
 | Preview | `ResumePreview` | Final resume + PDF/Word download + share copy toggle |
 | Score | `ResumeScorePanel` | AI 7-section score with grade (A–F), progress bars, top fixes |
 | Job Match | `JobMatchPanel` | Paste JD + jobTitle + company → match %, gap analysis, section fixes, top 3 fixes |
@@ -38,8 +39,16 @@
 | Template | `ResumeTemplates` | Change template |
 | Analyze | `ResumeUpload` | Upload & improve an existing resume |
 
+## Auto-Build Pipeline (resumeOrchestrator.ts)
+4-wave parallel AI orchestration (~15s):
+- **Wave 1**: `education_v2` + `work_bullets` + `project_bullets` + `certifications_v2` + `skills_v2` (all parallel)
+- **Wave 2**: `summary_v2` + `resume_score` + `no_experience` (if 0 work) + `nigeria_nysc` (if toggled)
+- **Wave 3**: `master_assembler` — synthesises all wave 1+2 outputs into coherent final resume
+- **Wave 4**: `shareable_link` — generates WhatsApp/LinkedIn/email copy
+- Options: NYSC toggle, optional JD paste for role targeting
+
 ## Backend AI Actions (VALID_ACTIONS)
-`education`, `education_v2`, `work`, `work_bullets`, `project_bullets`, `summary_v2`, `certifications_v2`, `skills_v2`, `skills`, `skills_grouped`, `summary`, `ats_optimize`, `career_qa`, `orchestrate`, `analyze`, `resume_score`, `job_match`, `no_experience`, `nigeria_nysc`, `shareable_link`
+`education`, `education_v2`, `work`, `work_bullets`, `project_bullets`, `summary_v2`, `certifications_v2`, `skills_v2`, `skills`, `skills_grouped`, `summary`, `ats_optimize`, `career_qa`, `orchestrate`, `analyze`, `resume_score`, `job_match`, `no_experience`, `nigeria_nysc`, `shareable_link`, `master_assembler`
 
 ## Key Files
 - `server/groqPrompts.ts` — all AI prompts, normalizeResult, emptyFallback, VALID_ACTIONS
@@ -58,6 +67,8 @@
 - `src/components/JobMatchPanel.tsx` — JD match UI (jobTitle + company + JD form, match score, section fixes accordion)
 - `src/components/NoExperiencePanel.tsx` — no-exp banner UI (summary rewrite, projects-as-experience, tiered skills, 30-day plan)
 - `src/components/ShareableLink.tsx` — AI-generated share copy (WhatsApp, LinkedIn, email signature, OG description)
+- `src/components/GenerateResumePanel.tsx` — Auto-Build UI: 6-step animated progress tracker, NYSC toggle, optional JD input, result card with grade/ATS/applied sections
+- `src/services/resumeOrchestrator.ts` — 4-wave parallel orchestration pipeline (buildFullResume); Wave1=sections, Wave2=enhancements, Wave3=master_assembler, Wave4=share copy
 
 ## Export
 - **PDF**: `src/services/pdfService.ts` (html2canvas + jsPDF)
