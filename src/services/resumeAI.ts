@@ -467,7 +467,192 @@ export const careerAssistant = async (
   }
 };
 
-// Orchestrate full resume pieces
+// ─── Resume Score ─────────────────────────────────────────────────────────────
+
+export type ScoreCategory = { score: number; label: string; feedback: string };
+export type ResumeScoreResult = {
+  total_score: number;
+  categories: {
+    content_quality: ScoreCategory;
+    ats_compatibility: ScoreCategory;
+    impact_metrics: ScoreCategory;
+    completeness: ScoreCategory;
+  };
+  top_strengths: string[];
+  top_fixes: string[];
+  overall_verdict: string;
+};
+
+export const scoreResume = async (payload: {
+  fullName: string;
+  summary: string;
+  education: string;
+  workExperience: string;
+  skills: string;
+  projects: string;
+  certifications: string;
+}): Promise<ResumeScoreResult> => {
+  const empty: ResumeScoreResult = {
+    total_score: 0,
+    categories: {
+      content_quality: { score: 0, label: "Needs Work", feedback: "" },
+      ats_compatibility: { score: 0, label: "Needs Work", feedback: "" },
+      impact_metrics: { score: 0, label: "Needs Work", feedback: "" },
+      completeness: { score: 0, label: "Needs Work", feedback: "" },
+    },
+    top_strengths: [],
+    top_fixes: [],
+    overall_verdict: "",
+  };
+  try {
+    const result = await invokeGroq("resume_score", payload as unknown as Record<string, unknown>);
+    const cats = result?.categories as Record<string, unknown> | undefined;
+    const normCat = (c: unknown): ScoreCategory => {
+      if (typeof c !== "object" || c === null) return { score: 0, label: "Needs Work", feedback: "" };
+      const o = c as Record<string, unknown>;
+      return { score: Number(o.score) || 0, label: String(o.label ?? ""), feedback: String(o.feedback ?? "") };
+    };
+    return {
+      total_score: Number(result?.total_score) || 0,
+      categories: {
+        content_quality: normCat(cats?.content_quality),
+        ats_compatibility: normCat(cats?.ats_compatibility),
+        impact_metrics: normCat(cats?.impact_metrics),
+        completeness: normCat(cats?.completeness),
+      },
+      top_strengths: Array.isArray(result?.top_strengths) ? (result.top_strengths as string[]) : [],
+      top_fixes: Array.isArray(result?.top_fixes) ? (result.top_fixes as string[]) : [],
+      overall_verdict: String(result?.overall_verdict ?? ""),
+    };
+  } catch (error) {
+    console.error("Error scoring resume:", error);
+    return empty;
+  }
+};
+
+// ─── Job Match ────────────────────────────────────────────────────────────────
+
+export type SkillGap = { skill: string; importance: string; suggestion: string };
+export type JobMatchResult = {
+  match_score: number;
+  match_label: string;
+  matched_keywords: string[];
+  missing_keywords: string[];
+  skill_gaps: SkillGap[];
+  quick_wins: string[];
+  verdict: string;
+};
+
+export const matchJobDescription = async (
+  resumeText: string,
+  jobDescription: string
+): Promise<JobMatchResult> => {
+  const empty: JobMatchResult = {
+    match_score: 0, match_label: "Partial Match",
+    matched_keywords: [], missing_keywords: [], skill_gaps: [], quick_wins: [], verdict: "",
+  };
+  try {
+    const result = await invokeGroq("job_match", { resumeText, jobDescription });
+    const normGap = (g: unknown): SkillGap | null => {
+      if (typeof g !== "object" || g === null) return null;
+      const o = g as Record<string, unknown>;
+      return { skill: String(o.skill ?? ""), importance: String(o.importance ?? ""), suggestion: String(o.suggestion ?? "") };
+    };
+    return {
+      match_score: Number(result?.match_score) || 0,
+      match_label: String(result?.match_label ?? "Partial Match"),
+      matched_keywords: Array.isArray(result?.matched_keywords) ? (result.matched_keywords as string[]) : [],
+      missing_keywords: Array.isArray(result?.missing_keywords) ? (result.missing_keywords as string[]) : [],
+      skill_gaps: Array.isArray(result?.skill_gaps)
+        ? (result.skill_gaps as unknown[]).map(normGap).filter((g): g is SkillGap => g !== null)
+        : [],
+      quick_wins: Array.isArray(result?.quick_wins) ? (result.quick_wins as string[]) : [],
+      verdict: String(result?.verdict ?? ""),
+    };
+  } catch (error) {
+    console.error("Error matching job description:", error);
+    return empty;
+  }
+};
+
+// ─── No Experience Mode ───────────────────────────────────────────────────────
+
+export type ExperienceAlternative = { type: string; title: string; example: string; why_it_works: string };
+export type NoExperienceResult = {
+  headline: string;
+  strategy: string;
+  experience_alternatives: ExperienceAlternative[];
+  quick_actions: string[];
+  encouraged_sections: string[];
+  tip: string;
+};
+
+export const getNoExperienceAdvice = async (payload: {
+  fullName: string;
+  fieldOfStudy: string;
+  academicLevel: string;
+  careerGoal: string;
+  hasProjects: string;
+  hasCertifications: string;
+  hasVolunteer: string;
+  hasFreelance: string;
+}): Promise<NoExperienceResult> => {
+  const empty: NoExperienceResult = {
+    headline: "", strategy: "", experience_alternatives: [], quick_actions: [], encouraged_sections: [], tip: "",
+  };
+  try {
+    const result = await invokeGroq("no_experience", payload as unknown as Record<string, unknown>);
+    const normAlt = (a: unknown): ExperienceAlternative | null => {
+      if (typeof a !== "object" || a === null) return null;
+      const o = a as Record<string, unknown>;
+      return {
+        type: String(o.type ?? ""),
+        title: String(o.title ?? ""),
+        example: String(o.example ?? ""),
+        why_it_works: String(o.why_it_works ?? ""),
+      };
+    };
+    return {
+      headline: String(result?.headline ?? ""),
+      strategy: String(result?.strategy ?? ""),
+      experience_alternatives: Array.isArray(result?.experience_alternatives)
+        ? (result.experience_alternatives as unknown[]).map(normAlt).filter((a): a is ExperienceAlternative => a !== null)
+        : [],
+      quick_actions: Array.isArray(result?.quick_actions) ? (result.quick_actions as string[]) : [],
+      encouraged_sections: Array.isArray(result?.encouraged_sections) ? (result.encouraged_sections as string[]) : [],
+      tip: String(result?.tip ?? ""),
+    };
+  } catch (error) {
+    console.error("Error getting no-experience advice:", error);
+    return empty;
+  }
+};
+
+// ─── NYSC Bullets ─────────────────────────────────────────────────────────────
+
+export const generateNyscBullets = async (payload: {
+  state: string;
+  ppa: string;
+  ppaSector: string;
+  rawDescription: string;
+  fieldOfStudy: string;
+  careerGoal: string;
+  duration: string;
+}): Promise<{ job_title: string; company_line: string; bullets: string[]; tip: string }> => {
+  try {
+    const result = await invokeGroq("nysc_bullets", payload as unknown as Record<string, unknown>);
+    return {
+      job_title: String(result?.job_title ?? ""),
+      company_line: String(result?.company_line ?? ""),
+      bullets: Array.isArray(result?.bullets) ? (result.bullets as string[]) : [],
+      tip: String(result?.tip ?? ""),
+    };
+  } catch (error) {
+    console.error("Error generating NYSC bullets:", error);
+    return { job_title: "", company_line: "", bullets: [], tip: "" };
+  }
+};
+
 export const orchestrateResume = async (
   payload: Record<string, unknown>
 ): Promise<{

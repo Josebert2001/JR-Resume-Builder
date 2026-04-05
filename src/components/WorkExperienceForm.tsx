@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, MoveUp, MoveDown, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, MoveUp, MoveDown, Sparkles, Loader2, AlertCircle, Flag } from 'lucide-react';
 import { useResumeContext, WorkExperience } from '@/context/ResumeContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,7 @@ import { FormWrapper } from './FormWrapper';
 import { toast } from 'sonner';
 import { analytics } from '@/services/analytics';
 import { generateWorkBullets } from '@/services/resumeAI';
+import { NyscHelper } from './NyscHelper';
 
 interface EntryErrors {
   position?: string;
@@ -26,6 +27,7 @@ export const WorkExperienceForm = () => {
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [entryErrors, setEntryErrors] = useState<Record<string, EntryErrors>>({});
   const [tips, setTips] = useState<Record<string, string>>({});
+  const [nyscOpen, setNyscOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const handleAddExperience = () => {
@@ -125,6 +127,21 @@ export const WorkExperienceForm = () => {
     } finally {
       setGeneratingId(null);
     }
+  };
+
+  const handleNyscApply = (entry: { position: string; description: string }) => {
+    const newExperience: WorkExperience = {
+      id: Date.now().toString(),
+      position: entry.position,
+      company: 'National Youth Service Corps (NYSC)',
+      location: '',
+      startDate: 'July 2024',
+      endDate: 'June 2025',
+      description: entry.description,
+    };
+    updateResumeData({
+      workExperience: [...(resumeData.workExperience || []), newExperience],
+    });
   };
 
   const validateForm = (): boolean => {
@@ -350,17 +367,42 @@ export const WorkExperienceForm = () => {
           })}
         </div>
 
-        <TouchRipple className="rounded-md">
-          <Button
-            onClick={handleAddExperience}
-            variant="outline"
-            className={cn("w-full border-dashed", isMobile && "h-12 text-base")}
-            data-testid="button-add-experience"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Work Experience
-          </Button>
-        </TouchRipple>
+        <div className="flex gap-2">
+          <TouchRipple className="rounded-md flex-1">
+            <Button
+              onClick={handleAddExperience}
+              variant="outline"
+              className={cn("w-full border-dashed", isMobile && "h-12 text-base")}
+              data-testid="button-add-experience"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Work Experience
+            </Button>
+          </TouchRipple>
+          <TouchRipple className="rounded-md shrink-0">
+            <Button
+              onClick={() => setNyscOpen(true)}
+              variant="outline"
+              className={cn(
+                "border-[#2d6a4f]/40 text-[#2d6a4f] hover:bg-[#e8f5ee] hover:border-[#2d6a4f]",
+                isMobile ? "h-12 px-3" : "px-3"
+              )}
+              title="Add NYSC experience"
+              data-testid="button-add-nysc"
+            >
+              <Flag className="h-4 w-4 mr-1.5" />
+              <span className="text-sm">NYSC</span>
+            </Button>
+          </TouchRipple>
+        </div>
+
+        <NyscHelper
+          open={nyscOpen}
+          onClose={() => setNyscOpen(false)}
+          fieldOfStudy={resumeData.education?.[0]?.fieldOfStudy || ''}
+          careerGoal={resumeData.workExperience?.[0]?.position || resumeData.personalInfo?.summary?.slice(0, 60) || ''}
+          onApply={handleNyscApply}
+        />
       </div>
     </FormWrapper>
   );
