@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { analytics } from '@/services/analytics';
 import { FormWrapper } from './FormWrapper';
 import { Card } from "@/components/ui/card";
+import { NigerianNyscPanel } from './NyscHelper';
 
 interface EntryErrors {
   school?: string;
@@ -308,6 +309,18 @@ export const EducationForm = () => {
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* Nigerian Student NYSC section */}
+                <div className="mt-3">
+                  <NigerianNyscPanel
+                    institution={edu.school}
+                    degree={edu.degree}
+                    fieldOfStudy={edu.fieldOfStudy}
+                    graduationYear={edu.graduationDate || ''}
+                    cgpa={edu.gpa || ''}
+                    careerGoal={resumeData.personalInfo?.summary?.slice(0, 80) || ''}
+                  />
                 </div>
               </Card>
             );

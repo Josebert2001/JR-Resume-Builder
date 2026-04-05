@@ -467,20 +467,26 @@ export const careerAssistant = async (
   }
 };
 
-// ─── Resume Score ─────────────────────────────────────────────────────────────
+// ─── Resume Score — section-by-section with grade A–F ────────────────────────
 
-export type ScoreCategory = { score: number; label: string; feedback: string };
+export type SectionScore = { score: number; max: number; status: string; fix: string };
+export type TopFix = { priority: string; section: string; fix: string; score_impact: string };
 export type ResumeScoreResult = {
   total_score: number;
-  categories: {
-    content_quality: ScoreCategory;
-    ats_compatibility: ScoreCategory;
-    impact_metrics: ScoreCategory;
-    completeness: ScoreCategory;
+  grade: string;
+  grade_message: string;
+  sections: {
+    summary: SectionScore;
+    experience: SectionScore;
+    projects: SectionScore;
+    skills: SectionScore;
+    education: SectionScore;
+    certifications: SectionScore;
+    ats: SectionScore;
   };
-  top_strengths: string[];
-  top_fixes: string[];
-  overall_verdict: string;
+  top_wins: string[];
+  top_fixes: TopFix[];
+  ats_risks: string[];
 };
 
 export const scoreResume = async (payload: {
@@ -492,37 +498,44 @@ export const scoreResume = async (payload: {
   projects: string;
   certifications: string;
 }): Promise<ResumeScoreResult> => {
+  const emptySect = (max: number): SectionScore => ({ score: 0, max, status: "weak", fix: "" });
   const empty: ResumeScoreResult = {
-    total_score: 0,
-    categories: {
-      content_quality: { score: 0, label: "Needs Work", feedback: "" },
-      ats_compatibility: { score: 0, label: "Needs Work", feedback: "" },
-      impact_metrics: { score: 0, label: "Needs Work", feedback: "" },
-      completeness: { score: 0, label: "Needs Work", feedback: "" },
+    total_score: 0, grade: "F", grade_message: "",
+    sections: {
+      summary: emptySect(20), experience: emptySect(25), projects: emptySect(20),
+      skills: emptySect(15), education: emptySect(10), certifications: emptySect(5), ats: emptySect(5),
     },
-    top_strengths: [],
-    top_fixes: [],
-    overall_verdict: "",
+    top_wins: [], top_fixes: [], ats_risks: [],
   };
   try {
     const result = await invokeGroq("resume_score", payload as unknown as Record<string, unknown>);
-    const cats = result?.categories as Record<string, unknown> | undefined;
-    const normCat = (c: unknown): ScoreCategory => {
-      if (typeof c !== "object" || c === null) return { score: 0, label: "Needs Work", feedback: "" };
-      const o = c as Record<string, unknown>;
-      return { score: Number(o.score) || 0, label: String(o.label ?? ""), feedback: String(o.feedback ?? "") };
+    const sects = result?.sections as Record<string, unknown> | undefined;
+    const normSect = (s: unknown, max: number): SectionScore => {
+      if (typeof s !== "object" || s === null) return emptySect(max);
+      const o = s as Record<string, unknown>;
+      return { score: Number(o.score) || 0, max: Number(o.max) || max, status: String(o.status ?? "weak"), fix: String(o.fix ?? "") };
+    };
+    const normFix = (f: unknown): TopFix | null => {
+      if (typeof f !== "object" || f === null) return null;
+      const o = f as Record<string, unknown>;
+      return { priority: String(o.priority ?? "low"), section: String(o.section ?? ""), fix: String(o.fix ?? ""), score_impact: String(o.score_impact ?? "") };
     };
     return {
       total_score: Number(result?.total_score) || 0,
-      categories: {
-        content_quality: normCat(cats?.content_quality),
-        ats_compatibility: normCat(cats?.ats_compatibility),
-        impact_metrics: normCat(cats?.impact_metrics),
-        completeness: normCat(cats?.completeness),
+      grade: String(result?.grade ?? "F"),
+      grade_message: String(result?.grade_message ?? ""),
+      sections: {
+        summary: normSect(sects?.summary, 20),
+        experience: normSect(sects?.experience, 25),
+        projects: normSect(sects?.projects, 20),
+        skills: normSect(sects?.skills, 15),
+        education: normSect(sects?.education, 10),
+        certifications: normSect(sects?.certifications, 5),
+        ats: normSect(sects?.ats, 5),
       },
-      top_strengths: Array.isArray(result?.top_strengths) ? (result.top_strengths as string[]) : [],
-      top_fixes: Array.isArray(result?.top_fixes) ? (result.top_fixes as string[]) : [],
-      overall_verdict: String(result?.overall_verdict ?? ""),
+      top_wins: Array.isArray(result?.top_wins) ? (result.top_wins as string[]) : [],
+      top_fixes: Array.isArray(result?.top_fixes) ? (result.top_fixes as unknown[]).map(normFix).filter((f): f is TopFix => f !== null) : [],
+      ats_risks: Array.isArray(result?.ats_risks) ? (result.ats_risks as string[]) : [],
     };
   } catch (error) {
     console.error("Error scoring resume:", error);
@@ -530,44 +543,64 @@ export const scoreResume = async (payload: {
   }
 };
 
-// ─── Job Match ────────────────────────────────────────────────────────────────
+// ─── Job Match — with section-level fixes and top 3 impactful changes ─────────
 
-export type SkillGap = { skill: string; importance: string; suggestion: string };
+export type MissingKeyword = { keyword: string; importance: string; where_to_add: string };
+export type SectionFix = { section: string; issue: string; fix: string };
+export type Top3Fix = { rank: number; fix: string; score_gain: string };
 export type JobMatchResult = {
   match_score: number;
   match_label: string;
-  matched_keywords: string[];
-  missing_keywords: string[];
-  skill_gaps: SkillGap[];
-  quick_wins: string[];
+  realistic_match: boolean;
   verdict: string;
+  matched_keywords: string[];
+  missing_keywords: MissingKeyword[];
+  section_fixes: SectionFix[];
+  top_3_fixes: Top3Fix[];
 };
 
 export const matchJobDescription = async (
   resumeText: string,
+  jobTitle: string,
+  company: string,
   jobDescription: string
 ): Promise<JobMatchResult> => {
   const empty: JobMatchResult = {
-    match_score: 0, match_label: "Partial Match",
-    matched_keywords: [], missing_keywords: [], skill_gaps: [], quick_wins: [], verdict: "",
+    match_score: 0, match_label: "Partial Match", realistic_match: true, verdict: "",
+    matched_keywords: [], missing_keywords: [], section_fixes: [], top_3_fixes: [],
   };
   try {
-    const result = await invokeGroq("job_match", { resumeText, jobDescription });
-    const normGap = (g: unknown): SkillGap | null => {
-      if (typeof g !== "object" || g === null) return null;
-      const o = g as Record<string, unknown>;
-      return { skill: String(o.skill ?? ""), importance: String(o.importance ?? ""), suggestion: String(o.suggestion ?? "") };
+    const result = await invokeGroq("job_match", { resumeText, jobTitle, company, jobDescription });
+    const normMissing = (m: unknown): MissingKeyword | null => {
+      if (typeof m !== "object" || m === null) return null;
+      const o = m as Record<string, unknown>;
+      return { keyword: String(o.keyword ?? ""), importance: String(o.importance ?? ""), where_to_add: String(o.where_to_add ?? "") };
+    };
+    const normSectionFix = (f: unknown): SectionFix | null => {
+      if (typeof f !== "object" || f === null) return null;
+      const o = f as Record<string, unknown>;
+      return { section: String(o.section ?? ""), issue: String(o.issue ?? ""), fix: String(o.fix ?? "") };
+    };
+    const normTop3 = (f: unknown): Top3Fix | null => {
+      if (typeof f !== "object" || f === null) return null;
+      const o = f as Record<string, unknown>;
+      return { rank: Number(o.rank) || 0, fix: String(o.fix ?? ""), score_gain: String(o.score_gain ?? "") };
     };
     return {
       match_score: Number(result?.match_score) || 0,
       match_label: String(result?.match_label ?? "Partial Match"),
-      matched_keywords: Array.isArray(result?.matched_keywords) ? (result.matched_keywords as string[]) : [],
-      missing_keywords: Array.isArray(result?.missing_keywords) ? (result.missing_keywords as string[]) : [],
-      skill_gaps: Array.isArray(result?.skill_gaps)
-        ? (result.skill_gaps as unknown[]).map(normGap).filter((g): g is SkillGap => g !== null)
-        : [],
-      quick_wins: Array.isArray(result?.quick_wins) ? (result.quick_wins as string[]) : [],
+      realistic_match: result?.realistic_match !== false,
       verdict: String(result?.verdict ?? ""),
+      matched_keywords: Array.isArray(result?.matched_keywords) ? (result.matched_keywords as string[]) : [],
+      missing_keywords: Array.isArray(result?.missing_keywords)
+        ? (result.missing_keywords as unknown[]).map(normMissing).filter((m): m is MissingKeyword => m !== null)
+        : [],
+      section_fixes: Array.isArray(result?.section_fixes)
+        ? (result.section_fixes as unknown[]).map(normSectionFix).filter((f): f is SectionFix => f !== null)
+        : [],
+      top_3_fixes: Array.isArray(result?.top_3_fixes)
+        ? (result.top_3_fixes as unknown[]).map(normTop3).filter((f): f is Top3Fix => f !== null)
+        : [],
     };
   } catch (error) {
     console.error("Error matching job description:", error);
@@ -575,81 +608,156 @@ export const matchJobDescription = async (
   }
 };
 
-// ─── No Experience Mode ───────────────────────────────────────────────────────
+// ─── No Experience Mode — reframe profile for zero-experience students ─────────
 
-export type ExperienceAlternative = { type: string; title: string; example: string; why_it_works: string };
+export type ProjectAsExperience = { project_name: string; role_title: string; bullets: string[] };
+export type TieredSkills = { primary: string[]; supporting: string[]; learning: string[] };
 export type NoExperienceResult = {
-  headline: string;
-  strategy: string;
-  experience_alternatives: ExperienceAlternative[];
-  quick_actions: string[];
-  encouraged_sections: string[];
+  has_nothing_flag: boolean;
+  recommended_section_order: string[];
+  rewritten_summary: string;
+  projects_as_experience: ProjectAsExperience[];
+  tiered_skills: TieredSkills;
+  thirty_day_plan: string[];
   tip: string;
 };
 
-export const getNoExperienceAdvice = async (payload: {
+export const buildNoExperienceResume = async (payload: {
   fullName: string;
   fieldOfStudy: string;
-  academicLevel: string;
   careerGoal: string;
-  hasProjects: string;
-  hasCertifications: string;
+  education: string;
+  projects: string;
+  skills: string;
+  certifications: string;
   hasVolunteer: string;
-  hasFreelance: string;
 }): Promise<NoExperienceResult> => {
   const empty: NoExperienceResult = {
-    headline: "", strategy: "", experience_alternatives: [], quick_actions: [], encouraged_sections: [], tip: "",
+    has_nothing_flag: false, recommended_section_order: [], rewritten_summary: "",
+    projects_as_experience: [], tiered_skills: { primary: [], supporting: [], learning: [] },
+    thirty_day_plan: [], tip: "",
   };
   try {
     const result = await invokeGroq("no_experience", payload as unknown as Record<string, unknown>);
-    const normAlt = (a: unknown): ExperienceAlternative | null => {
-      if (typeof a !== "object" || a === null) return null;
-      const o = a as Record<string, unknown>;
+    const normProject = (p: unknown): ProjectAsExperience | null => {
+      if (typeof p !== "object" || p === null) return null;
+      const o = p as Record<string, unknown>;
       return {
-        type: String(o.type ?? ""),
-        title: String(o.title ?? ""),
-        example: String(o.example ?? ""),
-        why_it_works: String(o.why_it_works ?? ""),
+        project_name: String(o.project_name ?? ""),
+        role_title: String(o.role_title ?? ""),
+        bullets: Array.isArray(o.bullets) ? (o.bullets as unknown[]).map(String) : [],
       };
     };
+    const ts = result?.tiered_skills as Record<string, unknown> | undefined;
     return {
-      headline: String(result?.headline ?? ""),
-      strategy: String(result?.strategy ?? ""),
-      experience_alternatives: Array.isArray(result?.experience_alternatives)
-        ? (result.experience_alternatives as unknown[]).map(normAlt).filter((a): a is ExperienceAlternative => a !== null)
+      has_nothing_flag: result?.has_nothing_flag === true,
+      recommended_section_order: Array.isArray(result?.recommended_section_order) ? (result.recommended_section_order as string[]) : [],
+      rewritten_summary: String(result?.rewritten_summary ?? ""),
+      projects_as_experience: Array.isArray(result?.projects_as_experience)
+        ? (result.projects_as_experience as unknown[]).map(normProject).filter((p): p is ProjectAsExperience => p !== null)
         : [],
-      quick_actions: Array.isArray(result?.quick_actions) ? (result.quick_actions as string[]) : [],
-      encouraged_sections: Array.isArray(result?.encouraged_sections) ? (result.encouraged_sections as string[]) : [],
+      tiered_skills: {
+        primary: Array.isArray(ts?.primary) ? (ts.primary as unknown[]).map(String) : [],
+        supporting: Array.isArray(ts?.supporting) ? (ts.supporting as unknown[]).map(String) : [],
+        learning: Array.isArray(ts?.learning) ? (ts.learning as unknown[]).map(String) : [],
+      },
+      thirty_day_plan: Array.isArray(result?.thirty_day_plan) ? (result.thirty_day_plan as string[]) : [],
       tip: String(result?.tip ?? ""),
     };
   } catch (error) {
-    console.error("Error getting no-experience advice:", error);
+    console.error("Error building no-experience resume:", error);
     return empty;
   }
 };
 
-// ─── NYSC Bullets ─────────────────────────────────────────────────────────────
+// ─── Nigerian NYSC — dual format for local + international employers ───────────
 
-export const generateNyscBullets = async (payload: {
-  state: string;
-  ppa: string;
-  ppaSector: string;
-  rawDescription: string;
+export type NyscVersion = { degree_line: string; cgpa_line?: string; gpa_line?: string; nysc_line?: string; service_line?: string; bullets: string[] };
+export type NigerianNyscResult = {
+  local_version: NyscVersion;
+  international_version: NyscVersion;
+  tip: string;
+};
+
+export const formatNigerianEducation = async (payload: {
+  institution: string;
+  degree: string;
   fieldOfStudy: string;
+  graduationYear: string;
+  cgpa: string;
+  cgpaScale: string;
+  degreeClass: string;
+  honors: string;
+  nyscStatus: string;
+  nyscState: string;
+  ppa: string;
+  ppaRole: string;
+  cdsGroup: string;
   careerGoal: string;
-  duration: string;
-}): Promise<{ job_title: string; company_line: string; bullets: string[]; tip: string }> => {
+}): Promise<NigerianNyscResult> => {
+  const emptyVer: NyscVersion = { degree_line: "", cgpa_line: "", bullets: [] };
+  const empty: NigerianNyscResult = { local_version: emptyVer, international_version: emptyVer, tip: "" };
   try {
-    const result = await invokeGroq("nysc_bullets", payload as unknown as Record<string, unknown>);
+    const result = await invokeGroq("nigeria_nysc", payload as unknown as Record<string, unknown>);
+    const normVer = (v: unknown): NyscVersion => {
+      if (typeof v !== "object" || v === null) return emptyVer;
+      const o = v as Record<string, unknown>;
+      return {
+        degree_line: String(o.degree_line ?? ""),
+        cgpa_line: String(o.cgpa_line ?? ""),
+        gpa_line: String(o.gpa_line ?? ""),
+        nysc_line: String(o.nysc_line ?? ""),
+        service_line: String(o.service_line ?? ""),
+        bullets: Array.isArray(o.bullets) ? (o.bullets as unknown[]).map(String) : [],
+      };
+    };
     return {
-      job_title: String(result?.job_title ?? ""),
-      company_line: String(result?.company_line ?? ""),
-      bullets: Array.isArray(result?.bullets) ? (result.bullets as string[]) : [],
+      local_version: normVer(result?.local_version),
+      international_version: normVer(result?.international_version),
       tip: String(result?.tip ?? ""),
     };
   } catch (error) {
-    console.error("Error generating NYSC bullets:", error);
-    return { job_title: "", company_line: "", bullets: [], tip: "" };
+    console.error("Error formatting Nigerian education:", error);
+    return empty;
+  }
+};
+
+// ─── Shareable Link Copy — AI-generated social share text ─────────────────────
+
+export type ShareableCopyResult = {
+  page_headline: string;
+  whatsapp_message: string;
+  linkedin_caption: string;
+  email_signature: string;
+  availability_badge: string;
+  og_description: string;
+};
+
+export const generateShareableCopy = async (payload: {
+  fullName: string;
+  careerGoal: string;
+  topSkills: string;
+  fieldOfStudy: string;
+  availabilityStatus: string;
+  bestAchievement: string;
+}): Promise<ShareableCopyResult> => {
+  const empty: ShareableCopyResult = {
+    page_headline: "", whatsapp_message: "", linkedin_caption: "",
+    email_signature: "", availability_badge: "Open to opportunities", og_description: "",
+  };
+  try {
+    const result = await invokeGroq("shareable_link", payload as unknown as Record<string, unknown>);
+    return {
+      page_headline: String(result?.page_headline ?? ""),
+      whatsapp_message: String(result?.whatsapp_message ?? ""),
+      linkedin_caption: String(result?.linkedin_caption ?? ""),
+      email_signature: String(result?.email_signature ?? ""),
+      availability_badge: String(result?.availability_badge ?? "Open to opportunities"),
+      og_description: String(result?.og_description ?? ""),
+    };
+  } catch (error) {
+    console.error("Error generating shareable copy:", error);
+    return empty;
   }
 };
 

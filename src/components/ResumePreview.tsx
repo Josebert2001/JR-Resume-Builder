@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, Loader2, FileText } from 'lucide-react';
+import { Download, Printer, Loader2, FileText, Share2, X } from 'lucide-react';
 import { FormattedResume } from './FormattedResume';
 import { useResumeContext } from '@/context/ResumeContext';
 import { generatePDF } from '@/services/pdfService';
 import { generateDocx } from '@/services/docxService';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ShareableResumePanel } from './ShareableLink';
 
 interface ResumePreviewProps {
   className?: string;
@@ -16,6 +17,7 @@ export function ResumePreview({ className }: ResumePreviewProps) {
   const { resumeData, template } = useResumeContext();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingWord, setIsGeneratingWord] = useState(false);
+  const [showSharePanel, setShowSharePanel] = useState(false);
 
   const handlePrint = () => {
     window.print();
@@ -56,9 +58,9 @@ export function ResumePreview({ className }: ResumePreviewProps) {
   return (
     <div className={className}>
       {/* Action bar — hidden when printing */}
-      <div className="flex items-center justify-between mb-4 print:hidden">
+      <div className="flex items-center justify-between mb-4 print:hidden gap-2 flex-wrap">
         <h2 className="text-2xl font-bold">Preview</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button onClick={handlePrint} variant="outline" size="sm" className="print:hidden" data-testid="button-print">
             <Printer className="w-4 h-4 mr-2" />
             Print
@@ -93,8 +95,25 @@ export function ResumePreview({ className }: ResumePreviewProps) {
             )}
             {isGenerating ? 'Generating…' : 'Download PDF'}
           </Button>
+          <Button
+            onClick={() => setShowSharePanel(s => !s)}
+            variant={showSharePanel ? "default" : "outline"}
+            size="sm"
+            className={cn("print:hidden", showSharePanel && "bg-[#2d6a4f] hover:bg-[#255c43] text-white")}
+            data-testid="button-share-resume"
+          >
+            {showSharePanel ? <X className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+            {showSharePanel ? 'Close' : 'Share Resume'}
+          </Button>
         </div>
       </div>
+
+      {/* Share panel — inline below action bar */}
+      {showSharePanel && (
+        <div className="mb-6 print:hidden">
+          <ShareableResumePanel />
+        </div>
+      )}
 
       {/* Resume content — this is exactly what gets captured for the PDF */}
       <div

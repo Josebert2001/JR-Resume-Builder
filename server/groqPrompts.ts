@@ -431,10 +431,10 @@ Score the resume compatibility, identify matched and missed keywords, and provid
         responseFormat: "json",
       };
 
-    // ─── Resume Score (detailed 4-category breakdown) ───────────────────────
+    // ─── Resume Score — section-by-section with grade A–F ─────────────────
     case "resume_score":
       return {
-        prompt: `You are a professional resume evaluator helping a college student or fresh graduate in Nigeria understand how strong their resume is. Be honest but encouraging. Score each category objectively.
+        prompt: `You are a professional resume evaluator helping a college student or fresh graduate in Nigeria understand how strong their resume is. Score each section individually, then provide an overall grade.
 
 RESUME DATA
 Name: ${payload.fullName ?? ""}
@@ -445,149 +445,216 @@ Skills: ${payload.skills ?? ""}
 Projects: ${payload.projects ?? ""}
 Certifications: ${payload.certifications ?? ""}
 
-TASK: Evaluate this resume across 4 categories and return a score and specific, actionable feedback for each.
+TASK: Score this resume section-by-section with specific, actionable feedback. Be honest but encouraging.
 
-CATEGORIES
-1. Content Quality (0–25): Are the descriptions professional, clear, and achievement-focused? Are bullet points well written?
-2. ATS Compatibility (0–25): Does the resume use industry-relevant keywords? Are sections clearly labelled? No fancy formatting issues?
-3. Impact & Metrics (0–25): Does the resume quantify results? Are accomplishments highlighted over generic duties?
-4. Completeness (0–25): Are all key sections present (summary, education, skills)? Is contact info complete? Are there gaps?
+SECTION SCORING RANGES
+- Summary (0–20): Is it compelling, specific, keyword-rich? Does it open with a hook?
+- Experience (0–25): Achievement-based bullets? Action verbs? Quantified impact? Relevant to career goal?
+- Projects (0–20): Are projects framed professionally? Tech stack visible? Impact shown?
+- Skills (0–15): Are skills specific and ATS-friendly? Right mix of technical, tools, and soft?
+- Education (0–10): Well-formatted? GPA included if strong? Relevant coursework or honors shown?
+- Certifications (0–5): Listed with issuer? Relevant to goal?
+- ATS (0–5): No tables, columns, or graphics? Standard section headings? Clean format?
 
-SCORING GUIDE
-- 20–25: Excellent
-- 14–19: Good, minor improvements needed
-- 8–13: Fair, notable gaps
-- 0–7: Needs significant work
+GRADE SCALE (based on total out of 100)
+A: 90–100, B: 75–89, C: 60–74, D: 45–59, F: below 45
+
+For each section return:
+- score (the number)
+- fix: one specific sentence on the most impactful improvement
+- status: "strong" | "good" | "fair" | "weak"
 
 Return ONLY valid JSON with this exact shape:
 {
   "total_score": number (0–100),
-  "categories": {
-    "content_quality": {
-      "score": number (0–25),
-      "label": "Excellent | Good | Fair | Needs Work",
-      "feedback": "2–3 specific sentences on what is strong and what to improve"
-    },
-    "ats_compatibility": {
-      "score": number (0–25),
-      "label": "Excellent | Good | Fair | Needs Work",
-      "feedback": "2–3 specific sentences on keyword density and formatting"
-    },
-    "impact_metrics": {
-      "score": number (0–25),
-      "label": "Excellent | Good | Fair | Needs Work",
-      "feedback": "2–3 specific sentences on quantifiable results"
-    },
-    "completeness": {
-      "score": number (0–25),
-      "label": "Excellent | Good | Fair | Needs Work",
-      "feedback": "2–3 specific sentences on missing sections or sparse content"
-    }
+  "grade": "A | B | C | D | F",
+  "grade_message": "One sentence explaining what the grade means for job applications",
+  "sections": {
+    "summary": { "score": number, "max": 20, "status": "strong|good|fair|weak", "fix": "specific fix sentence" },
+    "experience": { "score": number, "max": 25, "status": "strong|good|fair|weak", "fix": "specific fix sentence" },
+    "projects": { "score": number, "max": 20, "status": "strong|good|fair|weak", "fix": "specific fix sentence" },
+    "skills": { "score": number, "max": 15, "status": "strong|good|fair|weak", "fix": "specific fix sentence" },
+    "education": { "score": number, "max": 10, "status": "strong|good|fair|weak", "fix": "specific fix sentence" },
+    "certifications": { "score": number, "max": 5, "status": "strong|good|fair|weak", "fix": "specific fix sentence" },
+    "ats": { "score": number, "max": 5, "status": "strong|good|fair|weak", "fix": "specific fix sentence" }
   },
-  "top_strengths": ["strength 1", "strength 2", "strength 3"],
-  "top_fixes": ["fix 1", "fix 2", "fix 3"],
-  "overall_verdict": "One punchy sentence summarising the resume's readiness for job applications."
+  "top_wins": ["What is already strong about this resume (1–3 items)"],
+  "top_fixes": [
+    { "priority": "high|medium|low", "section": "section name", "fix": "fix text", "score_impact": "+X pts" }
+  ],
+  "ats_risks": ["Any ATS red flags detected"]
 }`,
         responseFormat: "json",
-        maxTokens: 1500,
+        maxTokens: 2000,
       };
 
-    // ─── Job Match (paste JD, get gap analysis) ────────────────────────────
+    // ─── Job Match — JD match with section-level breakdown ──────────────────
     case "job_match":
       return {
-        prompt: `You are a recruiter and ATS expert helping a Nigerian college student understand how well their resume matches a specific job description. Be specific and constructive.
+        prompt: `You are a senior recruiter and ATS expert helping a Nigerian college student understand exactly how well their resume matches a specific job. Be specific, honest, and constructive.
 
 STUDENT RESUME
 ${payload.resumeText ?? ""}
 
-JOB DESCRIPTION
-${payload.jobDescription ?? ""}
+JOB DETAILS
+Title: ${payload.jobTitle ?? ""}
+Company: ${payload.company ?? ""}
+Description: ${payload.jobDescription ?? ""}
 
-TASK: Analyse the match between the resume and the job description. Identify matched keywords, missing keywords, skill gaps, and give clear next steps.
+TASK: Analyse the match between the resume and the job. Return a detailed breakdown.
 
 Return ONLY valid JSON with this exact shape:
 {
   "match_score": number (0–100),
   "match_label": "Strong Match | Good Match | Partial Match | Weak Match",
-  "matched_keywords": ["kw1", "kw2", "kw3"],
-  "missing_keywords": ["kw1", "kw2", "kw3"],
-  "skill_gaps": [
-    { "skill": "skill name", "importance": "critical | important | nice-to-have", "suggestion": "How the student can address this gap" }
+  "realistic_match": true,
+  "verdict": "2–3 sentence overall assessment of fit and what to do next.",
+  "matched_keywords": ["kw1", "kw2"],
+  "missing_keywords": [{ "keyword": "kw", "importance": "critical|important|nice-to-have", "where_to_add": "section name" }],
+  "section_fixes": [
+    { "section": "section name", "issue": "what's wrong", "fix": "how to fix it" }
   ],
-  "quick_wins": ["Quick actionable edit 1", "Quick actionable edit 2", "Quick actionable edit 3"],
-  "verdict": "2–3 sentence overall assessment of fit and what to do next."
+  "top_3_fixes": [
+    { "rank": 1, "fix": "Most impactful fix to increase match score", "score_gain": "+X pts" },
+    { "rank": 2, "fix": "Second most impactful fix", "score_gain": "+X pts" },
+    { "rank": 3, "fix": "Third most impactful fix", "score_gain": "+X pts" }
+  ]
 }`,
         responseFormat: "json",
-        maxTokens: 1500,
+        maxTokens: 2500,
       };
 
-    // ─── No Experience Mode (alternatives for fresh students) ──────────────
+    // ─── No Experience Mode — reframe profile for zero-experience students ──
     case "no_experience":
       return {
-        prompt: `You are a career coach helping a Nigerian college student who has NO formal work experience build a competitive resume. Help them identify and frame what they DO have.
+        prompt: `You are a career coach helping a Nigerian college student who has NO formal work experience build a competitive resume. Your job is to help them reframe what they already have.
 
 STUDENT PROFILE
 Name: ${payload.fullName ?? ""}
 Field of study: ${payload.fieldOfStudy ?? ""}
-Year/Level: ${payload.academicLevel ?? ""}
 Career goal: ${payload.careerGoal ?? ""}
-Has projects: ${payload.hasProjects ?? "no"}
-Has certifications: ${payload.hasCertifications ?? "no"}
+Education: ${payload.education ?? ""}
+Projects: ${payload.projects ?? ""}
+Skills: ${payload.skills ?? ""}
+Certifications: ${payload.certifications ?? ""}
 Has volunteer/club experience: ${payload.hasVolunteer ?? "no"}
-Any freelance or side work: ${payload.hasFreelance ?? "no"}
 
-TASK: Give this student a personalised action plan to make their resume competitive despite having no formal work experience.
+TASK: Analyse their profile and help them present a competitive resume without formal work experience.
+
+RULES
+1. Rewrite their professional summary to sound confident, not apologetic.
+2. Reformat each project as if it were a professional experience entry (role title + bullets).
+3. Suggest a recommended section order that buries the empty experience section.
+4. Suggest a tiered skills structure: Primary (their strongest), Supporting, Learning.
+5. If profile is very thin (no projects, no certs, no clubs), set has_nothing_flag to true and provide a 30-day action plan.
+6. Never tell the student to lie — only reframe what is true.
 
 Return ONLY valid JSON with this exact shape:
 {
-  "headline": "One encouraging headline for this student",
-  "strategy": "2–3 sentence overall strategy for their resume",
-  "experience_alternatives": [
+  "has_nothing_flag": false,
+  "recommended_section_order": ["Summary", "Skills", "Projects", "Education", "Certifications"],
+  "rewritten_summary": "Rewritten 2–3 sentence professional summary with no mention of inexperience",
+  "projects_as_experience": [
     {
-      "type": "Internship | Volunteer | Club Role | Freelance | Academic Project | Part-Time | NYSC",
-      "title": "Suggested entry title",
-      "example": "Example of how to write this on a resume",
-      "why_it_works": "One sentence on why recruiters value this"
+      "project_name": "original project name",
+      "role_title": "Suggested professional role title (e.g. 'Full-Stack Developer — Personal Project')",
+      "bullets": ["Bullet 1", "Bullet 2", "Bullet 3"]
     }
   ],
-  "quick_actions": ["Action 1 they can take this week", "Action 2", "Action 3"],
-  "encouraged_sections": ["Section name 1", "Section name 2"],
-  "tip": "One strong coaching note."
+  "tiered_skills": {
+    "primary": ["top 4–5 skills they already have"],
+    "supporting": ["3–4 adjacent skills they can claim"],
+    "learning": ["2–3 skills to add in 30 days"]
+  },
+  "thirty_day_plan": ["Action 1", "Action 2", "Action 3", "Action 4", "Action 5"],
+  "tip": "One coaching note."
+}`,
+        responseFormat: "json",
+        maxTokens: 2000,
+      };
+
+    // ─── Nigerian NYSC — dual format for local and international employers ──
+    case "nigeria_nysc":
+      return {
+        prompt: `You are a professional resume coach helping a Nigerian student format their NYSC (National Youth Service Corps) year for their resume. You will produce TWO versions — one for Nigerian employers and one for international employers.
+
+STUDENT INPUT
+Institution: ${payload.institution ?? ""}
+Degree: ${payload.degree ?? ""}
+Field of study: ${payload.fieldOfStudy ?? ""}
+Graduation year: ${payload.graduationYear ?? ""}
+CGPA: ${payload.cgpa ?? ""} out of ${payload.cgpaScale ?? "5.0"}
+Degree class: ${payload.degreeClass ?? ""}
+Honors/Awards: ${payload.honors ?? ""}
+NYSC status: ${payload.nyscStatus ?? ""}
+State of posting: ${payload.nyscState ?? ""}
+PPA (Place of Primary Assignment): ${payload.ppa ?? ""}
+Role at PPA: ${payload.ppaRole ?? ""}
+CDS group: ${payload.cdsGroup ?? ""}
+Career goal: ${payload.careerGoal ?? ""}
+
+RULES
+LOCAL VERSION (Nigerian employers):
+- Use CGPA on a 5.0 scale
+- Use Nigerian degree class (First Class, Second Class Upper, etc.)
+- List NYSC as: "National Youth Service Corps | State | PPA | Role | Year"
+- Show CDS group if relevant
+
+INTERNATIONAL VERSION (global employers):
+- Convert CGPA to 4.0 scale (divide by 5, multiply by 4)
+- Use international honors equivalent (Summa Cum Laude, Magna Cum Laude, etc.)
+- Translate NYSC as: "Mandatory National Service — Nigeria | Year" and explain PPA role as a professional title
+- Do not use Nigerian-specific acronyms without explanation
+
+Return ONLY valid JSON with this exact shape:
+{
+  "local_version": {
+    "degree_line": "Full formatted degree line for Nigerian employers",
+    "cgpa_line": "CGPA X.XX / 5.0 — Degree Class",
+    "nysc_line": "NYSC formatted entry for local resume",
+    "bullets": ["NYSC bullet 1", "NYSC bullet 2"]
+  },
+  "international_version": {
+    "degree_line": "Full formatted degree line for international employers",
+    "gpa_line": "GPA X.XX / 4.0 (equivalent) — International honors equivalent",
+    "service_line": "Translated NYSC entry for international resume",
+    "bullets": ["Service bullet 1 with context", "Service bullet 2"]
+  },
+  "tip": "One coaching note on when to use which version."
 }`,
         responseFormat: "json",
         maxTokens: 1500,
       };
 
-    // ─── NYSC Section helper ────────────────────────────────────────────────
-    case "nysc_bullets":
+    // ─── Shareable Link Copy — AI-generated social share text ──────────────
+    case "shareable_link":
       return {
-        prompt: `You are a professional resume coach helping a Nigerian graduate write their NYSC (National Youth Service Corps) posting as a powerful work experience entry.
+        prompt: `You are a personal branding expert helping a Nigerian college student share their resume effectively on WhatsApp, LinkedIn, and email. Write compelling, authentic copy for each platform.
 
-STUDENT INPUT
-State posted to: ${payload.state ?? ""}
-PPA (Place of Primary Assignment): ${payload.ppa ?? ""}
-PPA sector: ${payload.ppaSector ?? ""}
-What they did (in their own words): ${payload.rawDescription ?? ""}
+STUDENT PROFILE
+Name: ${payload.fullName ?? ""}
+Career goal / target role: ${payload.careerGoal ?? ""}
+Top skills: ${payload.topSkills ?? ""}
 Field of study: ${payload.fieldOfStudy ?? ""}
-Career goal: ${payload.careerGoal ?? ""}
-Duration: ${payload.duration ?? "July 2024 – June 2025"}
+Availability status: ${payload.availabilityStatus ?? "open to work"}
+Best achievement: ${payload.bestAchievement ?? ""}
 
-TASK: Transform their NYSC experience into 3–4 powerful resume bullet points that make Nigerian employers take notice.
-
-RULES:
-1. Frame the PPA as a legitimate professional role — it IS real work experience.
-2. Highlight skills demonstrated: teaching, community development, project management, leadership, technical skills — whatever is relevant.
-3. Use strong action verbs. Every bullet must start differently.
-4. Add metrics where plausible (number of students, community size, project budget, etc.)
-5. Mention the NYSC context professionally — do not hide it, employers know what it is.
-6. Tailor bullets to the career goal.
+RULES
+1. Page headline: 6–8 words, punchy, includes their name and role. No buzzwords.
+2. WhatsApp message: Casual, warm, direct. 2–3 sentences. Ends with call to action. Sounds like a real person, not a press release.
+3. LinkedIn caption: Professional but personable. 3–5 sentences. Includes 2–3 relevant hashtags at the end.
+4. Email signature: One clean line. Format: "[Name] | [Role] | [Field] | [Email if provided]". No emojis.
+5. Availability badge: "Actively looking" | "Open to opportunities" | "Available from [Month]"
+6. OG description: 1 sentence summarising the resume for link preview. Max 160 characters.
 
 Return ONLY valid JSON with this exact shape:
 {
-  "job_title": "Suggested job title for resume (e.g. 'Corps Member — Mathematics Teacher' or 'Corps Member — IT Support Officer')",
-  "company_line": "PPA name, NYSC State Command | July 2024 – June 2025",
-  "bullets": ["Bullet 1", "Bullet 2", "Bullet 3", "Bullet 4"],
-  "tip": "One coaching note about how to present this NYSC experience."
+  "page_headline": "6–8 word punchy headline",
+  "whatsapp_message": "2–3 sentence WhatsApp share message",
+  "linkedin_caption": "3–5 sentence LinkedIn post caption with hashtags",
+  "email_signature": "One-line email signature",
+  "availability_badge": "Actively looking | Open to opportunities | Available from Month",
+  "og_description": "One sentence for link preview (max 160 chars)"
 }`,
         responseFormat: "json",
         maxTokens: 1200,
@@ -751,77 +818,119 @@ export function normalizeResult(
     };
   }
   if (action === "resume_score") {
-    const cats = raw?.categories as Record<string, unknown> | undefined;
-    const normCat = (c: unknown) => {
-      if (typeof c !== "object" || c === null) return { score: 0, label: "Needs Work", feedback: "" };
-      const o = c as Record<string, unknown>;
+    const sects = raw?.sections as Record<string, unknown> | undefined;
+    const normSect = (s: unknown) => {
+      if (typeof s !== "object" || s === null) return { score: 0, max: 0, status: "weak", fix: "" };
+      const o = s as Record<string, unknown>;
       return {
         score: Number(o.score) || 0,
-        label: String(o.label ?? "Needs Work"),
-        feedback: String(o.feedback ?? ""),
+        max: Number(o.max) || 0,
+        status: String(o.status ?? "weak"),
+        fix: String(o.fix ?? ""),
       };
+    };
+    const normFix = (f: unknown) => {
+      if (typeof f !== "object" || f === null) return null;
+      const o = f as Record<string, unknown>;
+      return { priority: String(o.priority ?? "low"), section: String(o.section ?? ""), fix: String(o.fix ?? ""), score_impact: String(o.score_impact ?? "") };
     };
     return {
       total_score: Number(raw?.total_score) || 0,
-      categories: {
-        content_quality: normCat(cats?.content_quality),
-        ats_compatibility: normCat(cats?.ats_compatibility),
-        impact_metrics: normCat(cats?.impact_metrics),
-        completeness: normCat(cats?.completeness),
+      grade: String(raw?.grade ?? "F"),
+      grade_message: String(raw?.grade_message ?? ""),
+      sections: {
+        summary: normSect(sects?.summary),
+        experience: normSect(sects?.experience),
+        projects: normSect(sects?.projects),
+        skills: normSect(sects?.skills),
+        education: normSect(sects?.education),
+        certifications: normSect(sects?.certifications),
+        ats: normSect(sects?.ats),
       },
-      top_strengths: Array.isArray(raw?.top_strengths) ? (raw.top_strengths as unknown[]).map(String) : [],
-      top_fixes: Array.isArray(raw?.top_fixes) ? (raw.top_fixes as unknown[]).map(String) : [],
-      overall_verdict: String(raw?.overall_verdict ?? ""),
+      top_wins: Array.isArray(raw?.top_wins) ? (raw.top_wins as unknown[]).map(String) : [],
+      top_fixes: Array.isArray(raw?.top_fixes) ? (raw.top_fixes as unknown[]).map(normFix).filter(Boolean) : [],
+      ats_risks: Array.isArray(raw?.ats_risks) ? (raw.ats_risks as unknown[]).map(String) : [],
     };
   }
   if (action === "job_match") {
-    const normGap = (g: unknown) => {
-      if (typeof g !== "object" || g === null) return null;
-      const o = g as Record<string, unknown>;
-      return {
-        skill: String(o.skill ?? ""),
-        importance: String(o.importance ?? "nice-to-have"),
-        suggestion: String(o.suggestion ?? ""),
-      };
+    const normMissing = (m: unknown) => {
+      if (typeof m !== "object" || m === null) return null;
+      const o = m as Record<string, unknown>;
+      return { keyword: String(o.keyword ?? ""), importance: String(o.importance ?? "nice-to-have"), where_to_add: String(o.where_to_add ?? "") };
+    };
+    const normSectionFix = (f: unknown) => {
+      if (typeof f !== "object" || f === null) return null;
+      const o = f as Record<string, unknown>;
+      return { section: String(o.section ?? ""), issue: String(o.issue ?? ""), fix: String(o.fix ?? "") };
+    };
+    const normTop3 = (f: unknown) => {
+      if (typeof f !== "object" || f === null) return null;
+      const o = f as Record<string, unknown>;
+      return { rank: Number(o.rank) || 0, fix: String(o.fix ?? ""), score_gain: String(o.score_gain ?? "") };
     };
     return {
       match_score: Number(raw?.match_score) || 0,
       match_label: String(raw?.match_label ?? "Partial Match"),
-      matched_keywords: Array.isArray(raw?.matched_keywords) ? (raw.matched_keywords as unknown[]).map(String) : [],
-      missing_keywords: Array.isArray(raw?.missing_keywords) ? (raw.missing_keywords as unknown[]).map(String) : [],
-      skill_gaps: Array.isArray(raw?.skill_gaps) ? (raw.skill_gaps as unknown[]).map(normGap).filter(Boolean) : [],
-      quick_wins: Array.isArray(raw?.quick_wins) ? (raw.quick_wins as unknown[]).map(String) : [],
+      realistic_match: raw?.realistic_match !== false,
       verdict: String(raw?.verdict ?? ""),
+      matched_keywords: Array.isArray(raw?.matched_keywords) ? (raw.matched_keywords as unknown[]).map(String) : [],
+      missing_keywords: Array.isArray(raw?.missing_keywords) ? (raw.missing_keywords as unknown[]).map(normMissing).filter(Boolean) : [],
+      section_fixes: Array.isArray(raw?.section_fixes) ? (raw.section_fixes as unknown[]).map(normSectionFix).filter(Boolean) : [],
+      top_3_fixes: Array.isArray(raw?.top_3_fixes) ? (raw.top_3_fixes as unknown[]).map(normTop3).filter(Boolean) : [],
     };
   }
   if (action === "no_experience") {
-    const normAlt = (a: unknown) => {
-      if (typeof a !== "object" || a === null) return null;
-      const o = a as Record<string, unknown>;
+    const normProject = (p: unknown) => {
+      if (typeof p !== "object" || p === null) return null;
+      const o = p as Record<string, unknown>;
       return {
-        type: String(o.type ?? ""),
-        title: String(o.title ?? ""),
-        example: String(o.example ?? ""),
-        why_it_works: String(o.why_it_works ?? ""),
+        project_name: String(o.project_name ?? ""),
+        role_title: String(o.role_title ?? ""),
+        bullets: Array.isArray(o.bullets) ? (o.bullets as unknown[]).map(String) : [],
       };
     };
+    const ts = raw?.tiered_skills as Record<string, unknown> | undefined;
     return {
-      headline: String(raw?.headline ?? ""),
-      strategy: String(raw?.strategy ?? ""),
-      experience_alternatives: Array.isArray(raw?.experience_alternatives)
-        ? (raw.experience_alternatives as unknown[]).map(normAlt).filter(Boolean)
-        : [],
-      quick_actions: Array.isArray(raw?.quick_actions) ? (raw.quick_actions as unknown[]).map(String) : [],
-      encouraged_sections: Array.isArray(raw?.encouraged_sections) ? (raw.encouraged_sections as unknown[]).map(String) : [],
+      has_nothing_flag: raw?.has_nothing_flag === true,
+      recommended_section_order: Array.isArray(raw?.recommended_section_order) ? (raw.recommended_section_order as unknown[]).map(String) : [],
+      rewritten_summary: String(raw?.rewritten_summary ?? ""),
+      projects_as_experience: Array.isArray(raw?.projects_as_experience) ? (raw.projects_as_experience as unknown[]).map(normProject).filter(Boolean) : [],
+      tiered_skills: {
+        primary: Array.isArray(ts?.primary) ? (ts.primary as unknown[]).map(String) : [],
+        supporting: Array.isArray(ts?.supporting) ? (ts.supporting as unknown[]).map(String) : [],
+        learning: Array.isArray(ts?.learning) ? (ts.learning as unknown[]).map(String) : [],
+      },
+      thirty_day_plan: Array.isArray(raw?.thirty_day_plan) ? (raw.thirty_day_plan as unknown[]).map(String) : [],
       tip: String(raw?.tip ?? ""),
     };
   }
-  if (action === "nysc_bullets") {
+  if (action === "nigeria_nysc") {
+    const normVer = (v: unknown) => {
+      if (typeof v !== "object" || v === null) return { degree_line: "", gpa_line: "", nysc_line: "", service_line: "", cgpa_line: "", bullets: [] };
+      const o = v as Record<string, unknown>;
+      return {
+        degree_line: String(o.degree_line ?? ""),
+        cgpa_line: String(o.cgpa_line ?? ""),
+        gpa_line: String(o.gpa_line ?? ""),
+        nysc_line: String(o.nysc_line ?? ""),
+        service_line: String(o.service_line ?? ""),
+        bullets: Array.isArray(o.bullets) ? (o.bullets as unknown[]).map(String) : [],
+      };
+    };
     return {
-      job_title: String(raw?.job_title ?? ""),
-      company_line: String(raw?.company_line ?? ""),
-      bullets: Array.isArray(raw?.bullets) ? (raw.bullets as unknown[]).map(String) : [],
+      local_version: normVer(raw?.local_version),
+      international_version: normVer(raw?.international_version),
       tip: String(raw?.tip ?? ""),
+    };
+  }
+  if (action === "shareable_link") {
+    return {
+      page_headline: String(raw?.page_headline ?? ""),
+      whatsapp_message: String(raw?.whatsapp_message ?? ""),
+      linkedin_caption: String(raw?.linkedin_caption ?? ""),
+      email_signature: String(raw?.email_signature ?? ""),
+      availability_badge: String(raw?.availability_badge ?? "Open to opportunities"),
+      og_description: String(raw?.og_description ?? ""),
     };
   }
   return raw;
@@ -868,23 +977,30 @@ export function emptyFallback(action: string): Record<string, unknown> {
       return { score: 0, matchedKeywords: [], missedKeywords: [], suggestions: ["Failed to analyze resume. Please try again."] };
     case "resume_score":
       return {
-        total_score: 0,
-        categories: {
-          content_quality: { score: 0, label: "Needs Work", feedback: "" },
-          ats_compatibility: { score: 0, label: "Needs Work", feedback: "" },
-          impact_metrics: { score: 0, label: "Needs Work", feedback: "" },
-          completeness: { score: 0, label: "Needs Work", feedback: "" },
+        total_score: 0, grade: "F", grade_message: "",
+        sections: {
+          summary: { score: 0, max: 20, status: "weak", fix: "" },
+          experience: { score: 0, max: 25, status: "weak", fix: "" },
+          projects: { score: 0, max: 20, status: "weak", fix: "" },
+          skills: { score: 0, max: 15, status: "weak", fix: "" },
+          education: { score: 0, max: 10, status: "weak", fix: "" },
+          certifications: { score: 0, max: 5, status: "weak", fix: "" },
+          ats: { score: 0, max: 5, status: "weak", fix: "" },
         },
-        top_strengths: [],
-        top_fixes: [],
-        overall_verdict: "",
+        top_wins: [], top_fixes: [], ats_risks: [],
       };
     case "job_match":
-      return { match_score: 0, match_label: "Partial Match", matched_keywords: [], missing_keywords: [], skill_gaps: [], quick_wins: [], verdict: "" };
+      return { match_score: 0, match_label: "Partial Match", realistic_match: true, verdict: "", matched_keywords: [], missing_keywords: [], section_fixes: [], top_3_fixes: [] };
     case "no_experience":
-      return { headline: "", strategy: "", experience_alternatives: [], quick_actions: [], encouraged_sections: [], tip: "" };
-    case "nysc_bullets":
-      return { job_title: "", company_line: "", bullets: [], tip: "" };
+      return { has_nothing_flag: false, recommended_section_order: [], rewritten_summary: "", projects_as_experience: [], tiered_skills: { primary: [], supporting: [], learning: [] }, thirty_day_plan: [], tip: "" };
+    case "nigeria_nysc":
+      return {
+        local_version: { degree_line: "", cgpa_line: "", nysc_line: "", bullets: [] },
+        international_version: { degree_line: "", gpa_line: "", service_line: "", bullets: [] },
+        tip: "",
+      };
+    case "shareable_link":
+      return { page_headline: "", whatsapp_message: "", linkedin_caption: "", email_signature: "", availability_badge: "Open to opportunities", og_description: "" };
     default:
       return { text: "" };
   }
@@ -909,5 +1025,6 @@ export const VALID_ACTIONS = [
   "resume_score",
   "job_match",
   "no_experience",
-  "nysc_bullets",
+  "nigeria_nysc",
+  "shareable_link",
 ] as const;

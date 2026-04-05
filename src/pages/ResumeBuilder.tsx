@@ -15,8 +15,7 @@ import { ResumeImprover } from '@/components/ResumeImprover';
 import { ResumeUpload } from '@/components/ResumeUpload';
 import { ResumeScorePanel } from '@/components/ResumeScorePanel';
 import { JobMatchPanel } from '@/components/JobMatchPanel';
-import { NoExperiencePanel } from '@/components/NoExperiencePanel';
-import { ShareableLink } from '@/components/ShareableLink';
+import { ShareableResumePanel } from '@/components/ShareableLink';
 
 const STEP_LABELS = ['Template', 'Info', 'Education', 'Work', 'Skills', 'Projects', 'Certifications', 'Preview'];
 
@@ -44,22 +43,18 @@ const ResumeBuilder = () => {
         {currentStep === 8 && (
           <Tabs defaultValue="preview" className="w-full">
             <div className="overflow-x-auto mb-8 -mx-1 px-1">
-              <TabsList className="inline-flex min-w-max w-full gap-1 p-1 h-auto">
-                <TabsTrigger value="preview" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[70px]" data-testid="tab-preview">Preview</TabsTrigger>
-                <TabsTrigger value="templates" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[70px]" data-testid="tab-template">Template</TabsTrigger>
-                <TabsTrigger value="score" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[55px]" data-testid="tab-score">Score</TabsTrigger>
-                <TabsTrigger value="job-match" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px]" data-testid="tab-job-match">Job Match</TabsTrigger>
-                <TabsTrigger value="no-exp" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[65px]" data-testid="tab-no-exp">No Exp?</TabsTrigger>
-                <TabsTrigger value="improve" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[65px]" data-testid="tab-improve">Improve</TabsTrigger>
-                <TabsTrigger value="share" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[55px]" data-testid="tab-share">Share</TabsTrigger>
+              <TabsList className="inline-flex min-w-max gap-1 p-1 h-auto">
+                <TabsTrigger value="preview" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-preview">Preview</TabsTrigger>
+                <TabsTrigger value="score" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-score">Score</TabsTrigger>
+                <TabsTrigger value="job-match" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-job-match">Job Match</TabsTrigger>
+                <TabsTrigger value="share" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-share">Share</TabsTrigger>
+                <TabsTrigger value="templates" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-template">Template</TabsTrigger>
+                <TabsTrigger value="analyze" className="text-xs sm:text-sm whitespace-nowrap px-3 py-1.5" data-testid="tab-analyze">Analyze</TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="preview">
               <ResumePreview />
-            </TabsContent>
-            <TabsContent value="templates">
-              <ResumeTemplates />
             </TabsContent>
             <TabsContent value="score">
               <ResumeScorePanel />
@@ -67,14 +62,17 @@ const ResumeBuilder = () => {
             <TabsContent value="job-match">
               <JobMatchPanel />
             </TabsContent>
-            <TabsContent value="no-exp">
-              <NoExperiencePanel />
-            </TabsContent>
-            <TabsContent value="improve">
-              <ResumeImprover resumeData={resumeData} />
-            </TabsContent>
             <TabsContent value="share">
-              <ShareableLink />
+              <div className="max-w-2xl mx-auto">
+                <h2 className="text-xl font-semibold mb-4">Share Your Resume</h2>
+                <ShareableResumePanel />
+              </div>
+            </TabsContent>
+            <TabsContent value="templates">
+              <ResumeTemplates />
+            </TabsContent>
+            <TabsContent value="analyze">
+              <ResumeImprover resumeData={resumeData} />
             </TabsContent>
           </Tabs>
         )}
