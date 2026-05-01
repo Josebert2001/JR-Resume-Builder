@@ -26,18 +26,21 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Only split truly isolated heavy libraries that are loaded lazily.
+          // Only split truly isolated heavy libraries.
           // DO NOT split React or any React-dependent UI libraries (Radix, etc.)
           // into separate chunks — doing so causes createContext initialization
           // order errors when chunks load before React is ready.
-          if (id.includes("@react-pdf/renderer") || id.includes("@react-pdf")) {
-            return "vendor-pdf";
+          if (id.includes("node_modules/@supabase")) {
+            return "vendor-supabase";
+          }
+          if (id.includes("node_modules/framer-motion")) {
+            return "vendor-motion";
+          }
+          if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) {
+            return "vendor-charts";
           }
           if (id.includes("node_modules/docx")) {
             return "vendor-docx";
-          }
-          if (id.includes("html2canvas")) {
-            return "vendor-canvas";
           }
         },
       },
