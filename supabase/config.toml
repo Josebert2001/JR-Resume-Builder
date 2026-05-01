@@ -1,5 +1,5 @@
 
-project_id = "ketgeysguwxleieciyyx"
+project_id = "wnplljglhllbslskhces"
 
 [functions.groq-generate]
 verify_jwt = false

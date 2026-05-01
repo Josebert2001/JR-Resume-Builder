@@ -1,7 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import { z } from "zod";
 import { buildPrompt, normalizeResult, emptyFallback, VALID_ACTIONS } from "./groqPrompts.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,10 +13,44 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const isDev = process.env.NODE_ENV !== "production";
 
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+// Security headers (helmet-equivalent without adding a dependency)
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  if (!isDev) {
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
+  next();
+});
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : ["http://localhost:5000", "http://localhost:3001"];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow same-origin and server-to-server requests (no origin header)
+      if (!origin) return callback(null, true);
+      if (isDev || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+  })
+);
+
+app.use(express.json({ limit: "2mb" }));
+
+const MAX_RATE_LIMIT_ENTRIES = 10000;
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 // Prune expired entries every 5 minutes to prevent memory leak
@@ -24,10 +62,16 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 function isRateLimited(
-  userId: string,
+  identifier: string,
   action: string
 ): { limited: boolean; resetTime?: number } {
-  const key = `${userId}:${action}`;
+  // Evict oldest entry when cap is reached to bound memory usage
+  if (rateLimitStore.size >= MAX_RATE_LIMIT_ENTRIES) {
+    const oldest = rateLimitStore.keys().next().value;
+    if (oldest) rateLimitStore.delete(oldest);
+  }
+
+  const key = `${identifier}:${action}`;
   const now = Date.now();
   const rules: Record<string, { maxRequests: number; windowMs: number }> = {
     ai_generation: { maxRequests: 20, windowMs: 60000 },
@@ -52,6 +96,14 @@ function isRateLimited(
   return { limited: false };
 }
 
+const generateRequestSchema = z
+  .object({
+    action: z.string(),
+    resumeText: z.string().max(50000).optional(),
+    jobDescription: z.string().max(10000).optional(),
+  })
+  .passthrough();
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
@@ -63,12 +115,22 @@ app.post("/api/groq-generate", async (req, res) => {
     return res.status(500).json({ error: "GROQ_API_KEY not configured on server" });
   }
 
-  const { action, ...payload } = req.body;
-  const userId = (req.headers["x-user-id"] as string) || "anonymous";
+  const parseResult = generateRequestSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return res.status(400).json({ error: "Invalid request payload" });
+  }
+
+  const { action, ...payload } = parseResult.data;
 
   if (!action || !(VALID_ACTIONS as readonly string[]).includes(action)) {
     return res.status(400).json({ error: "Invalid action" });
   }
+
+  // Use IP address as rate limit identifier — not spoofable unlike x-user-id header
+  const clientIp =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.socket.remoteAddress ||
+    "unknown";
 
   const rateLimitAction = [
     "education",
@@ -81,7 +143,7 @@ app.post("/api/groq-generate", async (req, res) => {
     ? "ai_generation"
     : "resume_analysis";
 
-  const rateLimitCheck = isRateLimited(userId, rateLimitAction);
+  const rateLimitCheck = isRateLimited(clientIp, rateLimitAction);
   if (rateLimitCheck.limited) {
     return res.status(429).json({
       error: "Rate limit exceeded",
@@ -114,8 +176,8 @@ app.post("/api/groq-generate", async (req, res) => {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("Groq API error:", error);
+      const errorText = await response.text();
+      if (isDev) console.error("Groq API error:", errorText);
       return res.status(502).json({ error: `Groq API error: ${response.status}` });
     }
 
@@ -149,10 +211,10 @@ app.post("/api/groq-generate", async (req, res) => {
 
     return res.json({ text: content });
   } catch (error: unknown) {
-    console.error("Error in groq-generate:", error);
+    if (isDev) console.error("Error in groq-generate:", error);
     return res.status(500).json({
       error: "Failed to generate content",
-      details: error instanceof Error ? error.message : String(error),
+      ...(isDev && { details: error instanceof Error ? error.message : String(error) }),
     });
   }
 });

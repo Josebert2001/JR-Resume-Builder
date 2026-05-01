@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { analyzeResume } from '@/services/resumeAI';
 import { useResumeContext } from '@/context/ResumeContext';
+import type { PersonalInfo, WorkExperience, Education } from '@/context/ResumeContext';
 import { toast } from 'sonner';
 import { FileValidator } from '@/services/fileValidation';
 import { analytics } from '@/services/analytics';
@@ -27,9 +28,9 @@ interface AnalysisResult {
   atsScore: number;
   keywords: string[];
   extractedData?: {
-    personalInfo?: any;
-    workExperience?: any[];
-    education?: any[];
+    personalInfo?: Partial<PersonalInfo>;
+    workExperience?: WorkExperience[];
+    education?: Education[];
     skills?: { id: string; name: string; level: number }[];
   };
 }

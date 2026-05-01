@@ -1,8 +1,19 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { z } from "zod";
 import { buildPrompt, normalizeResult, emptyFallback, VALID_ACTIONS } from "../server/groqPrompts.js";
 
 type Req = IncomingMessage & { body?: Record<string, unknown> };
 type Res = ServerResponse;
+
+const isDev = process.env.NODE_ENV !== "production";
+
+const requestSchema = z
+  .object({
+    action: z.string(),
+    resumeText: z.string().max(50000).optional(),
+    jobDescription: z.string().max(10000).optional(),
+  })
+  .passthrough();
 
 function send(res: Res, status: number, data: unknown) {
   const body = JSON.stringify(data);
@@ -13,7 +24,8 @@ function send(res: Res, status: number, data: unknown) {
 
 export default async function handler(req: Req, res: Res) {
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-user-id");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("X-Content-Type-Options", "nosniff");
 
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -27,17 +39,21 @@ export default async function handler(req: Req, res: Res) {
 
   const groqApiKey = process.env.GROQ_API_KEY;
   if (!groqApiKey) {
-    return send(res, 500, { error: "GROQ_API_KEY not configured on server" });
+    return send(res, 500, { error: "GROQ_API_KEY not configured" });
   }
 
-  const body = req.body ?? {};
-  const { action, ...payload } = body as { action: string; [key: string]: unknown };
+  const parseResult = requestSchema.safeParse(req.body ?? {});
+  if (!parseResult.success) {
+    return send(res, 400, { error: "Invalid request payload" });
+  }
+
+  const { action, ...payload } = parseResult.data;
 
   if (!action || !(VALID_ACTIONS as readonly string[]).includes(action)) {
     return send(res, 400, { error: "Invalid action" });
   }
 
-  const { prompt, responseFormat } = buildPrompt(action, payload);
+  const { prompt, responseFormat, maxTokens } = buildPrompt(action, payload);
 
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -57,13 +73,13 @@ export default async function handler(req: Req, res: Res) {
           { role: "user", content: prompt },
         ],
         temperature: 0.7,
-        max_tokens: 1000,
+        max_tokens: maxTokens ?? 1000,
       }),
     });
 
     if (!groqRes.ok) {
       const errText = await groqRes.text();
-      console.error("Groq API error:", errText);
+      if (isDev) console.error("Groq API error:", errText);
       return send(res, 502, { error: `Groq API error: ${groqRes.status}` });
     }
 
@@ -99,10 +115,10 @@ export default async function handler(req: Req, res: Res) {
 
     return send(res, 200, { text: content });
   } catch (err) {
-    console.error("Error in groq-generate:", err);
+    if (isDev) console.error("Error in groq-generate:", err);
     return send(res, 500, {
       error: "Failed to generate content",
-      details: err instanceof Error ? err.message : String(err),
+      ...(isDev && { details: err instanceof Error ? err.message : String(err) }),
     });
   }
 }

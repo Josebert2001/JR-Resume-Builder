@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { GenerationResponse } from '@/services/aiService';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 export type WorkExperience = {
   id: string;
@@ -79,6 +81,27 @@ export type ResumeData = {
   personalInfo?: PersonalInfo;
 };
 
+const EMPTY_RESUME: ResumeData = {
+  name: '',
+  email: '',
+  phone: '',
+  education: [],
+  workExperience: [],
+  certifications: [],
+  projects: [],
+  skills: [],
+  template: 'professional',
+  personalInfo: {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    location: '',
+    portfolio: '',
+    summary: '',
+  },
+};
+
 type ResumeContextType = {
   resumeData: ResumeData;
   updateResumeData: (data: Partial<ResumeData>) => void;
@@ -103,30 +126,85 @@ type ResumeContextType = {
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
 
 export const ResumeProvider = ({ children }: { children: ReactNode }) => {
-  const [storedResumeData, setStoredResumeData] = useLocalStorage<ResumeData>('resumeData', {
-    name: '',
-    email: '',
-    phone: '',
-    education: [],
-    workExperience: [],
-    certifications: [],
-    projects: [],
-    skills: [],
-    template: 'professional',
-    personalInfo: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      location: '',
-      portfolio: '',
-      summary: ''
-    }
-  });
-  
+  const { user } = useAuth();
+  const [storedResumeData, setStoredResumeData] = useLocalStorage<ResumeData>('resumeData', EMPTY_RESUME);
   const [aiGenerated, setAiGenerated] = useState<GenerationResponse | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Track the Supabase record ID and guard against overwriting during load
+  const supabaseRecordId = useRef<string | null>(null);
+  const isSyncingFromCloud = useRef(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load resume from Supabase when user signs in
+  useEffect(() => {
+    if (!user) {
+      supabaseRecordId.current = null;
+      return;
+    }
+
+    const loadFromSupabase = async () => {
+      isSyncingFromCloud.current = true;
+      const { data } = await supabase
+        .from('user_resumes')
+        .select('id, data')
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data?.data) {
+        supabaseRecordId.current = data.id as string;
+        setStoredResumeData(data.data as ResumeData);
+      }
+      isSyncingFromCloud.current = false;
+    };
+
+    loadFromSupabase();
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Debounced save to Supabase whenever resume data changes
+  useEffect(() => {
+    if (!user || isSyncingFromCloud.current) return;
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      const title = [
+        storedResumeData.personalInfo?.firstName,
+        storedResumeData.personalInfo?.lastName,
+      ]
+        .filter(Boolean)
+        .join(' ') || 'My Resume';
+
+      const payload = {
+        user_id: user.id,
+        title,
+        data: storedResumeData,
+        template_name: storedResumeData.template ?? 'professional',
+        is_default: true,
+      };
+
+      if (supabaseRecordId.current) {
+        await supabase
+          .from('user_resumes')
+          .update(payload)
+          .eq('id', supabaseRecordId.current);
+      } else {
+        const { data } = await supabase
+          .from('user_resumes')
+          .insert(payload)
+          .select('id')
+          .single();
+        if (data) supabaseRecordId.current = data.id as string;
+      }
+    }, 2000);
+
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [storedResumeData, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateResumeData = (data: Partial<ResumeData>) => {
     setStoredResumeData((prev: ResumeData) => ({ ...prev, ...data }));
@@ -136,49 +214,23 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
     updateResumeData({ template });
   };
 
-  const nextStep = () => {
-    setCurrentStep((prev) => prev + 1);
-  };
+  const nextStep = () => setCurrentStep((prev) => prev + 1);
+  const prevStep = () => setCurrentStep((prev) => Math.max(1, prev - 1));
 
-  const prevStep = () => {
-    setCurrentStep((prev) => Math.max(1, prev - 1));
-  };
-
-  const updateEducation = (education: Education[]) => {
-    updateResumeData({ education });
-  };
-
-  const updateCertifications = (certifications: Certification[]) => {
-    updateResumeData({ certifications });
-  };
+  const updateEducation = (education: Education[]) => updateResumeData({ education });
+  const updateCertifications = (certifications: Certification[]) => updateResumeData({ certifications });
 
   const updatePersonalInfo = (info: Partial<PersonalInfo>) => {
     setStoredResumeData((prev: ResumeData) => ({
       ...prev,
       personalInfo: {
-        ...(prev.personalInfo || {
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          location: '',
-          portfolio: '',
-          summary: ''
-        }),
-        ...info
-      }
+        ...(prev.personalInfo ?? EMPTY_RESUME.personalInfo!),
+        ...info,
+      },
     }));
   };
 
-  const personalInfo = storedResumeData.personalInfo || {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    location: '',
-    portfolio: '',
-    summary: ''
-  };
+  const personalInfo = storedResumeData.personalInfo ?? EMPTY_RESUME.personalInfo!;
 
   return (
     <ResumeContext.Provider
@@ -192,12 +244,12 @@ export const ResumeProvider = ({ children }: { children: ReactNode }) => {
         isGenerating,
         setIsGenerating,
         setTemplate,
-        template: storedResumeData.template || 'professional',
+        template: storedResumeData.template ?? 'professional',
         nextStep,
         prevStep,
-        education: storedResumeData.education || [],
+        education: storedResumeData.education ?? [],
         updateEducation,
-        certifications: storedResumeData.certifications || [],
+        certifications: storedResumeData.certifications ?? [],
         updateCertifications,
         personalInfo,
         updatePersonalInfo,

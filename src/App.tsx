@@ -4,6 +4,7 @@ import { Toaster } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
 import FontLoader from "./components/FontLoader";
 import { ResumeProvider } from "./context/ResumeContext";
+import { AuthProvider } from "./context/AuthContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -24,6 +25,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
+        <AuthProvider>
         <ResumeProvider>
           <TooltipProvider>
             <Router
@@ -50,6 +52,7 @@ function App() {
             </Router>
           </TooltipProvider>
         </ResumeProvider>
+        </AuthProvider>
       </ErrorBoundary>
     </QueryClientProvider>
   );

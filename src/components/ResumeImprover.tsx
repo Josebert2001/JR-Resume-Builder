@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { TouchRipple } from './ui/touch-ripple';
 import { analyzeResume } from '@/services/resumeAI';
 import { toast } from 'sonner';
-import type { ResumeData, PersonalInfo } from '@/context/ResumeContext';
+import type { ResumeData, PersonalInfo, WorkExperience, Education, Skill } from '@/context/ResumeContext';
 
 interface ResumeImproverProps {
   resumeData: ResumeData;
@@ -45,24 +45,25 @@ PROFESSIONAL SUMMARY
 ${personalInfo.summary || 'Professional seeking new opportunities'}
 
 WORK EXPERIENCE
-${workExperience?.map((exp: any) => `
+${workExperience?.map((exp: WorkExperience) => `
 ${exp.position || ''} - ${exp.company || ''}
 ${exp.startDate ? `${exp.startDate} - ${exp.endDate || 'Present'}` : ''}
 ${exp.description || ''}
 `).join('\n') || ''}
 
 EDUCATION
-${education.map((edu: any) => `
+${education.map((edu: Education) => `
 ${edu.degree || ''} in ${edu.fieldOfStudy || ''} - ${edu.school || ''}
 ${edu.graduationDate ? `Graduated: ${edu.graduationDate}` : ''}
 ${edu.description || ''}
 `).join('\n')}
 
 SKILLS
-${skills?.map((skill: any) => skill.name).join(', ') || ''}`;
+${skills?.map((skill: Skill) => skill.name).join(', ') || ''}`;
   };
 
-  const generateImprovements = (analysisResult: any): ImprovementSuggestion[] => {
+  type AnalysisResult = Awaited<ReturnType<typeof analyzeResume>>;
+  const generateImprovements = (analysisResult: AnalysisResult): ImprovementSuggestion[] => {
     const improvements: ImprovementSuggestion[] = [];
     
     // Critical improvements

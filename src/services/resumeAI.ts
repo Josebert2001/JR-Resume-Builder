@@ -1,16 +1,12 @@
-// Calls the local Express backend which proxies Groq API securely
 async function invokeGroq(action: string, payload: Record<string, unknown>) {
   const response = await fetch("/api/groq-generate", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action, ...payload }),
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: "Unknown error" }));
-    console.error(`Groq API error [${action}]`, error);
     throw new Error(error.error || `HTTP ${response.status}`);
   }
 
